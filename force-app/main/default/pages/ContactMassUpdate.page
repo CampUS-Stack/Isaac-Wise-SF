@@ -1,0 +1,47 @@
+<!--
+ - Created by Chris Home Desktop on 8/1/2017.
+ -->
+
+<apex:page id="ContactMassUpdate" standardController="Account" extensions="ContactMassUpdateController">
+
+    <apex:form >
+        <apex:sectionHeader title="Update Contacts" subtitle="Address" />
+
+        <apex:pageBlock title="Address to Copy">
+            <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Address to Copy"/>
+                    <apex:selectList value="{!AddressToCopy}" multiSelect="false" size="1">
+                        <apex:selectOptions value="{!AddressValues}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Billing Address"/>
+                    <apex:outputText value="{!Account.BillingStreet + ' ' + Account.BillingCity + ' ' + Account.BillingState + ' ' + Account.BillingPostalCode}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Mailing Address"/>
+                    <apex:outputText value="{!Account.ShippingStreet + ' ' + Account.ShippingCity + ' ' + Account.ShippingState + ' ' + Account.ShippingPostalCode}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel ></apex:outputLabel>
+                    <apex:commandButton value="Copy Address" action="{!UpdateAddresses}"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <br/>
+            <apex:pageBlockSection >
+                <apex:pageBlockTable value="{!ContactWrappers}" var="conWrap" >
+                    <apex:column >
+                        <apex:inputCheckbox value="{!conWrap.IsSelected}"/>
+                    </apex:column>
+                    <apex:column value="{!conWrap.TheContact.FirstName}"/>
+                    <apex:column value="{!conWrap.TheContact.LastName}"/>
+                    <apex:column >
+                            {!conWrap.TheContact.MailingStreet + ' ' + conWrap.TheContact.MailingCity + ' ' + conWrap.TheContact.MailingState + ' ' + conWrap.TheContact.MailingPostalCode}
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>

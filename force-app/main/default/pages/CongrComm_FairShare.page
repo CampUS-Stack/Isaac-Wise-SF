@@ -1,0 +1,260 @@
+<!--
+ - Created by Kritik Garg on 16-02-2019.
+ -->
+
+<apex:page controller="CongrComm_FairShareController"
+           id="CongrComm_FairShare"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 center">
+                                    <center>
+                                        <apex:commandbutton styleClass="btn wiseBtn " action="{!saveFairShare}"  value="Submit" ></apex:commandbutton>&nbsp;
+                                        <apex:commandbutton styleClass="btn wiseBtn " action="{!URLFOR($Page.CongrComm_FinancialsBillHistory)}"  value="View Previous Billing"></apex:commandbutton>
+                                    </center>
+                                </div>
+                            </div>
+                            <br/>
+                            <h4>Assessment Guidelines for calculating your 2% Fair Share are below</h4>
+                           <!-- <h2 class="text-center">Your 2024-2025 Contribution</h2>-->
+                            <h2 class="text-center">Your {!CURRENT_FISCAL_YEAR} Contribution</h2>
+                            <hr/>
+
+                            <apex:outputPanel id="error">
+                                <apex:messages layout="block" styleClass="alert alert-danger errors custom-error" style="list-style-type: none;" >
+                                </apex:messages>
+                            </apex:outputPanel>
+
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label style="margin-top: 7px;" for="Membership">Membership:</label><br/>
+                                </div>
+                                <div class="col-sm-8 form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">$</div>
+                                        <!--<input  type="text" class="form-control Membership" id="Membership" placeholder="Amount"/>-->
+                                        <apex:inputText value="{!fairShare.Membership_Contribution__c}" styleClass="form-control Membership" />
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label style="margin-top: 7px;" for="PlumStreetTemple">Plum Street
+                                        Temple:</label><br/>
+                                </div>
+                                <div class="col-sm-8 form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">$</div>
+                                        <!--<input type="text" readonly="true" value="150" class="form-control" id="PlumStreetTemple"-->
+                                               <!--placeholder="Amount"/>-->
+                                        <apex:inputText value="{!fairShare.PST__c}" html-readonly="true" styleClass="form-control pst" />
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label style="margin-top: 7px;" for="Total">Total:</label><br/>
+                                </div>
+                                <div class="col-sm-8 form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">$</div>
+                                        <input type="text" style="font-weight: bold;" class="form-control total" readonly="true" id="Total" placeholder="0"/>
+                                        <!--<apex:inputField value="{!fairShare.Total__c}" styleClass="form-control total" />-->
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br/>
+                            <br/>
+                            <apex:outputPanel rendered="{!NOT(ISNULL(fairShare.Last_Year_Fair_Share__c))}">
+                            <center>
+                            <i>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <p><b>Your totals from last year's fair share:</b></p>
+                                        <p>Membership Contribution:&nbsp;<apex:outputText value="${!fairShare.Last_Year_Membership_Amount__c}" /></p>
+                                        <p>PST Contribution:&nbsp;<apex:outputText value="${!fairShare.Last_Year_PST_Amount__c}" /></p>
+                                        <p>Total Contribution:&nbsp;<apex:outputText value="${!fairShare.Last_Year_Contribution_Total__c}" /></p>
+                                    </div>
+                                </div>
+                                </i>
+                                </center>
+                            </apex:outputPanel>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <p>
+                                        <strong>
+                                            Thank you for your membership and your support of Wise Temple. Please consider increasing you annual contribution by 10% this year.
+                                            Wise Temple spends well above $4,000 per household to meet the needs of our diverse population. Your generosity makes a difference.
+                                            
+                                        </strong>
+                                    </p>
+                                    
+
+                                   <ul style="list-style-type:disc">
+    
+    <li style="margin-left : 20px">Click on the “View Previous Billing” button above to see last year’s contribution.</li>
+    <li style="margin-left : 20px">URJ dues are no longer separated out from your membership pledge.</li>
+<li style="margin-left : 20px">Please remember that the total above does not include your Religious School, Hebrew Connect or B’nai Mitzvah fees</li>
+</ul>
+
+                                </div>
+                            </div>
+
+                            <br/>
+
+
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <label for="HouseholdNameInput">Confidential comments for the Executive
+                                        Director: </label><br/>
+                                    <apex:inputTextarea style="width=100%" value="{!fairShare.Member_Comments__c}"  styleClass="form-control" id="NameInput"/>
+                                    <!--<apex:input value="{!fairShare.Membership_Contribution__c}" styleClass="form-control Membership" />-->
+
+                                    <small id="HelpBlock" class="form-text text-muted">
+                                        All information will be kept confidential.
+                                    </small>
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <h4>Fair Share Guidelines - 2% of Gross Income:</h4>
+
+
+                                    <table class="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th>Income</th>
+                                            <th>Contribution</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>$ 50,000</td>
+                                            <td>$ 1,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>$ 75,000</td>
+                                            <td>$ 1,500</td>
+                                        </tr>
+                                        <tr>
+                                            <td>$ 100,000</td>
+                                            <td>$ 2,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>$ 125,000</td>
+                                            <td>$ 2,500</td>
+                                        </tr>
+                                        <tr>
+                                            <td>$ 150,000</td>
+                                            <td>$ 3,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>$ 200,000</td>
+                                            <td>$ 4,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Over $ 200,000</td>
+                                            <td>2 %</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cost Per Family</td>
+                                            <td>$ 4,000</td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 center">
+                                    <center>
+                                        <apex:commandbutton styleClass="btn wiseBtn " action="{!saveFairShare}"  value="Submit"></apex:commandbutton>&nbsp;
+                                        <apex:commandbutton styleClass="btn wiseBtn " action="{!URLFOR($Page.CongrComm_FinancialsBillHistory)}"  value="View Previous Billings"></apex:commandbutton>
+                                    </center>
+                                </div>
+                            </div>
+                            <!--<div class="row">-->
+                                <!--<div class="col-12">-->
+                                <!--</div>-->
+                            <!--</div>-->
+
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+    <script>
+        $( document ).ready(function() {
+            $('.Membership').on('input',function(e){
+                //alert('Changed!')
+                calculateTotal();
+            });
+
+            calculateTotal();
+
+            function calculateTotal() {
+                var membershipAmt = 0 ;
+                var total = 0;
+                var pst = 0;
+
+                if ($('.Membership').val() > 0) {
+                    membershipAmt = $('.Membership').val();
+                }
+
+                if ($('.pst').val() > 0) {
+                    pst = $('.pst').val();
+                }
+
+                // var finalUR = membershipAmt * 0.12 ;
+                // console.log(finalUR);
+                // if (finalUR > 250) {
+                //     finalUR = 250;
+                // }
+
+                // console.log(total);
+                //
+                // total = membershipAmt + finalUR;
+                // console.log(total);
+
+                total = +membershipAmt + +pst  ;
+
+                $('.total').val(total.toFixed(2));
+
+            }
+
+        });
+
+    </script>
+
+</apex:page>

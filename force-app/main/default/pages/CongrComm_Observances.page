@@ -1,0 +1,80 @@
+<!--
+ - Created by Chris Home Desktop on 4/16/2018.
+ -->
+
+<apex:page controller="CongrComm_ObservancesController" 
+           id="CongrComm_Observances" 
+           showHeader="false" 
+           applyBodyTag="false" 
+           sidebar="false" 
+           standardStylesheets="false" 
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Yahrzeit Observances
+                            </h2>
+                            <h4 class="sub-title">{!$Label.Community_Yahrzeit_Observe}</h4>
+                            <p>Names will be read at services on Friday evening and Saturday morning for the yahrzeits occurring Sunday through 
+                            Saturday of the current week. If you wish to light a yahrzeit candle at home, do so the evening before the yahrzeit date.</p>
+                            <hr/>
+                            <apex:repeat value="{!observanceWrappers}" var="ow">
+                                <h3>Observances for {!ow.theContact.Name}</h3>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Name
+                                            </th>
+                                            <th>
+                                                Relationship
+                                            </th>
+                                            <th>
+                                                Date of Death
+                                            </th>
+                                            <th>
+                                                Next Observance
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <apex:repeat value="{!ow.theObservances}" var="o">
+                                            <tr>
+                                                <td><apex:outputField value="{!o.Deceased_Name__c}"/></td>
+                                                <td><apex:outputField value="{!o.Relationship__c}"/></td>
+                                                <td><apex:outputField value="{!o.Date_of_Death__c}"/></td>
+                                                <td><apex:outputField value="{!o.Next_Observance_Date__c}"/></td>
+                                            </tr>
+                                        </apex:repeat>
+                                    </tbody>
+                                </table>
+                            </apex:repeat>
+                            
+                        <div class="col-xs-12">
+                        <h5>If you have questions or would like to add a Yahrzeit observance, please contact the rabbis' assistant at 513.793.2559 
+                        or click below to send a message.</h5>
+                            </div>
+                            
+                            <div class="col-xs-12">
+                                <apex:commandLink style="font-size:1.5em;" value="Send a Message to Rabbis' Assistant" action="{!URLFOR($Page.CongrComm_YahrzeitInfoUpdate) }" />
+                            </div>
+                             <div class="col-xs-12">
+                                
+                            </div>
+                            
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

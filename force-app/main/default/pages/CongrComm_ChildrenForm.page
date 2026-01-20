@@ -1,0 +1,65 @@
+<!--
+ - Created by Chris Home Desktop on 6/4/2018.
+ -->
+
+<apex:page id="CongrComm_ChildrenForm" controller="CongrComm_ChildrenFormCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="form1" >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!Save}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_EditRelationships) + '?cId=' + ContactIdFromURL}" styleClass="cancelBtn btn "/>
+                                </div>
+                            </div>
+                            <h2>Non-Member Relationships</h2>
+                            <br/>
+                            <!--<h3>Can’t find who you are looking for?</h3>-->
+                            <!--<div>-->
+                                <!--<apex:pageMessages id="pagemsg"/>-->
+                            <!--</div>-->
+                            <!--<div class="row">-->
+                                <!--<div class="col-sm-12 form-group" style="margin-top:10px;">-->
+                                    <!--<label for="firstNameInput">Enter the information below and we will take care of it.</label>-->
+                                    <!--<apex:inputTextarea rows="4" value="{!TheAccount.Children_Form__c}" html-placeholder="Please Include:  Name, relationship Type" styleClass="form-control" id="descriptionInput" />-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!---->
+                            <h3>
+                                In-town Grandchildren
+                            </h3>
+                            <div class="row">
+                                <div class="col-sm-12 form-group" style="margin-top:10px;">
+                                    <label for="firstNameInput">Do you have grandchildren in town (who are not Wise Temple members) that you’d like
+                                        to bring to family or inter-generational events? Let us know and we will send you
+                                        information about programs you can invite them to (we won’t contact them directly). Please include name and birthdate (so we can send you information relevant to their age group).
+                                      </label>
+                                    <apex:inputTextarea rows="4" value="{!TheAccount.Town_Grandchildren_Form__c}"   styleClass="form-control" id="TownGrandChildrenDescriptionInput"  />
+                                </div>
+                            </div>
+                           
+                            <h3>
+                                In-town Adult Children
+                            </h3>
+                            <div class="row">                                
+                                <div class="col-sm-12 form-group" style="margin-top:10px;">
+                                    <label for="firstNameInput">Do you have in-town adult children that you’d like us to reach out to about membership at Wise Temple? Please include name, address, email, phone, and birthdate (so we can send them information relevant to their age group).</label>
+                                    <apex:inputTextarea rows="4" value="{!TheAccount.Town_AdultChildren_Form__c}"  styleClass="form-control" id="TownAdultChildrenDescriptionInput" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

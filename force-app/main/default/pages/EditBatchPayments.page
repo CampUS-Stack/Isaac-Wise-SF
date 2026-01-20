@@ -1,0 +1,81 @@
+<!--
+ - Created by Chris Home Desktop on 12/15/2017.
+ -->
+
+<apex:page id="EditBatchPayments" controller="EditBatchPaymentController" tabStyle="Payment_Adjustment__c">
+    <apex:form >
+        <apex:pageBlock rendered="{!NOT(ShowPaymentReallocation) && NOT(ShowPaymentTransfer)}" title="Choose a Payment to Edit">
+            <apex:pageBlockTable value="{!Payments}" var="payment">
+                <apex:column width="15%">
+                    <apex:commandLink value="Transfer Payment" action="{!ShowPaymentTransferBlock}" >
+                        <apex:param value="{!payment.Id}" assignTo="{!SelectedPaymentId}" name="transferPaymentId"/>
+                    </apex:commandLink>
+                    &nbsp;&nbsp;
+                    <apex:commandLink value="ReAllocate Amount" action="{!ShowPaymentReallocationBlock}" >
+                        <apex:param value="{!payment.Id}" assignTo="{!SelectedPaymentId}" name="reAllocatePaymentId"/>
+                    </apex:commandLink>
+                </apex:column>
+                <apex:column value="{!payment.Name}"/>
+                <apex:column value="{!payment.Household__c}" />
+                <apex:column value="{!payment.Amount__c}" />
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        <apex:pageBlock rendered="{!ShowPaymentReallocation && NOT(ShowPaymentTransfer)}" title="ReAllocate Payment">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton value="Back" action="{!BackFromPaymentReAllocation}" />
+                <apex:commandButton value="Save" action="{!Save}" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Payment Name"/>
+                    <apex:commandLink value="{!SelectedPayment.Name}" action="/{!SelectedPayment.Id}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Payment Amount"/>
+                    <apex:outputLabel value="{!SelectedPayment.Amount__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Payment Date"/>
+                    <apex:outputLabel value="{!SelectedPayment.Date_of_Action__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Household"/>
+                    <apex:outputField value="{!SelectedPayment.Household__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!NOT(ShowPaymentReallocationNewAllocation)}">
+                    <apex:outputLabel value=""/>
+                    <apex:commandButton value="New Allocation" action="{!ShowPaymentReAllocationNewAllocationBlock}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Select a Designation to Apply Funds" rendered="{!ShowPaymentReallocationNewAllocation}" >
+                <apex:pageBlockTable value="{!AssessmentsForNewAllocation}" var="assess" width="100%">
+                    <apex:column >
+                        <apex:commandLink value="Select" action="{!SelectNewAllocationAssessment}">
+                            <apex:param value="{!assess.Id}" assignTo="{!SelectedAssessmentIdForNewAllocation}" name="reAllocateAssessId"/>
+                        </apex:commandLink>
+                    </apex:column>
+                    <apex:column value="{!assess.Designation__r.Name}"/>
+                    <apex:column value="{!assess.Assessment_Date__c}"/>
+                    <apex:column value="{!assess.Remaining_Balance__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <apex:pageBlockTable value="{!PaymentAllocations}" var="wrap">
+                <apex:column value="{!wrap.DesignationName}" />
+                <apex:column >
+                    <apex:inputField value="{!wrap.allocation.Amount__c}"/>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        <apex:pageBlock rendered="{!NOT(ShowPaymentReallocation) && ShowPaymentTransfer}" title="Transfer Payment">
+            <apex:pageBlockTable value="{!Payments}" var="payment">
+                <apex:column width="15%">
+                    <apex:commandButton value="Transfer Payment" />&nbsp;&nbsp;
+                    <apex:commandButton value="ReAllocate Amount" />
+                </apex:column>
+                <apex:column value="{!payment.Name}"/>
+                <apex:column value="{!payment.Household__c}" />
+                <apex:column value="{!payment.Amount__c}" />
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

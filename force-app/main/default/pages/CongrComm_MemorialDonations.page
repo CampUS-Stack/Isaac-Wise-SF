@@ -1,0 +1,246 @@
+<!--
+ - Created by Kritik Garg on 19-06-2020.
+ -->
+
+<apex:page id="CongrComm_MemorialDonations"
+           controller="CongrComm_DonationsController"
+
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+
+                <div class="container-fluid">
+
+
+
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Continue" action="{!makeDonationAction}"
+                                                        styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                            <h2>Memorial Book</h2>
+                            <apex:outputPanel id="errorMessage" rendered="{!pageErrors}">
+                                <div class="alert alert-danger" role="alert">
+                                    <apex:pageMessages />
+                                </div>
+                            </apex:outputPanel>
+                            <hr/>
+
+                            <h4>
+                                If you submitted names last year, they are displayed below. Click "Copy" to enter them
+                                for this year. You may add or delete names before submitting. Scroll down to submit names for this year.
+                            </h4>
+                             <table class="table">
+                                <col width="5%"/>
+                                <thead>
+                                <tr>
+                                    <th>
+                                        Entry
+                                    </th>
+
+                                    
+<!--                                    <th>-->
+<!--                                        Donation Type-->
+<!--                                    </th>-->
+<!--                                    <th>-->
+<!--                                        Amount-->
+<!--                                    </th>-->
+<!--                                    <th>-->
+<!--                                        Hard Copy-->
+<!--                                    </th>-->
+                                    <th>
+                                        Honoree Memorial Names
+                                    </th>
+                                    <th>
+                                        Remembered By
+                                    </th>
+                                    <th>
+                                        Fiscal Year
+                                    </th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <apex:variable value="{!0}" var="index"/>
+                                <apex:repeat value="{!memorialBooks}" var="book" id="thePriorRepeat">
+                                    <tr>
+                                     <td>
+                                            <apex:outputText value="{!book.Name}" />
+                                        </td>
+
+                                        
+<!--                                        <td>-->
+<!--                                            <apex:outputText value="{!book.Donation_Type__c}" />-->
+<!--                                        </td>-->
+<!--                                        <td>-->
+<!--                                            <apex:outputField value="{!book.Assessment__r.Assessed_Amount__c}" />-->
+<!--                                        </td>-->
+<!--                                        <td>-->
+<!--                                            <apex:outputField value="{!book.Hard_Copy__c}"/>-->
+<!--                                        </td>-->
+                                        <td>
+                                            <apex:outputText value="{!book.Honoree_Memorial_Names__c}"/>
+                                        </td>
+                                        <td>
+                                            <apex:outputText value="{!book.Remembered_By__c}"/>
+                                        </td>
+                                        <td>
+                                            <apex:outputText value="{!book.Fiscal_Year__c}"/>
+                                        </td>
+                                        <td>
+                                            <apex:commandLink value="Copy" action="{!copyBook}" styleClass="btn">
+                                                <apex:param name="bookIndex" value="{!index}" assignTo="{!bookIndex}" />
+                                            </apex:commandLink>
+                                        </td>
+                                    </tr>
+                                    <apex:variable var="index" value="{!index + 1}"/>
+                                </apex:repeat>
+                                </tbody>
+                            </table>
+                            <hr/>
+                            <h4>
+                                Enter names separated by commas.
+                            </h4>
+                             <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <label for="HomePhoneInput">In Memory Of</label>
+                                    <apex:inputTextarea rows="3" value="{!honoreeName}" styleClass="form-control"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <label for="HouseholdNameInput">Remembered By</label><br/>
+                                    <apex:inputTextarea rows="3" value="{!listing}" styleClass="form-control"/>
+                                </div>
+                            </div>
+                           
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label for="HouseholdNameInput">Amount</label><br/>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <apex:inputText value="{!amount}" styleClass="form-control" id="NameInput" onChange="refreshTotal();"/>
+                                    </div>
+                                    <small class="hb help-block" style="display: none;">A $10 mailing fee will be added to your payment total</small>
+
+                                </div>
+<!--                                <div class="col-sm-6 form-group"> -->
+<!--                                       <label for="HomePhoneInput">Fiscal Year</label> -->
+<!--                                       <apex:selectList styleClass="form-control" size="1" value="{!fiscalYear}"> -->
+ <!--                                          <apex:selectOptions value="{!memorialFiscalYears }"/> -->
+  <!--                                     </apex:selectList> -->
+ <!--                                  </div> -->
+                            </div>
+
+<!--                            <div class="row">-->
+<!--                                <div class="col-sm-6 form-group">-->
+<!--                                    <label for="HomePhoneInput">Fund</label>-->
+<!--                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedFund}">-->
+<!--                                        <apex:selectOptions value="{!fundOptions }"/>-->
+<!--                                    </apex:selectList>-->
+<!--                                </div>-->
+<!--                                <div class="col-sm-6">-->
+<!--                                    <label for="HouseholdNameInput">Amount</label><br/>-->
+<!--                                    <div class="input-group">-->
+<!--                                        <span class="input-group-addon">$</span>-->
+<!--                                        <apex:inputText value="{!amount}" styleClass="form-control" id="NameInput" onChange="refreshTotal();"/>-->
+<!--                                    </div>-->
+<!--                                    <small class="hb help-block" style="display: none;">A $5 mailing fee will be added to your payment total</small>-->
+
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="row">-->
+<!--                                <div class="col-sm-6 form-group">-->
+<!--                                    <label for="HomePhoneInput">Donation Type</label>-->
+<!--                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedDonationType}">-->
+<!--                                        <apex:selectOptions value="{!memorialDonationTypes }"/>-->
+<!--                                    </apex:selectList>-->
+<!--                                </div>-->
+<!--                                <div class="col-sm-6 form-group">-->
+<!--                                    <label for="HomePhoneInput">Fiscal Year</label>-->
+<!--                                    <apex:selectList styleClass="form-control" size="1" value="{!fiscalYear}">-->
+<!--                                        <apex:selectOptions value="{!memorialFiscalYears }"/>-->
+<!--                                    </apex:selectList>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+
+
+                            <div class="row" >
+                                <div class="col-sm-12 form-group">
+                                    <label>
+                                        <apex:inputCheckbox styleClass="hard-copy-cb" value="{!includeHardCopyCost}" onClick="refreshTotal();" />
+                                        <span class="label-text"> &nbsp;
+                                            I want hard copy to be mailed (Add $10.00 in total)
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="row"></div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="HouseholdNameInput">Select a Method of Payment</label><br/>
+                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedPaymentMethod}">
+                                        <apex:selectOptions value="{! paymentOptions }"/>
+                                    </apex:selectList>
+                                    <p>
+                                        <small>Credit cards accepted are Visa, Mastercard, and Discover.</small>
+                                    </p>
+                                </div>
+                                <div class="col-sm-6 form-group">
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Continue" action="{!makeMemorialDonationAction}"
+                                                        styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+    <script>
+        $(document).ready(function () {
+            refreshTotal();
+        });
+
+        function refreshTotal() {
+            var checkbox = $('.hard-copy-cb');
+            console.log(checkbox);
+            if (checkbox[0].checked) {
+                console.log('checked');
+                $('.hb').show();
+            } else {
+                console.log('not checked');
+                $('.hb').hide();
+            }
+        }
+
+
+    </script>
+
+</apex:page>

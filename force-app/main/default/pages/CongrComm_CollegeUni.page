@@ -1,0 +1,76 @@
+<!--
+- Created by Chris Home Desktop on 5/2/2018.
+ -->
+
+<apex:page controller="CongrComm_CollegeUniController" 
+           id="CongrComm_CollegeUni" 
+           showHeader="false" 
+           applyBodyTag="false" 
+           sidebar="false" 
+           standardStylesheets="false" 
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Colleges and Universities
+                            </h2>
+                            <p>
+                                Editing for {!theContact.FirstName} {!theContact.LastName}
+                            </p>
+                            <hr/>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            College/University Name
+                                        </th>
+                                        <th>
+                                            Grade Level
+                                        </th>
+                                        <th>
+                                            Major
+                                        </th>
+                                        <th>
+                                            End Date
+                                        </th>
+                                        <th>
+
+                                        </th>
+                                	</tr>
+                                </thead>
+                                <tbody>
+                                    <apex:repeat value="{!contactColleges}" var="c" id="theRepeat">
+                                        <tr>
+                                            <td><apex:outputField value="{!c.College_University__c}"/></td>
+                                            <td><apex:outputField value="{!c.Grade_Level__c}"/></td>
+                                            <td><apex:outputField value="{!c.Major__c}"/></td>
+                                            <td><apex:outputField value="{!c.End_Date__c}"/></td>
+                                            <td>
+                                                <apex:commandButton value="Edit" styleClass="btn wiseBtn" onclick="window.location = '/CongrComm_CollegeUniEdit\?cId={!c.Id}&type=edit'; return false;"/>&nbsp;&nbsp;
+                                                <apex:commandButton value="Remove" styleClass="btn wiseBtn" action="{!RemoveCollegeUniversity}" reRender="theRepeat" onComplete="location.reload()">
+                                                    <apex:param value="{!c.Id}" assignTo="{!CollegeUniversityIdToDelete}" name="param1"/>
+                                                </apex:commandButton>
+                                            </td>
+                                        </tr>
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                            <div>
+                            	<apex:commandButton value="Add New" styleClass="btn wiseBtn" onclick="window.location = '/CongrComm_CollegeUniEdit\?cId={!contactId}&type=new'; return false;"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

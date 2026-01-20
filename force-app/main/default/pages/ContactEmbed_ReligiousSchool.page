@@ -1,0 +1,80 @@
+<!--
+ - Created by Chris Home Desktop on 6/29/2017.
+ -->
+
+<apex:page id="ContactEmbed_ReligiousSchool" standardController="Contact">
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageBlockSection columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="" />
+                    <apex:commandLink value="Enroll/Unenroll Student" onclick="window.open('/apex/StudentSchedule_Edit?id={!Contact.Id}')"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="" />
+                    <apex:outputLabel value="" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Religious School Student" />
+                    <apex:outputField value="{!Contact.Religious_School_Student__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Grade Level" />
+                    <apex:outputField value="{!Contact.Grade_Level__c}" />
+                </apex:pageBlockSectionItem>
+                <!--<apex:pageBlockSectionItem >-->
+                    <!--<apex:outputLabel value="" />-->
+                    <!--<apex:commandLink value="Remove from Hebrew Classes" onclick="ProcessRemoveFromAllHebrewClassesWebService();"/>-->
+                <!--</apex:pageBlockSectionItem>-->
+                <!--<apex:pageBlockSectionItem >-->
+                    <!--<apex:outputLabel value="" />-->
+                    <!--<apex:commandLink value="Remove from All Classes" onclick="ProcessRemoveFromAllClassesWebService();"/>-->
+                <!--</apex:pageBlockSectionItem>-->
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:includeScript value="/soap/ajax/35.0/connection.js" />
+        <apex:includeScript value="/soap/ajax/35.0/apex.js" />
+
+        <script>
+            function ProcessRemoveFromAllClassesWebService(){
+                var result = sforce.apex.execute("UtilitiesReligiousSchool",
+                        "RemoveFromAllClasses", {
+                            contactId : '{!Contact.Id}'
+                        });
+
+                if(result == 'NoEnrollmentsFound'){
+                    alert('{!Contact.Name} is not enrolled in any classes.');
+                }
+                else if(result == 'InsertError'){
+                    alert('There was an error deleting the enrollments. Please contact your administrator');
+                }
+                else if(result == 'UnknownException'){
+                    alert('There was an unknown error. Please contact your administrator');
+                }
+                else{
+                    alert('{!Contact.Name} has successfully been un-enrolled from all classes. Please refresh the page to see the changes.');
+                }
+            }
+            function ProcessRemoveFromAllHebrewClassesWebService(){
+                var result = sforce.apex.execute("UtilitiesReligiousSchool",
+                        "RemoveFromAllHebrewClasses", {
+                            contactId : '{!Contact.Id}'
+                        });
+
+                if(result == 'NoEnrollmentsFound'){
+                    alert('{!Contact.Name} is not enrolled in any classes.');
+                }
+                else if(result == 'InsertError'){
+                    alert('There was an error deleting the enrollments. Please contact your administrator');
+                }
+                else if(result == 'UnknownException'){
+                    alert('There was an unknown error. Please contact your administrator');
+                }
+                else{
+                    alert('{!Contact.Name} has successfully been un-enrolled from Hebrew all classes. Please refresh the page to see the changes.');
+                }
+            }
+
+        </script>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,137 @@
+<!--
+ - Created by Chris Home Desktop on 11/7/2017.
+ -->
+
+<apex:page id="SummarizeAssessments" controller="PaymentPagesController" docType="html-5.0" tabStyle="Account">
+    <apex:form >
+
+
+        <apex:pageBlock id="theBlock">
+            <apex:pageBlockButtons >
+                <!--<apex:commandButton value="Search" action="{!UpdatePageLists}" />-->
+                <apex:commandButton value="Summarize Assessments" action="{!SummarizeAssessments}" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Search" id="searchPanel" columns="2" collapsible="False">
+
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Designation" for="Designation"/>
+                    <apex:inputText id="Designation" value="{!FilledDesignation}" />
+                </apex:pageBlockSectionItem>
+
+                <apex:pageBlockSectionItem >
+
+                </apex:pageBlockSectionItem>
+
+
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Start Date" for="stDate"/>
+                    <apex:input value="{!FilledStartDate}" type="date" id="stDate"  style="height: 18px; font-family: inherit;"/>
+                </apex:pageBlockSectionItem>
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="End Date" for="edDate"/>
+                    <apex:input value="{!FilledEndDate}" type="date" id="edDate"  style="height: 18px; font-family: inherit;"/>
+                </apex:pageBlockSectionItem>
+
+
+                <apex:pageBlockSectionItem >
+                    <input  type="button" class="btn" onClick="javascript:ShowLoading();searchAction();" value="Search"/>
+                    <!-- <input type="button" class="btn" action value="Back to Opportunity"/> -->
+                </apex:pageBlockSectionItem>
+
+            </apex:pageBlockSection>
+
+
+
+            <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value=" Amount to Summarize" />
+                    <apex:outputText value="$ {!UnSummarizedAssessmentTotal}" id="summarizedTotal" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockTable value="{!unSummarizedAssessments}" var="assessWrap">
+                <apex:column >
+                    <apex:facet name="header">
+                        <apex:commandLink value="Select All" action="{!SelectAllUnSummarizedAssessments}"  reRender="theBlock,theBlock2"/>
+                    </apex:facet>
+                    <apex:inputCheckbox value="{!assessWrap.isSelected}" onChange="ReRenderTotals();"/>
+                </apex:column>
+                <apex:column value="{!assessWrap.Assessment.Assessment_Date__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changeAssessmentSortColumn}" value="Assessment Date   {!IF(assessmentSelectedField=='Assessment_Date__c',IF(assessmentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Assessment_Date__c" name="column" assignTo="{!assessmentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!assessWrap.Assessment.Status__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changeAssessmentSortColumn}" value="Status   {!IF(assessmentSelectedField=='Status__c',IF(assessmentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Status__c" name="column" assignTo="{!assessmentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!assessWrap.Assessment.Account__r.Name}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changeAssessmentSortColumn}" value="Account Name   {!IF(assessmentSelectedField=='Account__r.Name',IF(assessmentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Account__r.Name" name="column" assignTo="{!assessmentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <!--<apex:column value="{!assessWrap.PaymentAdjustment.RecordType.Name}" />-->
+                <apex:column value="{!assessWrap.Assessment.Designation__r.Name}">
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changeAssessmentSortColumn}" value="Designation Name   {!IF(assessmentSelectedField=='Designation__r.Name',IF(assessmentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Designation__r.Name" name="column" assignTo="{!assessmentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <!--<apex:column value="{!payWrap.PaymentAdjustment.Name}" />-->
+                <apex:column value="{!assessWrap.Assessment.Assessed_Amount__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changeAssessmentSortColumn}" value="Assessed Amount   {!IF(assessmentSelectedField=='Assessed_Amount__c',IF(assessmentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Assessed_Amount__c" name="column" assignTo="{!assessmentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <!---->
+                <!--<apex:column headerValue="{!$ObjectType.Assessment__c.fields.Assessment_Date__c.Label}">-->
+                <!--<apex:outputText value="{0,date,dd-MMM-yyyy}">-->
+                <!--<apex:param value="{!assessWrap.Assessment.Assessment_Date__c}" />-->
+                <!--</apex:outputText>-->
+                <!--</apex:column>-->
+
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        <apex:actionFunction action="{!UpdatePageLists}" name="RunSearch" reRender="theBlock" />
+        <apex:actionFunction name="ReRenderTotals" reRender="summarizedTotal" />
+
+        <apex:actionFunction name="searchAction" action="{!applyFilter}" reRender="theBlock" onComplete="HideLoading();">
+        </apex:actionFunction>
+    </apex:form>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script>
+        function ShowLoading() {
+            console.log('show Loading');
+            $.blockUI({ css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                } });
+
+            //setTimeout($.unblockUI, 2000);
+        }
+        function HideLoading() {
+            console.log('hide Loading');
+            $.unblockUI();
+            //CONSOLE.log(url)
+        }
+    </script>
+</apex:page>

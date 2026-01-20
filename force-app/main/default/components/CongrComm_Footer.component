@@ -1,0 +1,8 @@
+<!--
+ - Created by Chris Home Desktop on 4/7/2018.
+ -->
+
+<apex:component id="CongrComm_Footer" layout="none">
+
+    <div style="height:50px;"></div>
+</apex:component>

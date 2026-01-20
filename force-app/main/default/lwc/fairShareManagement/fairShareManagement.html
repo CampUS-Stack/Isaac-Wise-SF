@@ -1,0 +1,138 @@
+<!--
+ - Created by Chris Gibson on 2/14/2023.
+ -->
+
+<!-- Fair Share Management -->
+<template>
+    <template if:true={isLoading}>
+        <lightning-spinner></lightning-spinner>
+    </template>
+    <lightning-card>
+        <lightning-layout>
+            <!--            <lightning-layout-item padding="around-small">-->
+            <!--                <lightning-combobox-->
+            <!--                        data-id="prevFiscalYear"-->
+            <!--                        name="prevFiscalYear"-->
+            <!--                        label="Previous Fiscal Year"-->
+            <!--                        value={chosenPreviousFiscalYear}-->
+            <!--                        options={fiscalYears}-->
+            <!--                        onchange={inputOnChangeHandler}></lightning-combobox>-->
+            <!--            </lightning-layout-item>-->
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                        data-id="currentFiscalYear"
+                        name="currentFiscalYear"
+                        label="Fiscal Year to Process"
+                        value={chosenCurrentFiscalYearVal}
+                        options={fiscalYears}
+                        onchange={inputOnChangeHandler}></lightning-combobox>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                        data-id="membershipType"
+                        name="membershipType"
+                        label="Membership Type"
+                        value={memTypeSelected}
+                        options={memberTypes}
+                        onchange={inputOnChangeHandler}></lightning-combobox>
+            </lightning-layout-item>
+        </lightning-layout>
+        <br/>
+        <template if:true={configurationsChosen}>
+            <template if:true={fairShareWrapper}>
+                <lightning-layout>
+                    <lightning-layout-item padding="around-small">
+                        <lightning-input type="number" label="Membership Amount"
+                                         data-id="memAmount"
+                                         value={membershipAmount}
+                                         name="memAmount"
+                                         onchange={inputOnChangeHandler}></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item padding="around-small">
+                        <lightning-input type="number" label="PST Amount"
+                                         value={pstAmount}
+                                         data-id="pstAmount"
+                                         name="pstAmount"
+                                         onchange={inputOnChangeHandler}></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item>
+                        <div style="margin-top:33px;">
+                            <lightning-helptext content="Create FS for Members - this button will create a Fair Share record for all members
+                            based on the amounts inputted into Membership and PST amount."></lightning-helptext>
+                            <lightning-button label="Create FS for Members"
+                                              onclick={runFairShareCreation}></lightning-button>
+                        </div>
+                    </lightning-layout-item>
+                </lightning-layout>
+                <br/>
+                <lightning-layout>
+                    <lightning-layout-item padding="around-small">
+                        <lightning-input type="text" label="Membership Designation Id"
+                                         data-id="memDesignationName"
+                                         name="memDesignationName"
+                                         value={memDesignationId}
+                                         onchange={inputOnChangeHandler}></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item padding="around-small">
+                        <lightning-input type="text" label="PST Designation Id"
+                                         data-id="secDesignationName"
+                                         name="secDesignationName"
+                                         value={pstDesignationId}
+                                         onchange={inputOnChangeHandler}></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item>
+                        <div style="margin-top:33px;">
+                            <lightning-helptext content="Turn All FairShare Into Invoices - this button will create PST and Membership Invoices for all
+                                Fair Share record in this group that do not have an invoice. The amounts will be driven from each FairShare
+                                record's Membership Contribution and PST amounts."></lightning-helptext>
+                            <lightning-button label="Turn All FairShare Into Invoices"
+                                              onclick={runInvoiceCreation}></lightning-button>
+                        </div>
+                    </lightning-layout-item>
+                </lightning-layout>
+                <div class="slds-large-size_1-of-1 slds-p-around_medium">
+                    <article class="slds-card custom-card">
+                        <div class="slds-card__header slds-grid custom-card-header">
+                            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                <div class="slds-media__figure">
+                                <span class="slds-icon_container slds-icon-standard-account" title="account">
+                                    <span class="slds-assistive-text">Fair Share </span>
+                                </span>
+                                </div>
+                                <div class="slds-media__body">
+                                    <h2 class="slds-card__header-title">
+                                        <span>Fair Share Management for {chosenCurrentFiscalYear} - {memTypeSelected}</span>
+                                    </h2>
+                                </div>
+                                <div class="slds-no-flex">
+                                    <button class="slds-button slds-button_neutral" onclick={runFairShareUpdate}>Update
+                                        $0
+                                        Fair Share
+                                    </button>
+                                </div>
+                            </header>
+                        </div>
+                        <div class="slds-card__body slds-card__body_inner custom-card-body">
+                            <span class="slds-form-element__control" style="clear:both;">
+                                <p>Member Families with Fair Share - {fairShareWrapper.NumFamiliesWithFairShare}</p>
+                            </span>
+                            <span class="slds-form-element__control">
+                                <h2>Member Families without Fair Share - {fairShareWrapper.NumFamiliesWithoutFairShare}</h2>
+                            </span>
+                            <br/>
+                            <span class="slds-form-element__control">
+                                <p>Fair Share Records with Invoices - {fairShareWrapper.NumFairShareWithoutInvoice}</p>
+                            </span>
+                            <span class="slds-form-element__control">
+                                <h2>Fair Share Records without Invoices - {fairShareWrapper.NumFairShareWithInvoice}</h2>
+                            </span>
+                        </div>
+                        <footer class="slds-card__footer custom-card-footer slds-grid_align-center">
+
+                        </footer>
+                    </article>
+                </div>
+            </template>
+        </template>
+    </lightning-card>
+</template>

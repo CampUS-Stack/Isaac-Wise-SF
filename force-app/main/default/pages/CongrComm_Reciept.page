@@ -1,0 +1,102 @@
+<!--
+ - Created by Chris Home Desktop on 7/7/2018.
+ -->
+
+<apex:page id="CongrComm_Reciept" controller="CongrComm_RecieptCtrl" showHeader="false" sideBar="false" docType="html-5.0" standardStylesheets="false" applyBodyTag="true" >
+
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                        <div class="row"> 
+                            <div class="well col-sm-7 col-sm-push-3 col-xs-12 ">
+                                <div class="row">
+                                    <div class="col-xs-6 col-sm-6 col-md-6">
+                                        <address>
+                                            <strong>Isaac M. Wise Temple</strong>
+                                            <br/>
+                                            8329 Ridge Road
+                                            <br/>
+                                            Cincinnati, OH 45236
+                                            <br/>
+                                            <abbr title="Phone">P:</abbr> 513.793.2556
+                                        </address>
+                                    </div>
+                                    <div class="col-xs-6 col-sm-6 col-md-6 text-right">
+                                        <p>
+                                            <em>Date:&nbsp;&nbsp;
+                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                    <apex:param value="{!thePayment.Check_Date__c}" />
+                                                </apex:outputText>
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>Card:&nbsp;&nbsp;{!thePayment.Last_4_of_Credit_Card__c}</em>
+                                        </p>
+                                        <p>
+                                            <em>{!thePayment.Name}</em>
+                                        </p>
+<!--                                        <p>-->
+<!--                                            <em>Type:&nbsp;&nbsp;{!thePayment.Authorize_net_Account_Type__c}</em>-->
+<!--                                        </p>-->
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="text-center">
+                                        <h1>Receipt</h1>
+                                    </div>
+                                    <br/>
+                                    <br/>
+                                    <div class="text-center">
+                                        <h3><em>{!thePayment.Receipt_Text__c}</em></h3>
+                                    </div>
+                                    <div class="text-center">
+                                        <h3><em><a href="https://{!thePayment.Receipt_Link__c}" >{!thePayment.Receipt_Link__c}</a></em></h3>
+                                    </div>
+                                    <table class="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th></th>
+                                            <th class="text-center"></th>
+                                            <th class="text-center">Amount</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <apex:repeat value="{!thePayment.Scheduled_Payment_Bridges__r}" var="schedPayBridges">
+
+                                            <tr>
+                                                <td class="col-md-9"><em>{!schedPayBridges.Scheduled_Payment__r.Assessment__r.Designation__r.Designation_Description__c}</em></td>
+                                                <td class="col-md-1 text-center"></td>
+                                                <td class="col-md-1 text-center"></td>
+                                                <td class="col-md-1 text-center">
+                                                    <apex:outputField value="{!schedPayBridges.Amount__c}" />
+                                                </td>
+                                            </tr>
+                                        </apex:repeat>
+                                        <tr>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td class="text-right"><h4><strong>Total: </strong></h4></td>
+                                            <td class="text-center text-danger">
+                                                <h4><strong>
+                                                        <apex:outputField value="{!thePayment.Amount__c}" />
+                                                    </strong></h4>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    		<div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

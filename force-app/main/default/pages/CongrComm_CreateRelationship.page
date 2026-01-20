@@ -1,0 +1,63 @@
+<!--
+ - Created by Chris Home Desktop on 4/24/2018.
+ -->
+
+<apex:page id="CongrComm_CreateRelationship" showHeader="false" controller="CongrComm_NewRelationshipCtrl" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row col-sm-12" style="padding-top:10px;">
+                                <div class="col-xs-12 center">
+                                    <h3>Add A Family Member</h3>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-4 form-group" style="margin-top:10px;">
+                                    <label for="firstNameInput">First Name</label>
+                                    <apex:input value="{!FirstName}" type="text" styleClass="form-control" id="firstNameInput" />
+                                </div>
+                                <div class="col-sm-4 form-group" style="margin-top:10px;">
+                                    <label for="firstNameInput">Last Name</label>
+                                    <apex:input value="{!LastName}" type="text" styleClass="form-control" id="lastNameInput"  />
+                                </div>
+                                <div class="col-sm-2 center">
+                                    <label ></label>
+                                    <apex:commandButton style="margin-top:15px;" action="{!RunContactSearch}" value="Find Congregation Member"  styleClass="wiseBtn btn btn-default" reRender="tableDisplayArea" />
+                                </div>
+                            </div>
+                            <apex:outputPanel id="tableDisplayArea" >
+                                <apex:outputPanel rendered="{!NumberOfResults > 0}">
+                                    <div class="row table-responsive col-sm-12" style="margin-top:20px;">
+                                        <table class="table">
+                                            <th></th>
+                                            <th>Member Name</th>
+                                            <th>Account Name</th>
+                                            <apex:repeat value="{!ContactResults}" var="conWrap">
+                                                <tr>
+                                                    <td>
+                                                        <apex:commandButton value="Select" styleClass="wiseBtn btn btn-default"/>
+                                                    </td>
+                                                    <td>{!conWrap.theContact.Name}</td>
+                                                    <td>{!conWrap.theContact.Account.Name}</td>
+                                                </tr>
+                                            </apex:repeat>
+                                        </table>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

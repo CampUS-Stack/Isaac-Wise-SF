@@ -1,0 +1,6 @@
+<!--
+ - Created by Chris Home Desktop on 4/16/2018.
+ -->
+
+<apex:page id="CongrComm_Landing" controller="CongrComm_LandingCtrl" action="{!forwardToHomePage}" >
+</apex:page>

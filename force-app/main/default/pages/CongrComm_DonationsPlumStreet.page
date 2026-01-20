@@ -1,0 +1,103 @@
+<apex:page controller="CongrComm_DonationsController"
+           id="CongrComm_FinancialsHome"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0"
+>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+
+                <div class="container-fluid">
+
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Continue" action="{!makeDonationAction}" styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                            <h2 class="title">
+                                Donate Light - Plum Street Temple
+                            </h2>
+                            <p>
+                               As we enter this season of giving, of hope, and of light, give to the Plum Street Temple Historic Preservation Fund to 
+                               support the ongoing preservation and maintenance of your sanctuary.<hr/>
+
+                            </p>
+                            <h3> Giving Levels</h3> <hr/>
+                            <h4> Shining - $50 per bulb</h4><br/>
+
+                            <h4> Illumination - $500 (Ten bulbs)</h4>
+<h5>With up to 10 recognition letters if given as gifts<br />
+Every Illumination contributor will be invited to a special reception and tour at Plum Street</h5><br/>
+
+    <h4>Brilliance - $2500 or more</h4>
+<h5>Every Brilliance contributor will be invited to the reception/tour above and to a “behind-the-scenes” surprise</h5>
+                            <apex:outputPanel id="errorMessage" rendered="{!pageErrors}">
+                                <div class="alert alert-danger" role="alert" >
+                                    <apex:pageMessages />
+                                </div>
+                            </apex:outputPanel>
+                            <hr/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Fund</label>
+                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedFund}">
+                                        <apex:selectOptions value="{!PSTHPFfundOptions}"/>
+                                    </apex:selectList>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="HouseholdNameInput">Amount ($50 minimum)</label><br/>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <apex:inputText value="{!amount}" styleClass="form-control" id="NameInput"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Honoree/memorial name</label>
+                                    <apex:inputText value="{!honoreeName}" styleClass="form-control" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="HouseholdNameInput">Listing</label><br/>
+                                    <apex:inputText value="{!listing}" styleClass="form-control" html-placeholder="How would you like your name/s listed in acknowledgements?" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Donation Type</label>
+                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedDonationType}">
+                                        <apex:selectOptions value="{!DonationTypes }"/>
+                                    </apex:selectList> <br/>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-12 form-group">
+                                    <label for="HomePhoneInput">Send acknowledgement to</label>
+                                    <apex:inputTextArea value="{!sendAcknowledgementTo}" styleClass="form-control" html-placeholder="Include name and address" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Continue" action="{!makeDonationAction}" styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+</apex:page>

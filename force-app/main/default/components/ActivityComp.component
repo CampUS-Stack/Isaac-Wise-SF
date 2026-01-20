@@ -1,0 +1,8 @@
+<apex:component >
+    <div style="overflow: scroll; width: 400px; height: 200px;">
+        <apex:pageBlock >
+            <apex:enhancedList type="Activity" height="200" rowsPerPage="25"> 
+            </apex:enhancedlist>
+        </apex:pageBlock>
+    </div>
+</apex:component>

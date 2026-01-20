@@ -1,0 +1,136 @@
+<apex:page controller="CongrComm_FinancialsPayHistoryController"
+           id="CongrComm_FinancialsPayHistory"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="center">
+                                <center><apex:commandButton value="Back" action="{!cancel}" styleClass="btn wiseBtn"/></center>
+                            </div>
+                            <h2 class="title">
+                                Financials
+                            </h2>
+                            <p>
+                                Payment History for {!theContact.Account.Name}<br/>
+                                <br/>
+                                Payments made during previous 2 years. Click "View Details" to see how each payment was applied.
+                            </p>
+                            <hr/>
+                            <div style="display: {!if(hasPayments, 'block', 'none')};">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>
+                                            Payment Date
+                                        </th>
+                                        <th>
+                                            Payment Amount
+                                        </th>
+                                        <th>
+                                            Details
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <apex:variable value="0" var="index"/>
+                                    <apex:repeat value="{!wrappedPaymentList}" var="p" id="theRepeat">
+                                        <tr style="height:20px;">
+                                            <td>
+                                                <apex:outputField value="{!p.thePayment.Check_Date__c}"/>
+                                            </td>
+                                            <td>
+                                                <apex:outputField value="{!p.thePayment.Amount__c}"/>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn cancelBtn" data-toggle="modal" data-target="{!'#modal' + p.theId}">
+                                                    View Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                        <div class="modal fade" id="{!'modal' + p.theId}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header" style="height: 60px;">
+                                                        <h4 class="modal-title" id="exampleModalLabel">Payment Details</h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body" style="background-color: #f5f5f5">
+                                                        <!--<div style="float: left;">-->
+                                                            <!--Issac M. Wise Temple <br/>-->
+                                                            <!--8329 Ridge Road <br/>-->
+                                                            <!--Cincinnati, OH 45236 <br/>-->
+                                                            <!--P: 513.793.2556-->
+                                                        <!--</div>-->
+                                                        <!--<div style="float: right;text-align:left;">-->
+                                                            <!--<i>Date:&nbsp;&nbsp;<apex:outputField style="font-weight:bold;"  value="{!p.thePayment.Check_Date__c}"/></i>-->
+                                                            <!--<br/>-->
+                                                            <!--<i><apex:outputField style="font-weight:bold;"  value="{!p.thePayment.Name}"/></i>-->
+                                                            <!--<br/>-->
+                                                            <!--<i>Card #:&nbsp;&nbsp;<apex:outputField style="font-weight:bold;" value="{!p.thePayment.Last_4_of_Credit_Card__c}"/></i>-->
+                                                            <!--<br/>-->
+                                                            <!--<i>Type :&nbsp;&nbsp;<apex:outputField style="font-weight:bold;"  value="{!p.thePayment.Authorize_net_Account_Type__c}"/></i>-->
+                                                        <!--</div>-->
+                                                        <div style="clear: both;">
+                                                            <br/>
+                                                            <h1 style="text-align: center;">
+                                                                Payment Details
+                                                            </h1><br/>
+                                                            <div class="row">
+                                                                <div class="col-sm-9" style="border-bottom: 1px solid #DDD; padding-top: 10px; padding-bottom: 10px;">
+                                                                    <b>Designation</b>
+                                                                </div>
+                                                                <div class="col-sm-3" style="text=align: right !important; border-bottom: 1px solid #DDD; padding-top: 10px; padding-bottom: 10px;">
+                                                                    <b>Amount</b>
+                                                                </div>
+                                                                <apex:repeat value="{!p.paymentDetails}" var="pd" id="payDetailRepeat">
+                                                                    <div class="col-sm-9" style="border-bottom: 1px solid #DDD; padding-top: 10px; padding-bottom: 10px;">
+                                                                        <apex:outputField value="{!pd.Assessment_Designation__c}"/>
+                                                                    </div>
+                                                                    <div class="col-sm-3" style="border-bottom: 1px solid #DDD; padding-top: 10px; padding-bottom: 10px;">
+                                                                        <apex:outputField value="{!pd.Amount__c}"/>
+                                                                    </div>
+                                                                </apex:repeat>
+                                                                <div class="col-sm-9" style="padding-top: 10px; padding-bottom: 10px;">
+
+                                                                </div>
+                                                                <div class="col-sm-3" style="padding-top: 10px; padding-bottom: 10px;">
+                                                                    <h4><b>Total: &nbsp; <span style="color: #a84142;"><apex:outputField value="{!p.thePayment.Amount__c}"/></span></b></h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </apex:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p style="display: {!if(hasPayments, 'none', 'block')};">
+                                You have no payment history.
+                            </p>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

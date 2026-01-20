@@ -1,0 +1,42 @@
+<!--
+ - Created by Chris Home Desktop on 5/8/2018.
+ -->
+
+<apex:page id="ExportAssessmentPreview" controller="ExportController_Assessments">
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Total Amount" />
+                    <apex:outputText id="totalPaymentSelected" value="{!TotalAssessmentAmountSelected}" />
+                </apex:pageBlockSectionItem>
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Total Selected Assessment" />
+                    <apex:outputText id="TotalNumberOfAssessmentSelected" value="{!TotalNumberOfAssessmentSelected}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="theBlock" columns="1" rendered="{!NumberOfUnTransferredAssessments > 0}">
+                <apex:commandButton value="Export Assessments" action="{!GoToExportAssessmentsPage}" />
+                <apex:pageBlockTable value="{!AssessmentSelectionWrappers}" var="assessWrap">
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink value="Select All" action="{!SelectAllAssessments}"/>
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!assessWrap.IsSelected}">
+                            <apex:actionSupport event="onchange" reRender="totalPaymentSelected,TotalNumberOfAssessmentSelected" />
+                        </apex:inputCheckbox>
+                    </apex:column>
+                    <apex:column value="{!assessWrap.Assessment.Name}"/>
+                    <apex:column value="{!assessWrap.Assessment.Account__r.Name}"/>
+                    <apex:column value="{!assessWrap.Assessment.Status__c}"/>
+                    <apex:column value="{!assessWrap.Assessment.Assessed_Amount__c}"/>
+                    <apex:column value="{!assessWrap.Assessment.Assessment_Date__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <apex:outputLabel value="There are no assessments to export at this time. Please summarize some assessments and come back to this page." rendered="{!NumberOfUnTransferredAssessments == 0}" />
+
+            <apex:actionFunction action="{!SearchForAssessments}" name="RunSearch" />
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

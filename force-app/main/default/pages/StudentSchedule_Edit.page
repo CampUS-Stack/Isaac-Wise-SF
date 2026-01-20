@@ -1,0 +1,127 @@
+<!--
+ - Created by Chris Home Desktop on 7/14/2017.
+ -->
+
+<apex:page id="StudentSchedule_Edit" standardController="Contact" sideBar="true" extensions="StudentSchedule_EditController">
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" />
+    <apex:form id="theForm">
+        <apex:actionFunction reRender="theForm" name="rerenderForm" />
+        <apex:pageBlock title="Class Roster Wizard" id="classPageBlock">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton action="{!ShowAddClassSection}" reRender="rosterDisplayArea" value="Search for Class"/>
+                <!--<apex:commandButton action="/apex/ClassRoster_Copy?id={!$CurrentPage.parameters.id}&retURl={!$CurrentPage.URL}" value="Copy Another Class Roster"/>-->
+                <apex:commandButton action="/{!Contact.Id}" reRender="rosterDisplayArea" value="Back to Student"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Class Name" for="className" />
+                    <apex:outputField id="gradeLevel" value="{!Contact.Name}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Grade Level" for="gradeLevel" />
+                    <apex:outputField id="gradeLevel" value="{!Contact.Grade_Level__c}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:outputPanel id="rosterDisplayArea">
+            <apex:outputPanel rendered="{!displayAddClass}">
+                <table width="100%">
+                    <col width="65%"/>
+                    <col width="35%"/>
+                    <tr>
+                        <td style="vertical-align:top;">
+                            <apex:pageBlock id="theBlock" >
+                                <apex:pageBlockButtons location="top">
+                                    <apex:commandButton id="addStudentSearchBtn" value="Search" action="{!SearchForClasses}" reRender="theBlock,theBlock2"/>
+                                    <!--<apex:commandButton value="Clear" onclick="window.location.reload();" reRender="theBlock,theBlock2"/>-->
+                                    <apex:commandButton value="Clear" action="{!ClearAddClassForm}" reRender="theBlock,theBlock2"/>
+                                    <apex:commandButton value="View Schedule" onclick="window.location.reload();" reRender="theBlock,theBlock2"/>
+                                </apex:pageBlockButtons>
+                                <apex:pageBlockSection columns="2">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputLabel value="Class Name" for="className" />
+                                        <apex:inputText id="className" value="{!ClassName}" onKeyPress="checkForEnterKey(event);"/>
+                                    </apex:pageBlockSectionItem>
+                                    <!--<apex:pageBlockSectionItem >-->
+                                    <!--<apex:outputLabel value="School Year" for="className" />-->
+                                    <!--<apex:inputField id="studentName" value="{!theClass.Name}" onKeyPress="checkForEnterKey(event);"/>-->
+                                    <!--</apex:pageBlockSectionItem>-->
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Classes" columns="1">
+
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputLabel value=""  />
+                                        <apex:commandButton onclick="var r = confirm('Are you sure you want to enroll all selected students in {!JSINHTMLENCODE(Contact.Name)}?'); if(r == false){return false}" id="addStudentBtn" value="Add Classes" action="{!AddSelectedClass}" reRender="theBlock,theBlock2"/>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockTable width="100%" value="{!ClassWrappers}" var="classwrap">
+                                        <apex:column >
+                                            <apex:facet name="header">
+                                                <apex:commandLink value="Select All"   action="{!AddSelectedClass}"  onComplete="reRenderDisplayArea();">
+                                                    <apex:param name="theParam" assignTo="{!ClassIdToAdd}" value="{!classwrap.TheClass.Id}" />
+                                                </apex:commandLink>
+                                            </apex:facet>
+                                            <apex:inputCheckbox styleClass="studentCheckbox" value="{!classwrap.isSelected}"/>
+                                        </apex:column>
+                                        <apex:column value="{!classwrap.TheClass.Name}" >
+                                            <apex:facet name="header">
+                                                <apex:commandLink style="color:black;" action="{!changeSortColumn}" value="Name   {!IF(selectedField=='Name',IF(selectedSortOrder=='DESC','▼','▲'),'')}">
+                                                    <apex:param value="FirstName" name="column" assignTo="{!selectedField}" ></apex:param>
+                                                </apex:commandLink>
+                                            </apex:facet>
+                                        </apex:column>
+                                    </apex:pageBlockTable>
+                                </apex:pageBlockSection>
+                            </apex:pageBlock>
+                        </td>
+                        <td style="vertical-align:top;">
+                            <apex:pageBlock id="theBlock2" >
+                                <apex:pageBlockSection title="Currently Enrolled" columns="1">
+                                    <apex:pageBlockTable width="100%"  value="{!EnrolledClassWrappers}" var="studentwrap">
+                                        <!--<apex:column width="6%" headerValue="Action">-->
+                                        <!--<apex:commandButton value="Remove" action="{!RemoveStudent}" reRender="theBlock,theBlock2" onComplete="classPageBlock">-->
+                                        <!--<apex:param name="theParam" assignTo="{!StudentIdToRemove}" value="{!studentwrap.student.Id}" />-->
+                                        <!--</apex:commandButton>-->
+                                        <!--</apex:column>-->
+                                        <apex:column value="{!studentwrap.TheClass.Name}" />
+                                    </apex:pageBlockTable>
+                                </apex:pageBlockSection>
+                            </apex:pageBlock>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!NOT(displayAddClass)}">
+                <apex:pageBlock id="maincurrentEnrolledBlock">
+                    <apex:pageBlockSection title="Currently Enrolled" columns="1">
+                        <apex:pageBlockTable width="100%" value="{!EnrolledClassWrappers}" var="classwrap">
+                            <apex:column width="5%" headerValue="Action">
+                                <apex:commandButton value="Un-Enroll" onclick="var r = confirm('Are you sure you want to drop {!classwrap.TheClass.Name} out of {!Contact.Name}?'); if(r == false){return false}" action="{!RemoveClass}"  reRender="maincurrentEnrolledBlock">
+                                    <apex:param name="theParam" assignTo="{!ClassIdToRemove}" value="{!classwrap.TheClass.Id}" />
+                                </apex:commandButton>
+                            </apex:column>
+                            <apex:column value="{!classwrap.TheClass.Name}" />
+                        </apex:pageBlockTable>
+                    </apex:pageBlockSection>
+                </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:outputPanel>
+        <apex:actionFunction name="reRenderDisplayArea" reRender="rosterDisplayArea,theBlock,theBlock2" />
+        <script>
+
+            $j = jQuery.noConflict();
+
+            $j(document).ready(function() {
+
+            });
+
+            function checkForEnterKey(e){
+                console.log('Click found. ' + e.keyCode + ' ' + e.ctrlKey);
+                if (e.keyCode==13){
+                    console.log('Enter Key found.');
+                    $j('[id$=addStudentSearchBtn]').trigger('click');
+                }
+            }
+
+        </script>
+    </apex:form>
+</apex:page>

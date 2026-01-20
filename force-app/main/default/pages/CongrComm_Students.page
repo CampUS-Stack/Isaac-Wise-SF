@@ -1,0 +1,74 @@
+<!--
+ - Created by Chris Home Office on 4/11/2019.
+ -->
+
+<apex:page id="CongrComm_Students" controller="CongrComm_StudentRegCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+    <style>
+        /* Medium devices (desktops, 992px and up) */
+        /*@media screen and (max-width: 992px) {*/
+        /*}*/
+        .conRow{
+            padding-bottom:12px;
+            padding-top:5px;
+            /*margin-right:8px;*/
+        }
+
+    </style>
+    <apex:form >
+        <apex:composition template="{!$Site.Template}">
+            <apex:define name="body">
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+
+                            <apex:outputPanel rendered="{!showMsg}" >
+                                <h4 class="sub-title" style="color: #c24c39;">Thank you. Your form for this child has been submitted. Please click below to register another child.</h4>
+                            </apex:outputPanel>
+
+                            <div class="row page-header" style="margin-left:15px;margin-right:15px;">
+                            <h2>Wise Temple Kehillah Registration for 25-26</h2>
+                            
+               
+                            <p> Click "Register" next to your child's name to be taken to the registration form. If you have questions about Kehillah,
+                              please contact Courtney Anthony at (513) 538-0373 or canthony@wisetemple.org.</p>
+                              
+                              <p>25-26 Tuition Rates. These amounts are only for your information. You will not be charged or billed for this until Sep 1.</p>
+                              <p>3's class: $165</p>
+                              <p>Kehillah - Grades PreK-6: $385</p>
+                              <p>Kehillah - Grades 7-8: $465</p>
+                              <p>Hebrew Grades 4-6 (whether in person or Hebrew Connect): $300</p>
+                                
+
+                            </div>
+                            <div class="row" style="margin-left:15px;margin-right:15px;">
+                                <table class="table">
+                                    <apex:repeat id="eventsTable" value="{!childContacts}" var="conWrap">
+                                        <tr>
+                                            <!--<td>
+                                            <apex:inputCheckbox value="{!conWrap.IsSelected}"/>
+                                        </td>-->
+                                            <td>
+                                                <apex:outputText value="{!conWrap.theContact.FirstName + ' ' + conWrap.theContact.LastName}"/>
+                                            </td>
+                                            <td>
+                                                <apex:commandButton value="Register" action="{!URLFOR($Page.CongrComm_StudentRegistration)+'?id='+conWrap.theContact.Id}" styleClass="cancelBtn btn"/>
+                                            </td>
+
+                                        </tr>
+                                    </apex:repeat>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:define>
+        </apex:composition>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,630 @@
+<!--
+ - Created by Chris Home Office on 4/11/2019.
+ -->
+
+<apex:page id="CongrComm_StudentRegistration" controller="CongrComm_StudentRegCtrl" showHeader="false"
+           applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-dropdown/2.0.3/jquery.dropdown.js"
+            integrity="sha256-IE5QkfaiGL8TXmW4I4pBVvK+vxBC/YbRw4xbG0v+Bhg=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+    <style>
+        /* Medium devices (desktops, 992px and up) */
+        /*@media screen and (max-width: 992px) {*/
+        /*}*/
+        .conRow {
+            padding-bottom: 12px;
+            padding-top: 5px;
+            /*margin-right:8px;*/
+        }
+
+        div[id$='_selected_hint'] {
+            display: none;
+        }
+
+        div[id$='_unselected_hint'] {
+            display: none;
+        }
+
+        label .checkbox {
+            position: relative;
+            cursor: pointer;
+            color: #666;
+            font-size: 30px;
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            position: absolute;
+            right: 9000px;
+        }
+
+        /*Check box*/
+        input[type="checkbox"] + .label-text:before {
+            content: "\f096";
+            font-family: "FontAwesome";
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            width: 1em;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        input[type="checkbox"]:checked + .label-text:before {
+            content: "\f14a";
+            color: #c24c39;
+            animation: effect 250ms ease-in;
+        }
+
+        input[type="checkbox"]:disabled + .label-text {
+            color: #aaa;
+        }
+
+        input[type="checkbox"]:disabled + .label-text:before {
+            content: "\f0c8";
+            color: #ccc;
+        }
+
+        input[type="radio"] + .label-text:before {
+            content: "\f10c";
+            font-family: "FontAwesome";
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            width: 1em;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        input[type="radio"]:checked + .label-text:before {
+            content: "\f192";
+            color: #c24c39;
+            animation: effect 250ms ease-in;
+        }
+
+        input[type="radio"]:disabled + .label-text {
+            color: #aaa;
+        }
+
+        input[type="radio"]:disabled + .label-text:before {
+            content: "\f111";
+            color: #ccc;
+        }
+
+    </style>
+    <apex:form >
+        <apex:composition template="{!$Site.Template}">
+            <apex:define name="body">
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row page-header" style="margin-left:15px;margin-right:15px;">
+                                
+                                <h3>25-26 Kehillah Registration for:</h3>
+                                <p style="font-size:25px;"> {!ContactToEdit.FirstName} {!ContactToEdit.LastName}</p>
+                                <h4 style="color:red;">Please review and update the following information:</h4>
+                            </div>
+                            <div class="row">
+                                <apex:outputPanel rendered="{!PageHasError}">
+                                    <div class="alert alert-danger" role="alert">
+                                        <apex:pageMessages />
+                                    </div>
+                                </apex:outputPanel>
+                            </div>
+                            <div class="row" >
+<div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">First Name</label>
+                                    <apex:inputField value="{!ContactToEdit.FirstName}" type="text" styleClass="form-control" />
+                                </div>
+
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Last Name</label>
+                                    <apex:inputField value="{!ContactToEdit.LastName}" type="text" styleClass="form-control" />
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Preferred Nickname</label>
+                                    <apex:inputField value="{!ContactToEdit.Nickname__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Hebrew Name</label>
+                                    <apex:inputField value="{!ContactToEdit.Hebrew_Name__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Gender</label>
+                                    <apex:inputField value="{!ContactToEdit.Gender__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Date of Birth</label>
+                                    <apex:inputField value="{!ContactToEdit.Date_of_Birth__c}" type="text"
+                                                     styleClass="form-control datepicker" showDatePicker="false">
+                                        <!--                                        <apex:actionSupport event="onchange" action="{!isAgeUnder19}"/>-->
+                                    </apex:inputField>
+
+                                </div>
+                            </div>
+                            <div class="row" style="margin-left:15px;margin-right:15px;">
+                       <h4 style="color:red;">Please make sure your child's secular school is updated and accurate for the coming school year:</h4>      
+                       </div>
+                                                        <hr/>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Secular School Name</label>
+                                    <apex:inputField required="true" value="{!ContactToEdit.School_Name__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Other School</label>
+                                    <apex:inputField value="{!ContactToEdit.Other_Secular_School__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                            </div>
+                            <hr/>
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingStreetInput">Household Street Address</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingStreet}" type="text"
+                                                     styleClass="form-control" id="CurrentMailingStreetInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingCityInput">City</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingCity}" type="text"
+                                                     styleClass="form-control" id="CurrentMailingCityInput"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingStateInput">State</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingState}" type="text"
+                                                     styleClass="form-control" id="MailingStateInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingPostalcodeInput">Zip Code</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingPostalCode}"
+                                                     type="text" styleClass="form-control" id="MailingPostalcodeInput"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Home Phone (land line or primary cell)</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Phone}" type="text"
+                                                     styleClass="form-control" id="HomePhoneInput"/>
+                                </div>
+                            </div>
+                            <h4>To update parent cell phones and emails, click "Family Members Personal Information" on
+                                left and choose "Contact Details", after submitting this form.</h4>
+
+
+                            <hr/>
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <label for="lastNameInput">Name of Parent at Separate Address (if
+                                        applicable)</label>
+                                    <apex:inputField value="{!ContactToEdit.Other_Parent_Name1__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Other Parent Email</label>
+                                    <apex:inputField value="{!ContactToEdit.Other_Parent_Email1__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Other Parent Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Other_Parent_Phone1__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Street</label>
+                                    <apex:inputField value="{!ContactToEdit.OtherStreet}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">City</label>
+                                    <apex:inputField value="{!ContactToEdit.OtherCity}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">State</label>
+                                    <apex:inputField value="{!ContactToEdit.OtherState}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Zip Code</label>
+                                    <apex:inputField value="{!ContactToEdit.OtherPostalCode}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                 <div class="row" style="margin-left:15px;margin-right:15px;">
+                       <h4 style="color:red;">Please add your child's cell phone number:</h4>      
+                       </div>
+                         <hr/>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Child's Cell Phone (If Applicable)</label>
+                                    <apex:inputField value="{!ContactToEdit.Mobile_Phone__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+
+
+                            <hr/>
+
+                            <!-- Doctor & Emergency Info -->
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Doctor's Name</label>
+                                    <apex:inputField value="{!ContactToEdit.Doctor_s_Name__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Doctor_s_Phone__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Dentist's Name</label>
+                                    <apex:inputField value="{!ContactToEdit.Dentist__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Dentist_s_Phone__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+                            <hr/>
+
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <label for="lastNameInput">Emergency Contact 1</label>
+                                    <apex:inputField value="{!ContactToEdit.Emergency_Contact_1__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Relationship</label>
+                                    <apex:inputField value="{!ContactToEdit.Emergency_Contact_1_Relationship__c}"
+                                                     type="text" styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Emergency_Contact_1_Phone__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+                            <hr/>
+
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+                                    <label for="lastNameInput">Emergency Contact 2</label>
+                                    <apex:inputField value="{!ContactToEdit.Emergency_Contact_2__c}" type="text"
+                                                     styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Relationship</label>
+                                    <apex:inputField value="{!ContactToEdit.Emergency_Contact_2_Relationship__c}"
+                                                     type="text" styleClass="form-control" html-placeholder=""/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Emergency_Contact_2_Phone__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+
+                            <div class="row" style="margin-left:15px;margin-right:15px;">
+
+                            </div>
+
+                            <div class="row page-header" style="margin-left:15px;margin-right:15px;">
+                                <h4 style="color:red;">Please complete the following information to register for the
+                                    25-26 school year, fields marked with * are mandatory:</h4>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 form-group">
+
+                                    <label>
+                                        <apex:inputCheckbox value="{!stdRegFormEdit.New_Student__c}"/>
+                                        <span class="label-text">New Student
+                                            <p class="help-block">Is this your child's first year at Wise Temple Kehillah?</p>
+                                        </span>
+                                    </label>
+
+
+                                    <!--<label for="lastNameInput">New Student</label>
+                                    <apex:inputCheckbox value="{!stdRegFormEdit.New_Student__c}"/>
+                                    <p class="help-block">Is this your child's first year at Wise Temple Kehillah?</p>-->
+                                </div>
+                                <div class="col-sm-12 form-group">
+                                    <label for="lastNameInput">Register for Kehillah
+                                        <p class="help-block">Please select grade level*</p></label>
+
+                                    <apex:selectList styleClass="form-control" size="1"
+                                                     value="{!stdRegFormEdit.Register_for_Sunday_School__c}">
+                                        <apex:selectOptions value="{!classOptions }"/>
+                                    </apex:selectList>
+                                    <!--                                    <apex:inputField value="{!stdRegFormEdit.Register_for_Sunday_School__c}" type="text" styleClass="form-control" html-placeholder=""/>-->
+                                </div>
+                                
+                                <div class="col-sm-12 form-group">
+                                    <label for="lastNameInput">Hebrew Study Plans
+                                        <p class="help-block">For grades 4, 5 and 6</p>
+                                    </label>
+                                    <apex:inputField value="{!stdRegFormEdit.Hebrew_Study__c}" type="text"
+                                                     styleClass="form-control" html-placeholder=""/>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Tutoring Details</label>
+                                    <apex:inputTextArea value="{!stdRegFormEdit.Tutoring_Details__c}"
+                                                        styleClass="form-control"
+                                                        html-placeholder="Please provide tutor's name or explanation of alternative Hebrew study"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label>
+                                        <apex:inputCheckbox value="{!stdRegFormEdit.Need_Help_Finding_Tutor__c}"/>
+                                        <span class="label-text">We need help finding a tutor
+                                        </span>
+                                    </label>
+                                    <!--<label for="lastNameInput">We need help finding a tutor</label>
+                                    <apex:inputCheckbox value="{!stdRegFormEdit.Need_Help_Finding_Tutor__c}"/>-->
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Special Student Information</label>
+                                    <apex:inputTextArea value="{!stdRegFormEdit.Special_Student_Information__c}"
+                                                        styleClass="form-control"
+                                                        html-placeholder="What should we know to help with your child's class placement?"/>
+                                </div>
+                                 <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Buddy Request</label>
+                                    <apex:inputTextArea value="{!stdRegFormEdit.Buddy_Request__c}"
+                                                        styleClass="form-control"
+                                                        html-placeholder="Do you want your child placed with a particular friend?"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Attendance Concerns</label>
+                                    <apex:inputTextArea value="{!stdRegFormEdit.Attendance_Concerns__c}"
+                                                        styleClass="form-control"
+                                                        html-placeholder="Is there anything that will affect your child's attendance at Kehillah?"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Attending Jewish Summer Camp?</label>
+                                        <apex:inputField value="{!stdRegFormEdit.Attending_Summer_Camp__c}" type="text"
+                                                         styleClass="form-control"
+                                                         html-placeholder="Please list if your child will be attending GUCI, Livingston, Wildbrook or another Jewish affiliated summer camp"/>
+                                    </div>
+                            </div>
+
+                            <!-- Health Information : Start -->
+                            <apex:outputPanel id="healthInformation"
+                                              rendered="{!if(ContactToEdit.Age__c<19,true,false)}">
+                                <div class="row">
+                                    <div class="col-sm-12 form-group">
+                                        <label for="lastNameInput">Health Information
+                                            <p class="help-block">Please select all that apply and explain in Health
+                                                Information Details below</p>
+                                        </label>
+                                        <apex:inputField value="{!stdRegFormEdit.Health_Information__c}" type="text"
+                                                         styleClass=" form-control MultiClass" html-placeholder=""/>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Allergies</label>
+                                        <apex:inputField value="{!stdRegFormEdit.Allergies__c}" type="text"
+                                                         styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Medications</label>
+                                        <apex:inputField value="{!stdRegFormEdit.Medications__c}" type="text"
+                                                         styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Health Information Details</label>
+                                        <apex:inputField value="{!stdRegFormEdit.Health_Information_Details__c}"
+                                                         styleClass="form-control"
+                                                         html-placeholder="{!stdRegFormEdit.Health_Information_Details__c}"/>
+                                    </div>
+                                    
+     <div class="row">
+                                <div class="col-sm-12 form-group">
+
+                                    <label>
+                                        <apex:inputCheckbox value="{!stdRegFormEdit.Require_Medication__c}"/>
+                                        <span class="label-text">Medication required at Kehillah?
+                                            <p class="help-block">Does your student require medication to be administered by Kehillah teachers?</p>
+                                            <p class="help-block" style="color:red;">If your student requires medication to be administerd by staff, please <a href="https://www.wisetemple.org/wp-content/uploads/2024/04/Wise-Temple-Medication-Form.editable.pdf" target="_blank">click here</a> to download a fillable PDF form. This must be returned by mail to Courtney Anthony prior to the start of the school year.</p>
+                                        </span>
+                                    </label>
+
+                                </div>
+                                </div>
+
+
+
+                                    <div class="col-sm-6 form-group">
+                                        <inputText placeholder="consent language"/>
+                                    </div>
+                                    <div class="col-sm-12 form-group">
+                                        <p>
+                                            I give my consent for Wise Temple to seek emergency medical treatment for my
+                                            child, should it be deemed necessary, at the discretion of the Wise Temple staff and faculty. I agree to be responsible
+                                            for any cost incurred by such medical attention. (Wise Temple will only seek
+                                            medical attention for a child in case of an emergency, and will make every effort to contact parents as quickly as possible in the event of an emergency. In the case of a
+                                            minor
+                                            illness or injury, we will contact parents/other
+                                            emergency contacts listed).
+                                        </p>
+                                    </div>
+                                    <div class="col-sm-12 form-group">
+                                        <label>
+                                            <apex:inputCheckbox value="{!stdRegFormEdit.Medical_Consent__c}"/>
+                                            <span class="label-text">I give medical consent as described above.*
+                                        </span>
+                                        </label>
+
+
+                                        <!-- <label for="lastNameInput">I give medical consent as described above</label>
+                                                <apex:inputCheckbox value="{!stdRegFormEdit.Medical_Consent__c}"/>-->
+                                    </div>
+                                    <p>During Kehillah, we take photos and videos that may be used internally, including on school
+                                bulletin boards,
+                                in communications with Kehillah families, and in Wise Temple promotional
+                                materials. We never share
+                                these photos with outside organizations or identify individual students by name.</p>
+ <div class="col-sm-12 form-group">
+                                        <label>
+                                            <apex:inputCheckbox value="{!stdRegFormEdit.Photo_Consent__c}"/>
+                                            <span class="label-text">I understand and accept Kehillah's photo policy.*
+                                        </span>
+                                        </label>
+                                        </div>
+                                    
+                                </div>
+
+                            </apex:outputPanel>
+                            
+                            
+                            <!-- Health Information : End -->
+                            
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Submit" styleClass="wiseBtn btn btn-default"
+                                                        action="{!SaveData}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_Students)}"
+                                                        styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:define>
+        </apex:composition>
+    </apex:form>
+    <script type="text/javascript">
+        var $j = jQuery.noConflict();
+
+        $j(document).ready(function () {
+
+            $j(' tr.multiSelectPicklistRow td').hide()
+            var col = 1;
+            var x
+            $j('.multiSelectPicklistRow').each(function (i, val) {
+
+                var unselectedValues = [];
+                var selectedValues = [];
+                var element = '';
+                $j(this).wrap('<div id= "wrapId' + col + '" ></div>');
+
+                element = element + '<select data-id= "wrapId' + col + '" class="selectpicker" data-width="auto" multiple="true">';
+
+                // $j(this).find('optgroup[label="Chosen"] option').each(function() {
+                $j($j(this).find('select:nth-child(1)')[1]).find('option').each(function () {
+                    selectedValues.push($j(this));
+                    console.log(selectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' selected="true"> ' + $j(this).text() + '</option>';
+                })
+                // $j(this).find('optgroup[label="Available"] option').each(function() {
+                $j($j(this).find('select:nth-child(1)')[0]).find('option').each(function () {
+                    unselectedValues.push($j(this));
+                    console.log(unselectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' > ' + $j(this).text() + '</option>';
+                })
+
+                element = element + ' </select>';
+
+                $j(this).append(element);
+
+                col = col + 1;
+            })
+
+            $j('.selectpicker').on('changed.bs.select', function (e, a, b, c) {
+
+                var tmp = e.target.options[a].text
+                selectValue(e.currentTarget.getAttribute('data-id'), $j(e.target.options[a]).attr('data-v'));
+
+            });
+
+            function selectValue(id, value) {
+
+                // console.log( $j('#'+id+ ' optgroup[label="Available"] option[value='+value+']'))
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+                $j('#' + id + ' option[value=' + value + ']').trigger('dblclick')
+
+            }
+
+            function unselectValue(id, value) {
+
+                console.log($j('#' + id + ' optgroup[label="Chosen"] option[value=' + value + ']'))
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+
+            }
+
+            $j(function () {
+                $j(".datepicker").datepicker({
+                    format: 'm/d/yyyy'
+                }).on('changeDate', dateChanged);
+                ;
+            });
+
+            function dateChanged() {
+                console.log('test Change');
+                // $( ".datepicker" ).trigger( "change" );
+
+            }
+
+        });
+
+    </script>
+
+
+    <apex:stylesheet value="{!URLFOR($Resource.DatePicker, '/datepicker/css/datepicker.css')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DatePicker, '/datepicker/js/bootstrap-datepicker.js')}"/>
+</apex:page>

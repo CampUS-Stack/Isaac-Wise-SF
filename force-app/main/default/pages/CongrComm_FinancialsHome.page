@@ -1,0 +1,542 @@
+<apex:page controller="CongrComm_FinancialsHomeController"
+           id="CongrComm_FinancialsHome"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0"
+>
+
+    <style>
+        .badge-danger {
+            background-color: red;
+        }
+
+        .badge-success {
+            background-color: green;
+        }
+
+        .badge-primary {
+            background-color: blue;
+        }
+    </style>
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Financials
+                            </h2>
+                            <p>
+                                Financials for {!theContact.Account.Name}
+                            </p>
+                            <hr/>
+                            <h4 style="color:red">
+                                A credit card convenience fee of 2.5% will be
+                                automatically added to your total. There are no fees for ACH payments.
+                            </h4>
+                                                        <!--<p style="color:red; line-height: 1.5;">In an effort to make payment easier during these challenging times, we-->
+                                                           <!--are waiving the 2.5% credit card fees just for the month of <u>May</u>. Thank you-->
+                                                        <!--for your support of Wise Temple.-->
+                                                 <!--</p>-->
+                            <br/>
+                            <p>Please note: We accept ACH, Visa, Mastercard, and Discover (at this time, we do not accept
+                                American Express)
+                            </p>
+                            <hr/>
+
+                            <div style="display: {!if(hasPriorAssessments, 'block', 'none')};">
+                                <h3>
+                                    Prior Fiscal Years
+                                </h3>
+                                <table class="table" style="display: {!if(hasPriorAssessments, 'block', 'none')};">
+                                    <col width="5%"/>
+                                    <thead>
+                                    <tr>
+                                        <!--<th>-->
+                                        <!--Select-->
+                                        <!--</th>-->
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            Assessment Amount
+                                        </th>
+                                        <th>
+                                            Remaining Balance
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <apex:variable value="0" var="index"/>
+                                    <apex:repeat value="{!wrappedPriorAssessments}" var="a" id="thePriorRepeat">
+                                        <tr>
+                                            <!--<td>-->
+                                            <!--<apex:inputCheckbox value="{!a.isSelected}" id="selected" onclick="selectAssessment({!a.theAssessment.Remaining_Balance__c}, {!a.index},'thePriorRepeat')"/>-->
+                                            <!--</td>-->
+                                            <td>
+                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                    <apex:param value="{!a.theAssessment.Assessment_Date__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{!a.theAssessment.Designation__r.Designation_Description__c}"/>
+                                            </td>
+
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Assessed_Amount__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Remaining_Balance__c}"/>
+                                                </apex:outputText>
+                                            </td>
+<!--                                            <td>-->
+<!--                                                <a class="btn-link"-->
+<!--                                                   style="display: {!IF(a.listOfSchedulePaymentWrappers.size>0,'','none')}"-->
+<!--                                                   data-toggle="collapse"-->
+<!--                                                   href="#{!a.theAssessment.Id}" role="button" aria-expanded="false">Multipayment</a>-->
+<!--                                            </td>-->
+                                        </tr>
+                                        <tr style="display: {!IF(a.listOfSchedulePaymentWrappers.size>0,'','none')}">
+                                            <td colspan="5" class="accordion" style="padding: 0px;border-top: none;">
+
+                                                <div id="{!a.theAssessment.Id}" class="collapse multi-collapse"
+                                                     aria-labelledby="headingOne">
+                                                    <table class="table" style="padding: 8px; padding-right: 16px;">
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>Schedule Date</th>
+                                                            <th>Amount</th>
+                                                            <th>Remaining Payment</th>
+                                                            <th>Is Currently Due</th>
+                                                            <th>Payment Status</th>
+
+                                                        </tr>
+                                                        <apex:repeat value="{!a.listOfSchedulePaymentWrappers}"
+                                                                     var="sp">
+                                                            <tr>
+                                                                <th></th>
+                                                                <td>
+                                                                    <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Date__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputText value="{0, number, $###,###.00}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Expected_Amount__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputText value="{0, number, $###,###.00}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Remaining_Balance__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputField value="{!sp.scheduledPayment.Is_Currently_Due__c}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Is_Currently_Due__c}"/>
+                                                                    </apex:outputField>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputPanel rendered="{! If((sp.scheduledPayment.Is_Currently_Due__c==true) &&( sp.scheduledPayment.Remaining_Balance__c>0)  ,true,false) }">
+                                                                        <span class="badge badge-pill badge-danger">Due</span>
+
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel rendered="{! If(sp.scheduledPayment.Remaining_Balance__c=0 ,true,false) }">
+                                                                        <span class="badge badge-pill badge-success">Paid</span>
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel rendered="{! If((sp.scheduledPayment.Is_Currently_Due__c==false) && (sp.scheduledPayment.Remaining_Balance__c>0) ,true,false) }">
+                                                                        <span class="badge badge-pill badge-primary">Upcoming</span>
+                                                                    </apex:outputPanel>
+                                                                </td>
+                                                            </tr>
+                                                        </apex:repeat>
+                                                    </table>
+
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                    </apex:repeat>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+
+                                        <td><b>Total Remaining Balance</b></td>
+                                        <td></td>
+                                        <td>
+                                            <apex:outputText value="{0, number, $###,###.00}">
+                                                <apex:param value="{!PriorTotalRemainingBalance}"/>
+                                            </apex:outputText>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <hr/>
+                            </div>
+
+                            <div style="display: {!if(hasAssessments, 'block', 'none')};">
+                                <p style="display: {!if(hasAssessments, 'none', 'block')};">
+                                    You have no remaining balances to pay.
+                                </p>
+                                <h3>
+                                    Current Fiscal Year
+                                </h3>
+                                <table class="table" style="display: {!if(hasAssessments, 'block', 'none')};">
+                                    <col width="5%"/>
+                                    <thead>
+                                    <tr>
+                                        <!--<th>-->
+                                        <!--Select-->
+                                        <!--</th>-->
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            Assessment Amount
+                                        </th>
+                                        <th>
+                                            Remaining Balance
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <apex:variable value="0" var="index"/>
+                                    <apex:repeat value="{!wrappedAssessments}" var="a" id="theRepeat">
+                                        <tr>
+                                            <!--<td>-->
+                                            <!--<apex:inputCheckbox value="{!a.isSelected}" id="selected" onclick="selectAssessment({!a.theAssessment.Remaining_Balance__c}, {!a.index},'theRepeat')"/>-->
+                                            <!--</td>-->
+                                            <td>
+                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                    <apex:param value="{!a.theAssessment.Assessment_Date__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{!a.theAssessment.Designation__r.Designation_Description__c}"/>
+                                            </td>
+
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Assessed_Amount__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Remaining_Balance__c}"/>
+                                                </apex:outputText>
+                                            </td>
+<!--                                            <td>-->
+<!--                                                <a class="btn-link"-->
+<!--                                                   style="display: {!IF(a.listOfSchedulePaymentWrappers.size>0,'','none')}"-->
+<!--                                                   data-toggle="collapse"-->
+<!--                                                   href="#{!a.theAssessment.Id}" role="button"-->
+<!--                                                   aria-expanded="false">Multipayment</a>-->
+<!--                                            </td>-->
+                                        </tr>
+                                        <tr style="display: {!IF(a.listOfSchedulePaymentWrappers.size>0,'','none')}">
+                                            <td colspan="5" class="accordion"
+                                                style="padding: 0px;border-top: none;">
+
+                                                <div id="{!a.theAssessment.Id}" class="collapse multi-collapse"
+                                                     aria-labelledby="headingOne">
+                                                    <table class="table" style="padding: 8px; padding-right: 16px;">
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>Schedule Date</th>
+                                                            <th>Amount</th>
+                                                            <th>Remaining Payment</th>
+                                                            <th>Is Currently Due</th>
+                                                            <th>Payment Status</th>
+
+                                                        </tr>
+                                                        <apex:repeat value="{!a.listOfSchedulePaymentWrappers}"
+                                                                     var="sp">
+                                                            <tr>
+                                                                <th></th>
+                                                                <td>
+                                                                    <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Date__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputText value="{0, number, $###,###.00}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Expected_Amount__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputText value="{0, number, $###,###.00}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Remaining_Balance__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputField value="{!sp.scheduledPayment.Is_Currently_Due__c}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Is_Currently_Due__c}"/>
+                                                                    </apex:outputField>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputPanel rendered="{! If((sp.scheduledPayment.Is_Currently_Due__c==true) &&( sp.scheduledPayment.Remaining_Balance__c>0)  ,true,false) }">
+                                                                        <span class="badge badge-pill badge-danger">Due</span>
+
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel rendered="{! If(sp.scheduledPayment.Remaining_Balance__c=0 ,true,false) }">
+                                                                        <span class="badge badge-pill badge-success">Paid</span>
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel rendered="{! If((sp.scheduledPayment.Is_Currently_Due__c==false) && (sp.scheduledPayment.Remaining_Balance__c>0) ,true,false) }">
+                                                                        <span class="badge badge-pill badge-primary">Upcoming</span>
+                                                                    </apex:outputPanel>
+                                                                </td>
+                                                            </tr>
+                                                        </apex:repeat>
+                                                    </table>
+
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                    </apex:repeat>
+                                    <tr>
+                                        <!--<td></td>-->
+                                        <td></td>
+
+                                        <td><b>Total Remaining Balance</b></td>
+                                        <td></td>
+                                        <td>
+                                            <apex:outputText value="{0, number, $###,###.00}">
+                                                <apex:param value="{!CurrentTotalRemainingBalance}"/>
+                                            </apex:outputText>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <hr/>
+                            </div>
+                            <div style="display: {!if(HasFutureAssessments, 'block', 'none')};">
+                                <h3>
+                                    Future Fiscal Years &amp; Pledges
+                                </h3>
+                                <table class="table" style="display: {!if(HasFutureAssessments, 'block', 'none')};">
+                                    <col width="5%"/>
+                                    <thead>
+                                    <tr>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            Assessment Amount
+                                        </th>
+                                        <th>
+                                            Remaining Balance
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <apex:variable value="0" var="index"/>
+                                    <apex:repeat value="{!wrappedFutureAssessments}" var="a" id="theFutureRepeat">
+                                        <tr>
+                                            <!--<td>-->
+                                            <!--<apex:inputCheckbox value="{!a.isSelected}" id="selected" onclick="selectAssessment({!a.theAssessment.Remaining_Balance__c}, {!a.index},'theFutureRepeat')"/>-->
+                                            <!--</td>-->
+                                            <td>
+                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                    <apex:param value="{!a.theAssessment.Assessment_Date__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{!a.theAssessment.Designation__r.Designation_Description__c}"/>
+                                            </td>
+
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Assessed_Amount__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Remaining_Balance__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                        </tr>
+                                        <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                    </apex:repeat>
+                                    <tr>
+                                        <td></td>
+
+                                        <td><b>Total Remaining Balance</b></td>
+                                        <td></td>
+                                        <td>
+                                            <apex:outputText value="{0, number, $###,###.00}">
+                                                <apex:param value="{!FutureTotalRemainingBalance}"/>
+                                            </apex:outputText>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <hr/>
+                            </div>
+                            <br/>
+                            <div style="display: {!if(hasAssessments  || HasFutureAssessments || HasPriorAssessments, 'block', 'none')};">
+                                <apex:commandButton value="Make a Payment" action="{!makePayment}"
+                                                    styleClass="btn wiseBtn"/>&nbsp;&nbsp;
+                                <apex:commandButton value="Make a Donation"
+                                                    action="{!URLFOR($Page.CongrComm_Donations)}"
+                                                    styleClass="btn wiseBtn"/>
+                            </div>
+                            <br/><br/>
+                            <!--<p>-->
+                            <!--Payment History for {!theContact.Account.Name}-->
+                            <!--</p>-->
+                            <!--<hr/>-->
+                            <!--<div style="display: {!if(hasPayments, 'block', 'none')};">-->
+                            <!--<table class="table">-->
+                            <!--<thead>-->
+                            <!--<tr>-->
+                            <!--<th>-->
+                            <!--Payment Date-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Payment Amount-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Details-->
+                            <!--</th>-->
+                            <!--</tr>-->
+                            <!--</thead>-->
+                            <!--<tbody>-->
+                            <!--<apex:repeat value="{!paymentList}" var="p" id="payRepeat">-->
+                            <!--<tr>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!p.Check_Date__c}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!p.Amount__c}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!p.Reason__c}"/>-->
+                            <!--</td>-->
+                            <!--</tr>-->
+                            <!--</apex:repeat>-->
+                            <!--</tbody>-->
+                            <!--</table>-->
+                            <!--</div>-->
+                            <!--<p style="display: {!if(hasPayments, 'none', 'block')};">-->
+                            <!--You have no payment history.-->
+                            <!--</p>-->
+                            <div style="margin-top: 10px;">
+                                <apex:commandbutton styleClass="btn wiseBtn "
+                                                    action="{!URLFOR($Page.CongrComm_FairShare)}"
+                                                    value="{!CURRENT_FISCAL_YEAR} Fair Share Form"></apex:commandbutton>
+                            </div>
+                            <br/>
+                            <div style="margin-top: 10px;">
+                                <apex:commandButton value="View Previous Billing" action="{!billingHistory}"
+                                                    styleClass="btn wiseBtn"/>
+                            </div>
+                            <div style="margin-top: 25px;">
+                                <apex:commandButton value="View Payment History" action="{!paymentHistory}"
+                                                    styleClass="btn wiseBtn"/>
+                            </div>
+                            <br/><br/>
+                            <!--<p>-->
+                            <!--Billing History for {!theContact.Account.Name}-->
+                            <!--</p>-->
+                            <!--<div style="display: {!if(hasBills, 'block', 'none')};">-->
+                            <!--<table class="table">-->
+                            <!--<thead>-->
+                            <!--<tr>-->
+                            <!--<th>-->
+                            <!--Designation-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Description-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Date-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Assessment Amount-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Adjustment Amount-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Amount Paid-->
+                            <!--</th>-->
+                            <!--</tr>-->
+                            <!--</thead>-->
+                            <!--<tbody>-->
+                            <!--<apex:variable value="0" var="index"/>-->
+                            <!--<apex:repeat value="{!billList}" var="b" id="billRepeat">-->
+                            <!--<tr>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!b.theAssessment.Designation__r.Name}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!b.theAssessment.Description__c}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!b.theAssessment.Assessment_Date__c}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!b.theAssessment.Assessed_Amount__c}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!b.theAssessment.Amount_Adjusted__c}"/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                            <!--<apex:outputField value="{!b.theAssessment.Amount_Paid__c}"/>-->
+                            <!--</td>-->
+                            <!--</tr>-->
+                            <!--<apex:variable var="num" value="{!VALUE(index) + 1}"/>-->
+                            <!--</apex:repeat>-->
+                            <!--</tbody>-->
+                            <!--</table>-->
+                            <!--</div>-->
+                            <!--<p style="display: {!if(hasBills, 'none', 'block')};">-->
+                            <!--You have no billing history.-->
+                            <!--</p>-->
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+    <script>
+        var selectedItemTotal = 0.0;
+        var totalSpan = document.getElementById('total');
+        totalSpan.innerHTML = selectedItemTotal.toFixed(2);
+
+        function selectAssessment(amount, index, repeatSection) {
+            var input = document.getElementById('CongrComm_FinancialsHome:CongrComm_Template:theForm:' + repeatSection + ':' + index + ':selected');
+            if (input.checked) {
+                selectedItemTotal += amount;
+            } else {
+                selectedItemTotal -= amount;
+            }
+            totalSpan.innerHTML = selectedItemTotal.toFixed(2);
+        };
+    </script>
+</apex:page>

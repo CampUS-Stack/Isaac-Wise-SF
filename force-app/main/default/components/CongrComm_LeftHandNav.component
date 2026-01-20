@@ -1,0 +1,50 @@
+<!--
+ - Created by Chris Home Desktop on 4/7/2018.
+ -->
+
+<apex:component id="CongrComm_LeftHandNav" layout="none" controller="CongrComm_LeftNavCtrl">
+    <style>
+        .wiseLink{
+            color:#542654;
+            font-size:1.05em;
+        }
+        @media print { .no-print, .no-print * { display: none !important; } }
+    </style>
+    <ul class="nav sidebarNavLinks no-print">
+        <br/>
+
+        <li style="font-weight: bold; font-size:1.1em;color: #03356a;"><a style="margin-left:-15px;" href="{!URLFOR($Page.CongrComm_Home) + '?retURL=' + $CurrentPage.Name}">Member Portal Home</a></li>
+
+        <li class="nav-divider"></li>
+        <li style="font-weight: bold; font-size:1.1em;color:#03356a;">Update my information</li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_HouseholdInfo) + '?retURL=' + $CurrentPage.Name}">Household Information</a></li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_MyFamilyInformation) + '?retURL=' + $CurrentPage.Name}">Family Members Personal Information</a></li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_UpdateGPSAll)}">Gifts, Passions and Skills (GPS)</a></li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_Observances) + '?retURL=' + $CurrentPage.Name}">Yahrzeit Observances</a></li>
+        <li class="nav-divider"></li> 
+          <!--<li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_MemorialDonations) + '?retURL=' + $CurrentPage.Name}">Memorial Book</a></li> -->  
+        <li class="nav-divider"></li>       
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_FinancialsHome)}">Financials</a></li>
+        <li class="nav-divider"></li>
+        
+        <br/>
+        <li style="font-weight: bold; font-size:1.1em;color: #03356a;">Resources</li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_Directory)}">Member Directory</a></li>
+        <li class="nav-divider"></li>
+         <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_Students)}">Kehillah Registration</a></li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_Classes)}">Class Assignments</a></li>
+        <li class="nav-divider"></li>
+        <li><a class="wiseLink" href="{!URLFOR($Page.CongrComm_AllEvents)}">Event Registration</a></li>
+        <li class="nav-divider"></li>
+       
+
+    </ul>
+
+
+</apex:component>

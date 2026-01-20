@@ -1,0 +1,45 @@
+<!--
+ - Created by cgibs on 7/26/2017.
+ -->
+
+<apex:page id="CampaignClone" sideBar="true" showHeader="true" controller="CampaignCloneController" tabStyle="Campaign">
+
+    <apex:form >
+        <apex:sectionHeader title="Lists/Groups Edit" subtitle="Clone List/Group" />
+
+        <apex:pageBlock title="Clone List/Group">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!Save}"/>
+                <apex:commandButton value="Cancel" action="{!Cancel}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="List/Group Name" />
+                    <apex:inputField value="{!NewCampaign.Name}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Active" />
+                    <apex:inputField value="{!NewCampaign.IsActive}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Fiscal Year" />
+                    <apex:inputField value="{!NewCampaign.Fiscal_Year_Global__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Type" />
+                    <apex:inputField value="{!NewCampaign.Type}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Parent List/Group" />
+                    <apex:inputField value="{!NewCampaign.ParentId}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Description" />
+                    <apex:inputField value="{!NewCampaign.Description}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

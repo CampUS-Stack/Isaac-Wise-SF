@@ -1,0 +1,102 @@
+<!--
+ - Created by Chris Home Desktop on 4/7/2018.
+ -->
+
+<apex:page id="CongrComm_Home" controller="CongrComm_LeftNavCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    <style>
+        .wiseActionLink{
+            color:#c24c39 !important;
+        }
+        .wizeActionLink p, a span {
+            color:#c24c39;
+        }
+        h2{
+            color: #03356a !important;
+        }
+    </style>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="col-sm-10 col-sm-offset-1 col-xs-12">
+                        <div class="jumbotron" style="height:20%;">
+                            <p>Hello {!CommunityUserContact.Nickname__c}. Welcome to the Wise Temple Member Portal. <br></br>
+                            Click the orange headings below to access each section.</p>
+                        </div>
+                        <div class="col-sm-4">
+                            <h2>My information</h2>
+                            <h3 style="margin-left:25px;color:maroon" ><a href="{!URLFOR($Page.CongrComm_HouseholdInfo)}" class="wiseActionLink">Update Household Information</a></h3>
+
+                            <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px">Edit Address, Home Phone</li>
+                                <li style="margin-left : 20px">Add a seasonal address if you have one</li>
+                            </ul>
+
+                            <h3 style="margin-left:25px;color:maroon" ><a href="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" class="wiseActionLink">Update Family Members’ Personal Information</a></h3>
+
+                            <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px"> Edit Cell Phone, Email, Employer</li>
+                                <li style="margin-left : 20px">Enter college addresses for children</li>
+                                <li style="margin-left : 20px">Create relationship links to other members</li>
+                            </ul>
+                            <h3 style="margin-left:25px;color:maroon" ><a href="{!URLFOR($Page.CongrComm_UpdateGPSAll) + '?cId=' + CommunityUserContact.Id}" class="wiseActionLink">Add Gifts, Passions, &amp; Skills</a></h3>
+
+                            <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px">Enter your "GPS" so we can connect you to Temple experiences most meaningful to you</li>
+                            <li class="active" style="margin-left : 20px">List other organizations where you have volunteered your skills</li>
+                            </ul>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <h2>&nbsp;</h2>
+
+                            <h3 style="margin-left:25px;color:maroon" class="wiseUpdateLink"><a href="{!URLFOR($Page.CongrComm_FinancialsHome)}" class="wiseActionLink">View Financials</a></h3>
+                            <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px">Check your balance and make a payment</li>
+                                <li class="active" style="margin-left : 20px">See previous billing and payments</li>
+                                <li class="active" style="margin-left : 20px">Submit {!CURRENT_FISCAL_YEAR} Fair Share form</li>
+                                <li class="active" style="margin-left : 20px">Make a donation</li>
+
+                            </ul>
+                           
+                            <h3 style="margin-left:25px;color:maroon" ><a href="{!URLFOR($Page.CongrComm_Observances)}" class="wiseActionLink">View Yahrzeit Observances</a></h3>
+                            <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px">Check the dates of Yahrzeits you observe</li>
+                            </ul>
+
+                          <!--<h3 style="margin-left:25px;color:maroon" ><a href="{!URLFOR($Page.CongrComm_MemorialDonations)}" class="wiseActionLink">Memorial Book</a></h3> 
+                        <ul style="list-style-type:disc"> 
+                              <li class="active" style="margin-left : 20px">Memorial Book 2025</li> 
+                             </ul>--> 
+                                                     
+                        </div>
+                        <div class="col-sm-4">
+                            <h2>Resources</h2>
+                            <h3 style="margin-left:25px;" ><a href="{!URLFOR($Page.CongrComm_Directory)}" class="wiseActionLink">Search Member Directory</a></h3>
+
+                            <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px">Find other Wise Temple members</li>
+                                <li class="active" style="margin-left : 20px">Search by name, by zip code, by child’s grade or school</li>
+                            </ul>
+
+                           
+                            
+                            
+                            <h3 style="margin-left:25px;" ><a href="{!URLFOR($Page.CongrComm_Students)}" class="wiseActionLink">Kehillah Registration</a></h3>
+                            
+                            <h3 style="margin-left:25px;" ><a href="{!URLFOR($Page.CongrComm_Classes)}" class="wiseActionLink">View Class Assignments</a></h3>
+                           
+                           <h3 style="margin-left:25px;" ><a href="{!URLFOR($Page.CongrComm_AllEvents)}" class="wiseActionLink">Event Registration</a></h3>
+                             <ul style="list-style-type:disc">
+                                <li class="active" style="margin-left : 20px">Register for Upcoming Events</li>
+                                <li class="active" style="margin-left : 20px">See which events you're registered for</li>
+                            </ul> 
+ 
+                        </div>
+                        
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

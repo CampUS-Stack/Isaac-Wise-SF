@@ -1,0 +1,103 @@
+<!--
+ - Created by Chris Home Office on 12/10/2018.
+ -->
+
+<apex:page id="CongrComm_AllEvents" controller="CongrComm_AllEvents" sideBar="false" showHeader="false">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Upcoming Events
+                            </h2>
+                            <br></br><br></br><h3>   <apex:commandLink style="font-size:1.1em;" value=" See which events you are already registered for" action="{!URLFOR($Page.CongrComm_MyEvents) }" /> </h3>
+                            <hr/>
+
+                            <ul class="list-group">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>
+                                            Name
+                                        </th>
+                                        <th>
+                                            Start Date
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                   <tr>
+                                        <td>
+                                            <a href="{!URLFOR($Page.CongrComm_MultiEvent) + '?etype=WiseUp'}">Good Deeds (WiseUp) Events</a>
+                                        </td>
+                                        <td>Multiple Dates Available</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <a href="{!URLFOR($Page.CongrComm_MultiEvent) + '?etype=Eitz'}">Adult Ed (Eitz Chayim) Events</a>
+                                        </td>
+                                        <td>Multiple Dates Available</td>
+                                    </tr>
+                                    <apex:repeat value="{!TheEvents}" var="event">
+
+                                        <tr>
+                                            <td><apex:commandLink action="{!URLFOR($Page.CongrComm_EventPage) + '?id=' + event.Id}">{!event.Name}</apex:commandLink></td>
+                                            <td> <apex:outputField value="{!event.Event_Date_Start__c}" /></td>
+                                        </tr>
+
+                                    </apex:repeat>
+                                   
+ 
+
+                                  
+                                    
+                                    </tbody>
+                                </table>
+                            </ul>
+                            <!--<table class="table">-->
+                            <!--<thead>-->
+                            <!--<tr>-->
+                            <!--<th>-->
+                            <!--Name-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Start Date-->
+                            <!--</th>-->
+                            <!--<th>-->
+                            <!--Description-->
+                            <!--</th>-->
+                            <!--</tr>-->
+                            <!--</thead>-->
+                            <!--<tbody>-->
+                            <!--<apex:repeat value="{!TheEvents}" var="event">-->
+                            <!--<tr>-->
+                            <!--<td width="40%"><apex:commandLink action="{!URLFOR($Page.CongrComm_EventPage) + '?id=' + event.Id}" value="{!event.Name}"/></td>-->
+                            <!--<td width="20%"><apex:outputField value="{!event.Event_Date_Start__c}"/></td>-->
+                            <!--&lt;!&ndash;<td><apex:outputField value="{!p.Event__r.Event_Date_End__c}"/></td>&ndash;&gt;-->
+                            <!--<td width="40%"><apex:outputField value="{!event.Description__c}"/></td>-->
+                            <!--</tr>-->
+                            <!--</apex:repeat>-->
+                            <!--</tbody>-->
+                            <!--</table>-->
+                            
+                            <hr/>
+                         <div class="col-xs-12">
+                             <h3>   <apex:commandLink style="font-size:1.1em;" value=" See which events you are already registered for" action="{!URLFOR($Page.CongrComm_MyEvents) }" /> </h3>
+                            </div>
+                        </div>
+                       
+
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

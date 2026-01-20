@@ -1,0 +1,144 @@
+<apex:page standardController="Event__c" extensions="ProgramSignInPDFController" sidebar="false" showHeader="false" standardStylesheets="false"
+           renderAs="pdf" applyBodyTag="false"  applyHtmlTag="false">
+    <html>
+    <head>
+        <style>
+            *{
+                font-family: Arial Unicode MS;
+            }
+
+            @page {
+                size: 10in 7.50in;
+                margin-top: 0.4in;
+                margin-bottom: 0.4in;
+                margin-left:  0.4in;
+                margin-right: 0.4in;
+
+
+            @bottom-right {
+                font-size: 10pt;
+                font-family: Arial Unicode MS;
+            content: "Report Run Date :<apex:outputText value="{0, date, MMMM dd','  yyyy}">
+            <apex:param value="{!NOW()+offset}" />
+            </apex:outputText>";
+            color : #000;
+            }
+
+            }
+
+            .program-name{
+                font-size: 28pt;
+            }
+
+            .total{
+                padding-top: 15px;
+                font-size: 10pt;
+
+            }
+
+            .program-date{
+                font-size: 12pt;
+                padding-left: 80px;
+                padding-bottom: 4px;
+                color: #898989;
+            }
+            .foo {
+                float: left;
+                width: 12px;
+                height: 12px;
+                margin: 5px;
+                border: 1px solid rgb(0, 0, 0);
+            }
+
+            table.GeneratedTable {
+                width: 100%;
+                background-color: #ffffff;
+                border-collapse: collapse;
+                border-width: 0px;
+                border-color: #999;
+                border-style: solid;
+                color: #000000;
+            }
+
+            table.GeneratedTable td {
+                border-width: 0px;
+                border-color: #999;
+                border-style: solid;
+                padding: 3px;
+                font-size: 9pt;
+            }
+
+            table.GeneratedTable th {
+                border-bottom-width: 1px;
+                border-right-width: 0px;
+                border-left-width: 0px;
+                border-top-width: 1px;
+                border-color: #000;
+                border-style: solid;
+                padding: 2px;
+                font-size: 9.1pt;
+                font-weight: bold;
+            }
+
+            table.GeneratedTable thead{
+                background-color: #ffffff;
+
+            }
+
+        </style>
+    </head>
+    <body>
+    <div class="program-name">
+            {!Event__c.Name}
+    </div>
+    <div class="program-date">
+        Program Date:
+        <apex:outputText value="{0, date, MMMM dd','  yyyy}">
+            <apex:param value="{!Event__c.Event_Date_Start__c + offset}" />
+        </apex:outputText>
+
+    </div>
+   
+
+    <table class="GeneratedTable">
+        <col width="70"/>
+        <col width="140"/>
+        <col width="150"/>
+        <col width="300"/>
+        <col width="100"/>
+        <col width="0"/>
+        <col width="0"/>
+
+        <thead>
+        <tr>
+            <th class="col-1">Attended</th>
+            <th class="col-2">Last Name</th>
+            <th class="col-3">First Name</th>
+            <th class="col-4">Family</th>
+            <th class="col-5">Email Address</th>
+            <th class="col-6"></th>
+            <th class="col-7"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <apex:repeat var="par" value="{!participants}">
+            <tr>
+                <td class="col-1"><div class="foo"/></td>
+                <td class="col-2">{!par.Contact__r.LastName}</td>
+                <td class="col-3">{!par.Contact__r.Nickname__c}</td>
+                <td class="col-4">{!par.Contact__r.Account.Name}</td>
+                <td class="col-5">{!par.Contact__r.Email}</td>
+                <td class="col-6"></td>
+                <td class="col-7"></td>
+                    
+            </tr>
+        </apex:repeat>
+        <tr>
+            <td class="total" colspan="7">Total Registered: {!Event__c.of_Registrants__c}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    </body>
+    </html>
+</apex:page>

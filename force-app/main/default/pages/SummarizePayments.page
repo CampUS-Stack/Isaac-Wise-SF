@@ -1,0 +1,131 @@
+<!--
+ - Created by Chris Home Desktop on 10/10/2017.
+ -->
+
+<apex:page id="SummarizePayments" controller="PaymentPagesController" docType="html-5.0">
+    <apex:form >
+        <apex:pageBlock id="Search">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Search" action="{!UpdatePageLists}" reRender="theBlock" />
+                <apex:commandButton value="Summarize Payments" action="{!SummarizePayments}" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Batch" />
+                    <apex:inputField value="{!DummyPA.Batch__c}" onchange="javascript:ShowLoading();RunSearch();"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Deposit ID" />
+                    <apex:selectList value="{!SelectedDepositId}" multiSelect="false" size="1" onchange="javascript:ShowLoading();RunSearch();">
+                        <apex:selectOptions value="{!DepositIds}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="From Date" />
+                    <apex:input value="{!FilledStartDate}" type="date" id="stDate" style="height: 18px; font-family: inherit;"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="To Date" />
+                    <apex:input value="{!FilledEndDate}" type="date" id="endDate" style="height: 18px; font-family: inherit;"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value=" Amount to Summarize" />
+                    <apex:outputText value="$ {!UnSummarizedTotal}" id="summarizedTotal" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock id="theBlock">
+            <apex:pageBlockTable value="{!unSummarizedPaymentAdjustments}" var="payWrap">
+                <apex:column >
+                    <apex:facet name="header">
+                        <apex:commandLink value="Select All" action="{!SelectAllUnSummarizedPayments}"  reRender="theBlock,theBlock2"/>
+                    </apex:facet>
+                    <apex:inputCheckbox styleClass="studentCheckbox" value="{!payWrap.isSelected}" onChange="ReRenderTotals();"/>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.Household__r.Name}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="Household Name   {!IF(paymentSelectedField=='Household__r.Name',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Household__r.Name" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.Status__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="Status   {!IF(paymentSelectedField=='Status__c',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Status__c" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.Batch__r.Deposit_ID__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="Deposit ID   {!IF(paymentSelectedField=='Batch__r.Deposit_ID__c',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Batch__r.Deposit_ID__c" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.RecordType.Name}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="RecordType   {!IF(paymentSelectedField=='RecordType.Name',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="RecordType.Name" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.Type__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="Type   {!IF(paymentSelectedField=='Type__c',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Type__c" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.Name}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="Payment Name   {!IF(paymentSelectedField=='Name',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Name" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                <apex:column value="{!payWrap.PaymentAdjustment.Amount__c}" >
+                    <apex:facet name="header">
+                        <apex:commandLink style="color:black;" action="{!changePaymentSortColumn}" value="Amount   {!IF(paymentSelectedField=='Amount__c',IF(paymentSelectedSortOrder=='DESC','▼','▲'),'')}">
+                            <apex:param value="Amount__c" name="column" assignTo="{!paymentSelectedField}" ></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+
+                <apex:column value="{!payWrap.PaymentAdjustment.Batch_Date__c}" >
+                    <apex:facet name="header">
+                        Batch Date ▼
+                    </apex:facet>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        <apex:actionFunction action="{!UpdatePageLists}" name="RunSearch" reRender="theBlock" onComplete="HideLoading();" />
+        <apex:actionFunction name="ReRenderTotals" reRender="summarizedTotal" />
+    </apex:form>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script>
+        function ShowLoading() {
+            console.log('show Loading');
+            $.blockUI({ css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                } });
+
+            //setTimeout($.unblockUI, 2000);
+        }
+        function HideLoading() {
+            console.log('hide Loading');
+            $.unblockUI();
+            //CONSOLE.log(url)
+        }
+    </script>
+</apex:page>

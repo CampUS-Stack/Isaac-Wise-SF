@@ -1,0 +1,132 @@
+<!--
+ - Created by Kritik Garg on 03-03-2020.
+ -->
+
+<aura:component controller="AssessmentAllocationsController" description="AssessmentAllocations"
+                implements="flexipage:availableForRecordHome,force:hasRecordId" access="global">
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="allocations" type="List"/>
+    <aura:attribute name="assessment" type="Object"/>
+    <aura:attribute name="recordId" type="String"/>
+
+
+
+    <div class="slds-panel__header slds-panel__header" style="background-color: white;">
+        <h2 class="slds-card__header-title slds-shrink-none slds-m-right--xx-small" style="font-weight: bold;"
+            title="Panel Header">
+            <aura:if isTrue="{!v.assessment.RecordType.Name =='Credit Assessment'}">
+            Credit Allocations
+            </aura:if>
+            <aura:if isTrue="{!v.assessment.RecordType.Name !='Credit Assessment'}">
+            Payment Adjustment Allocations
+            </aura:if>
+
+        </h2>
+    </div>
+
+
+    <aura:if isTrue="{!v.assessment.RecordType.Name =='Credit Assessment'}">
+        <div class="slds-grid">
+            <table class="slds-table slds-table--bordered slds-table--cell-buffer slds-table_fixed-layout">
+                <thead>
+                <tr class="slds-text-title--caps">
+                    <th scope="col" width="50%">
+                        <div class="slds-truncate" title="Name">Name</div>
+                    </th>
+                    <th scope="col" width="25%">
+                        <div class="slds-truncate" title="Amount">Amount</div>
+                    </th>
+                    <th scope="col" width="25%">
+                        <div class="slds-truncate" title="Created Date">Payment Date</div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <aura:iteration items="{!v.allocations}" var="allocation">
+                    <tr>
+
+                        <td scope="row" data-label="Name">
+                            <div class="slds-truncate" title="{! allocation.creditAllocation.Name}">
+                                <a href="{!'/'+allocation.creditAllocation.Id}"
+                                   tabindex="-1">{! allocation.creditAllocation.Name}</a>
+                            </div>
+                        </td>
+                        <td scope="row" data-label="Amount">
+                            <lightning:formattedNumber value="{!allocation.creditAllocation.Amount__c}" style="currency" currencyCode="USD"/>
+                        </td>
+                        <td scope="row" data-label="Created Date">
+                            <div class="slds-truncate ">
+                                <lightning:formattedDateTime value="{! allocation.creditAllocation.CreatedDate}"/>
+                            </div>
+                        </td>
+
+                    </tr>
+                </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </aura:if>
+
+    <aura:if isTrue="{!v.assessment.RecordType.Name !='Credit Assessment'}">
+        <div class="slds-grid">
+            <table class="slds-table slds-table--bordered slds-table--cell-buffer slds-table_fixed-layout">
+                <thead>
+                <tr class="slds-text-title--caps">
+                    <th scope="col" width="20%">
+                        <div class="slds-truncate" title="Name">Name</div>
+                    </th>
+
+                    <th scope="col" width="20%">
+                        <div class="slds-truncate" title="Assessment Date">Assessment Date</div>
+                    </th>
+                    <th scope="col" width="20%">
+                        <div class="slds-truncate" title="Assessment Amount">Assessment Amount</div>
+                    </th>
+                    <th scope="col" width="20%">
+                        <div class="slds-truncate" title="Tax Deductible">Tax Deductible</div>
+                    </th>
+                    <th scope="col" width="20%">
+                        <div class="slds-truncate" title="Created Date">Created Date</div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <aura:iteration items="{!v.allocations}" var="allocation">
+                    <tr>
+
+                        <td scope="row" data-label="Name">
+                            <div class="slds-truncate" title="{! allocation.paymentAdjustmentAllocation.Name}">
+                                <a href="{!'/'+allocation.paymentAdjustmentAllocation.Id}"
+                                   tabindex="-1">{! allocation.paymentAdjustmentAllocation.Name}</a>
+                            </div>
+                        </td>
+                        <td scope="row" data-label="Created Date">
+                            <div class="slds-truncate ">
+                                <lightning:formattedDateTime value="{! allocation.paymentAdjustmentAllocation.Assessment_Date__c}"/>
+                            </div>
+                        </td>
+                        <td scope="row" data-label="Amount">
+                            <lightning:formattedNumber value="{!allocation.paymentAdjustmentAllocation.Amount__c}" style="currency" currencyCode="USD"/>
+                        </td>
+
+                        <td scope="row" data-label="Tax Deductible">
+                            <ui:inputCheckbox disabled="true" change="{!allocation.paymentAdjustmentAllocation.Tax_Deductible__c}"/>
+                        </td>
+
+
+                        <td scope="row" data-label="Created Date">
+                            <div class="slds-truncate ">
+                                <lightning:formattedDateTime value="{! allocation.paymentAdjustmentAllocation.CreatedDate}"/>
+                            </div>
+                        </td>
+
+                    </tr>
+                </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </aura:if>
+
+
+</aura:component>

@@ -1,0 +1,63 @@
+<!--
+ - Created by Chris Home Desktop on 5/27/2018.
+ -->
+
+<apex:page id="CongrComm_UpdateGPSALL" controller="CongrComm_MyFamilyInfoCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+    <style>
+        /* Medium devices (desktops, 992px and up) */
+        /*@media screen and (max-width: 992px) {*/
+        /*}*/
+        .conRow{
+            padding-bottom:12px;
+            padding-top:5px;
+            /*margin-right:8px;*/
+        }
+
+    </style>
+    <apex:form >
+        <apex:composition template="{!$Site.Template}">
+            <apex:define name="body">
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row page-header" style="margin-left:15px;margin-right:15px;">
+                                <h2>Update Gifts, Passions, and Skills for Each Family Member</h2>
+                                <hr/>
+                                <ul style="list-style-type:disc">
+                                    <li style="margin-left : 20px">Enter your Gifts, Passions, and Skills so we can connect you to temple experiences most meaningful to you</li>
+                                </ul>
+                                
+                                
+                            </div>
+                            <apex:repeat value="{!HouseholdContacts}" var="conWrap">
+                                <div class="row col-md-4 col-sm-6 col-xs-12" >
+                                    <div class="panel panel-default">
+                                        <div class="col-xs-12 panel-heading">
+                                            <apex:outputText value="{!conWrap.theContact.FirstName + ' ' + conWrap.theContact.LastName}"/>
+                                        </div>
+                                        <div class="panel-body" >
+                                            <div class="col-sm-12 col-md-12 col-lg-12" >
+                                                <apex:commandButton style="margin-top:10px;" value="Gifts, Passions, & Skills" action="{!URLFOR($Page.CongrComm_UpdateGPS) + '?cId=' + conWrap.theContact.Id}" styleClass="btn wiseBtn" />
+                                            </div>
+                                            <div class="col-xs-12">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                </div>
+                            </apex:repeat>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:define>
+        </apex:composition>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,163 @@
+<!--
+ - Created by Chris Home Desktop on 4/7/2018.
+ -->
+
+<apex:component id="CongrComm_Header">
+
+    <style>
+        .nav li a{
+            /*background-color: #03356a !important;*/
+        }
+        .action-item{
+            color:#c24c39;
+        }
+        .navbar-default{
+            background-color: #03356a !important;
+            color:white !important;
+        }
+        .navbar-default li a{
+            background-color: #03356a !important;
+            color:white !important;
+        }
+        .navbar-default .active a{
+            background-color: #03356a !important;
+            color:white !important;
+        }
+        .navbar-collapse{
+            background-color: #03356a !important;
+            color:white !important;
+        }
+        .name-area{
+            padding-top:35px;
+            padding-bottom:0px;
+        }
+        .wiseBtn{
+            background-color:#c24c39;
+            color:white;
+        }
+        body{
+            font-weight:normal !important;
+        }
+        /* Medium devices (desktops, 992px and up) */
+        @media screen and (max-width: 768px) {
+            .name-area{
+                padding-bottom:20px;
+                padding-top:15px;
+            }
+            #userBtnGroup{
+                float:right;
+            }
+        }
+        @media (min-width: 768px) and (max-width: 1000px) {
+            .navbar-header {
+                float: none;
+            }
+            .navbar-left,.navbar-right {
+                float: none !important;
+            }
+            .navbar-toggle {
+                display: block;
+            }
+            .navbar-collapse {
+                border-top: 1px solid transparent;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+
+            }
+            .navbar-fixed-top {
+                top: 0;
+                border-width: 0 0 1px;
+            }
+            .navbar-collapse.collapse {
+                display: none!important;
+            }
+            .navbar-nav {
+                float: none!important;
+                margin-top: 50px;
+            }
+            .navbar-nav>li {
+                float: none;
+            }
+            .navbar-nav>li>a {
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+            .collapse.in{
+                display:block !important;
+            }
+
+        }
+
+    </style>
+
+    <div class="container-fluid">
+        <div class="col-lg-6 col-sm-6 col-xs-12">
+            <apex:image value="{!URLFOR($Resource.WiseLogo)}" />
+        </div>
+        <div class="col-lg-6 col-sm-6 col-xs-12 ">
+            <apex:outputPanel rendered="{!NOT(ISPICKVAL($User.UserType,'Guest'))}">
+                <div class="btn-group name-area pull-right" id="userBtnGroup">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-2 col-sm-2-offset" >
+                            <div style="padding-top:7px;">
+                                <a  href="mailto:jschaffzin@wisetemple.org" class="cancelBtn">Help
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4" >
+                            <button style="margin-right:10px;" type="button" class="btn btn-default wiseBtn" onclick="location.href = '{!URLFOR($Page.CongrComm_Donations)}'">
+                                Donate Now
+                            </button>
+                        </div>
+                        <!--<div class="col-xs-12 col-sm-3" >-->
+                            <!--<button type="button" class="btn btn-default dropdown-toggle wiseBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                              <!--<span class="caret"></span>-->
+                            <!--</button>-->
+                        <!--</div>-->
+                        <div class="col-xs-12 col-sm-4" >
+                            <button type="button" class="btn wiseBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {!$User.FirstName + ' ' + $User.LastName}&nbsp;<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{!$Site.Prefix}/secur/logout.jsp">Log Out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!--<apex:outputPanel rendered="{!NOT(ISPICKVAL($User.UserType,'Guest'))}">-->
+                    <!--</apex:outputPanel>-->
+                </div>
+            </apex:outputPanel>
+        </div>
+    </div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+                <!--<span class="navbar-brand">Menu</span>-->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse"  id="bs-example-navbar-collapse-1">
+
+                    <ul class="nav navbar-nav ">
+                        <li class="active"> <a href="https://www.wisetemple.org/about/" class="headertext">ABOUT<span class="sr-only">(current)</span></a></li>
+
+                        <li> <a href="https://www.wisetemple.org/worship/" class="headertext">WORSHIP</a></li>
+                        <li> <a href="https://www.wisetemple.org/study/" class="headertext">STUDY</a></li>
+                        <li> <a href="https://www.wisetemple.org/good-deeds/">GOOD DEEDS</a></li>
+                        <li> <a href="https://www.wisetemple.org/community/">COMMUNITY</a></li>
+                        <li> <a href="https://www.wisetemple.org/calendar/">CALENDAR</a></li>
+                        <li> <a href="https://wisetemple.force.com/">PORTAL HOME</a></li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+
+        </div><!-- /.container-fluid -->
+    </nav>
+
+
+</apex:component>

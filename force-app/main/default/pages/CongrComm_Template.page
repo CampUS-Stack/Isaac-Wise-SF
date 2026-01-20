@@ -1,0 +1,77 @@
+<!--
+ - Created by Chris Home Desktop on 4/7/2018.
+ -->
+
+<apex:page id="CongrComm_Template"
+           applyBodyTag="false"
+           applyHtmlTag="false"
+           showHeader="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+
+    <head>
+        <apex:stylesheet value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/css/bootstrap.min.css')}"/>
+        <apex:stylesheet value="{!URLFOR($Resource.bootstrap,'/bootstrap-3.3.7-dist/css/style.css')}"/>
+        <!--<apex:stylesheet value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/fonts/font-awesome.min.css')}"/>-->
+
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Isaac M. Wise Congregation Community</title>
+
+        <style type="text/css">
+            .topNavLinks {
+                font-family: Calibri;
+                font-size: 24px;
+            }
+
+            .sidebarNavLinks {
+                font-family: Calibri;
+                font-size: 18px;
+            }
+            .cancelBtn {
+                background-color: white;
+                color: #c24c39;
+                margin-left: 10px;
+            }
+            .wiseBtn{
+                background-color:#c24c39;
+                color:white;
+            }
+        </style>
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-125233815-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-125233815-1');
+        </script>
+    </head>
+    <html lang="en">
+        <body>
+            <div>
+                <apex:insert name="header">
+                    <c:CongrComm_Header />
+                </apex:insert>
+
+                <!--<div class="col-lg-10 col-lg-offset-1 col-md-12">-->
+                    <apex:insert name="body">
+                    </apex:insert>
+                <!--</div>-->
+
+                <apex:insert name="footer">
+                    <c:CongrComm_Footer />
+                </apex:insert>
+
+                <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+                <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+
+            </div>
+
+        </body>
+    </html>
+
+</apex:page>

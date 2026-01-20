@@ -1,0 +1,72 @@
+<apex:page id="CongrComm_EditRelationships" showHeader="false" controller="CongrComm_EditRelationshipsCtrl" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+
+        <apex:composition template="{!$Site.Template}">
+            <apex:define name="body">
+                <apex:form id="theForm">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                                <div class="row col-sm-12">
+                                    <div class="col-sm-12 text-center">
+                                        <!--<apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;-->
+                                        <!--<apex:commandButton value="Add New" action="{!URLFOR($Page.CongrComm_NewRelationship)+ '?cId=' + contactId}" styleClass="wiseBtn btn btn-default"/>&nbsp;&nbsp;-->
+                                        <apex:commandButton value="Save" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="wiseBtn btn"/>&nbsp;&nbsp;
+                                        <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="cancelBtn btn"/>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12"><h2>Are you related to other Wise Temple Members?</h2></div><br/>
+                                <div class="col-sm-12"><h4>Editing Relationships for {!CurrentContact.Name}</h4></div><br/>
+                                <div class="col-sm-12"><h4>(It's not necessary to add relationships among members of your own household)</h4></div>
+                                <div class="row table-responsive col-sm-12">
+                                    <table class="table">
+                                        <th>Related Person</th>
+                                        <th>Relationship Type</th>
+                                        <th></th>
+                                        <apex:repeat value="{!RelationshipWrappers}" var="relWrap">
+                                            <tr>
+                                                <td>{!relWrap.Relationship.Related_Contact__r.Name}</td>
+                                                <td>{!relWrap.RelationshipName}</td>
+                                                <td class="text-right">
+                                                    <apex:commandButton value="Edit" action="{!URLFOR($Page.CongrComm_NewRelationship) + '?cId=' + contactId + '&type=edit&&rId=' + relWrap.Relationship.Id}" styleClass="wiseBtn btn btn-default"/>&nbsp;&nbsp;
+                                                    <apex:commandButton value="Remove" action="{!DeleteRelationship}" styleClass="cancelBtn btn" reRender="theForm">
+                                                        <apex:param name="conId" value="{!relWrap.Relationship.Id}" assignTo="{!RelationshipIdToDelete}" />
+                                                    </apex:commandButton>
+                                                </td>
+                                            </tr>
+                                        </apex:repeat>
+                                    </table>
+                                </div>
+                                <div class="row col-sm-12">
+                                    <div class="col-sm-12 text-center">
+                                        <!--<apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;-->
+                                        <apex:commandButton value="Add New" action="{!URLFOR($Page.CongrComm_NewRelationship)+ '?cId=' + contactId}" styleClass="wiseBtn btn btn-default"/>&nbsp;&nbsp;
+                                        <!--<apex:commandButton value="Save" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="wiseBtn btn"/>&nbsp;&nbsp;-->
+                                        <!--<apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="cancelBtn btn"/>-->
+                                    </div>
+                                </div>
+                                <div class="row col-xs-12">
+                                    &nbsp;<br/>
+                                    <br/>
+                                </div>
+                                <br/>
+                                <div class="col-xs-12" style="padding-top:15px;"><h2>Non-Member Relationships</h2></div><br/>
+                                <div class="col-xs-12">
+                                    <apex:commandLink style="font-size:1.1em;" value="Do you have in-town grandchildren or adult children that you'd like to invite to events? Click here to let us know." action="{!URLFOR($Page.CongrComm_ChildrenForm) + '?cId=' + contactId}" />
+                                </div>
+                            </div>
+                            <div style="padding-top:10px;"  class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                                <div  class="sidebar-nav">
+                                    <c:CongrComm_LeftHandNav />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </apex:form>
+            </apex:define>
+        </apex:composition>
+
+
+
+
+</apex:page>

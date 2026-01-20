@@ -1,0 +1,438 @@
+<apex:page controller="CongrComm_FinancialsHomeController"
+           id="CongrComm_FinancialsPayment"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+    <style>
+        .badge-danger {
+            background-color: red;
+        }
+
+        .badge-success {
+            background-color: green;
+        }
+
+        .badge-primary {
+            background-color: blue;
+        }
+
+        .highlight-full {
+            background: greenyellow;
+        }
+
+        .highlight-partial {
+            background: orange;
+        }
+
+        input[type=radio] {
+            margin-left: 50px;
+        }
+
+        .radioClass {
+            margin-left: -50px;
+        }
+    </style>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="paymentForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div>
+                                <center>
+                                    <apex:commandButton value="Back" action="{!paymentCancel}"
+                                                        styleClass="btn wiseBtn"/>
+                                </center>
+                            </div>
+                            <h2 class="title">
+                                Financials
+                            </h2>
+                            <p>
+                                Make a Payment for {!theContact.Account.Name}
+                            </p>
+                            <br/>
+                            <h4 style="color:red">A credit card convenience fee of 2.5% will be
+                                automatically added to your total. There is no fee for paying by ACH.
+                            </h4>
+                            <!--                            <p style="color:red; line-height: 1.5;">In an effort to make payment easier during these challenging times, we-->
+                            <!--                                are waiving the 2.5% credit card fees just for the months of <u>April</u> and <u>May</u>. Thank you-->
+                            <!--                                for your support of Wise Temple.-->
+                            <!--                            </p>-->
+
+                            <br/>
+                            <p>Please note: We accept ACH, Visa, Mastercard, and Discover (at this time, we do not
+                                accept
+                                American Express)
+                            </p>
+                            <hr/>
+
+                            <apex:outputPanel id="msgPanel">
+                                <apex:pageMessages />
+                            </apex:outputPanel>
+                            <div style="display: {!if(hasSelectedAssessments, 'block', 'none')};">
+                                <h3>
+                                    Assessments
+                                </h3>
+                                <table class="table" style="display: {!if(hasSelectedAssessments, 'block', 'none')};">
+
+                                    <thead>
+                                    <tr></tr>
+                                    <tr>
+                                        <td colspan="2"><b>Select Payment Method</b></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="feeCell"></td>
+                                        <td>
+                                            <apex:selectRadio value="{!selectedPaymentMethod}"
+                                                              styleClass="radioClass"
+                                                              onChange="onPaymentMethodChange(this);">
+                                                <apex:selectoptions value="{!paymentOptions}"></apex:selectoptions>
+                                            </apex:selectRadio>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Description
+                                        </th>
+                                        <th>
+                                            Assessment Amount
+                                        </th>
+                                        <th>
+                                            Remaining Balance
+                                        </th>
+                                        <th>
+                                            Tax Deductible
+                                        </th>
+                                        <th class="feeCell">
+                                            Fee %
+                                        </th>
+                                        <th>
+                                            Payment Amount
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <apex:variable value="0" var="index"/>
+                                    <apex:repeat value="{!selectedAssessments}" var="a" id="theRepeat">
+                                        <tr>
+                                            <td>
+                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                    <apex:param value="{!a.theAssessment.Assessment_Date__c}"/>
+                                                </apex:outputText>
+
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{!a.theAssessment.Designation__r.Designation_Description__c}"/>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Assessed_Amount__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{0, number, $###,###.00}">
+                                                    <apex:param value="{!a.theAssessment.Remaining_Balance__c}"/>
+                                                </apex:outputText>
+                                            </td>
+                                            <td>
+                                                <apex:inputCheckbox disabled="true"
+                                                                    value="{!a.theAssessment.Is_Tax_Deductible__c}"/>
+                                            </td>
+                                            <td class="feeCell">
+                                                <apex:input disabled="true" type="number" style="width:70px;"
+                                                            styleClass="feeCharge" value="{!a.feeDecimal}"/>
+                                            </td>
+                                            <td>
+                                                <apex:input type="number" id="amountInput" styleClass="amountInput"
+                                                            html-data-assessment="{!a.theAssessment.Id}"
+                                                            value="{!a.paymentAmount}" onchange="updateAmount()"/>
+                                            </td>
+                                            <!--                                            <td>-->
+                                            <!--                                                <a class="btn-link"-->
+                                            <!--                                                   style="display: {!IF(a.listOfSchedulePaymentWrappers.size>0,'','none')}"-->
+                                            <!--                                                   data-toggle="collapse"-->
+                                            <!--                                                   href="#btn{!a.theAssessment.Id}" role="button" aria-expanded="false">Multipayment</a>-->
+                                            <!--                                            </td>-->
+                                        </tr>
+                                        <tr style="display: {!IF(a.listOfSchedulePaymentWrappers.size>0,'','none')}">
+                                            <td colspan="8" class="accordion" style="padding: 0px;border-top: none;">
+
+                                                <div id="btn{!a.theAssessment.Id}" class="collapse multi-collapse"
+                                                     aria-labelledby="headingOne">
+                                                    <table class="table" style="padding: 8px; padding-right: 16px;">
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>Schedule Date</th>
+                                                            <th>Amount</th>
+                                                            <th>Remaining Payment</th>
+                                                            <th>Is Currently Due</th>
+                                                            <th>Payment Status</th>
+
+                                                        </tr>
+                                                        <apex:variable value="0" var="sporder"/>
+                                                        <apex:repeat value="{!a.listOfSchedulePaymentWrappers}"
+                                                                     var="sp">
+                                                            <tr class="{!'spof_'+a.theAssessment.Id}"
+                                                                data-order="{!sporder}"
+                                                                data-amount="{!sp.scheduledPayment.Remaining_Balance__c}">
+                                                                <th></th>
+                                                                <td>
+                                                                    <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Date__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputText value="{0, number, $###,###.00}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Expected_Amount__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputText value="{0, number, $###,###.00}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Remaining_Balance__c}"/>
+                                                                    </apex:outputText>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputField value="{!sp.scheduledPayment.Is_Currently_Due__c}">
+                                                                        <apex:param value="{!sp.scheduledPayment.Is_Currently_Due__c}"/>
+                                                                    </apex:outputField>
+                                                                </td>
+                                                                <td>
+                                                                    <apex:outputPanel rendered="{! If((sp.scheduledPayment.Is_Currently_Due__c==true) &&( sp.scheduledPayment.Remaining_Balance__c>0)  ,true,false) }">
+                                                                        <span class="badge badge-pill badge-danger">Due</span>
+
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel rendered="{! If(sp.scheduledPayment.Remaining_Balance__c=0 ,true,false) }">
+                                                                        <span class="badge badge-pill badge-success">Paid</span>
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel rendered="{! If((sp.scheduledPayment.Is_Currently_Due__c==false) && (sp.scheduledPayment.Remaining_Balance__c>0) ,true,false) }">
+                                                                        <span class="badge badge-pill badge-primary">Upcoming</span>
+                                                                    </apex:outputPanel>
+                                                                </td>
+                                                            </tr>
+                                                            <apex:variable var="sporder" value="{!VALUE(sporder) + 1}"/>
+                                                        </apex:repeat>
+                                                    </table>
+
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                    </apex:repeat>
+                                    <!--                                    <tr>-->
+                                    <!--                                        <td colspan="2"><b>Select Payment Method</b></td>-->
+                                    <!--                                        <td></td>-->
+                                    <!--                                        <td></td>-->
+                                    <!--                                        <td></td>-->
+                                    <!--                                        <td></td>-->
+                                    <!--                                        <td>-->
+                                    <!--                                            <apex:selectRadio value="{!selectedPaymentMethod}" styleClass="radioClass"-->
+                                    <!--                                                              onChange="onPaymentMethodChange(this);">-->
+                                    <!--                                                <apex:selectoptions value="{!paymentOptions}"></apex:selectoptions>-->
+                                    <!--                                                &lt;!&ndash;                                                    <apex:actionSupport status="pageStatus" event="onchange" reRender="theForm"&ndash;&gt;-->
+                                    <!--                                                &lt;!&ndash;                                                                        action="{!getPaymentAdjustmentAmount}"&ndash;&gt;-->
+                                    <!--                                                &lt;!&ndash;                                                                        onComplete="loadCard();"/>&ndash;&gt;-->
+                                    <!--                                            </apex:selectRadio>-->
+                                    <!--                                        </td>-->
+                                    <!--                                    </tr>-->
+
+                                    <tr id="feeRow">
+                                        <td colspan="2"><b>Convenience Fee (Not applicable for ACH payments)</b>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            $<span id="fee"></span>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="2"><b>Total Payment</b></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="feeCell"></td>
+                                        <td>
+                                            $<span id="total"></span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <hr/>
+                            </div>
+
+                            <p style="display: {!if(hasSelectedAssessments, 'none', 'block')};">
+                                You have not selected any assessments to pay.
+                            </p><br/>
+                            <div>
+                                <apex:commandButton value="Back" action="{!paymentCancel}" styleClass="btn wiseBtn"/>
+                            </div>
+                            <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                                <div style="display: {!if(OR(HasAssessments, HasPriorAssessments, HasFutureAssessments), 'block', 'none')};">
+                                    <apex:outputPanel id="ContinueButton">
+                                        <center>
+                                            <apex:commandButton value="Continue" onClick="submitPayment(event)"
+                                                                disabled="{! IF(OR(ISNULL(calculatedTotal), calculatedTotal <= 0), TRUE, FALSE)}"
+                                                                styleClass="btn wiseBtn"/>
+                                        </center>
+                                    </apex:outputPanel>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <apex:actionFunction name="doPaymentSubmit" action="{!SubmitPayment}" reRender="msgPanel">
+                    <apex:param assignTo="{!totalPaymentAmount}" value="" name="totalParam"/>
+                    <apex:param assignTo="{!feeAmount}" value="" name="feeParam"/>
+                </apex:actionFunction>
+                <!--                <apex:actionFunction name="PaymentMethodChangedRerender" rerender="feeId"/>-->
+                <apex:actionFunction name="refreshContinue" reRender="ContinueButton"></apex:actionFunction>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+    <script>
+        var paymentTotal = 0.0;
+        var fee = 0.0;
+        var userEnteredTotal = 0.0;
+        var totalSpan = document.getElementById('total');
+        let selectedPaymentType = 'CC';
+        let feeSpan = undefined;
+        if (selectedPaymentType == 'CC') {
+            feeSpan = document.getElementById('fee');
+        }
+        totalSpan.innerHTML = paymentTotal.toFixed(2);
+
+        $j = jQuery.noConflict();
+
+        $j(document).ready(function () {
+            console.log('READY');
+            updateAmount();
+        });
+        Number.prototype.toFixedDown = function (digits) {
+            var re = new RegExp("(\\d+\\.\\d{" + digits + "})(\\d)"),
+                m = this.toString().match(re);
+            return m ? parseFloat(m[1]) : this.valueOf();
+        };
+
+
+        function submitPayment(e) {
+            var total = totalSpan.innerHTML;
+
+            e.preventDefault();
+            console.log(total);
+            doPaymentSubmit(fee, userEnteredTotal);
+            updateAmount();
+        }
+
+        function onPaymentMethodChange(e) {
+            console.log(e.value);
+            selectedPaymentType = e.value;
+
+            console.log('onPaymentMethodChangeRunning');
+            if(selectedPaymentType === 'ACH'){
+                $j('#feeRow').css('display','none');
+                $j('.feeCell').css('display','none');
+            }
+            else{
+                $j('#feeRow').css('display','table-row');
+                $j('.feeCell').css('display','table-cell');
+            }
+
+            updateAmount();
+            // PaymentMethodChangedRerender();
+
+        }
+
+        function updateAmount() {
+            var inputs = document.getElementsByClassName('amountInput');
+            var feeinputs = document.getElementsByClassName('feeCharge');
+            paymentTotal = 0.0;
+            feeTotal = 0.0;
+            fee = 0.0;
+            userEnteredTotal = 0.0;
+
+            for (var i = 0; i < inputs.length; i++) {
+                // console.log('inputs[' + i + '].value: ' + inputs[i].value);
+                var fee = 0;
+                if (inputs[i].value != '') {
+                    paymentTotal += parseFloat(inputs[i].value);
+                    userEnteredTotal += parseFloat(inputs[i].value);
+                    if (selectedPaymentType == 'CC') {
+                        fee = parseFloat(feeinputs[i].value)
+                        feeTotal += fee * parseFloat(inputs[i].value) / 100;
+                    }
+                    calculateAndHighlightRows($j(inputs[i]).data('assessment'), inputs[i].value);
+
+                } else {
+                    calculateAndHighlightRows($j(inputs[i]).data('assessment'), 0);
+
+                }
+            }
+
+            console.log('Payment Total : ' + paymentTotal);
+            if (paymentTotal == 0.0) {
+                feeSpan.innerHTML = (0.0).toFixed(2);
+                console.log('TOTAL Span: ' + totalSpan.innerHTML);
+                totalSpan.innerHTML = paymentTotal.toFixed(2);
+            } else {
+                fee = ((paymentTotal * .025));
+                feeSpan.innerHTML = feeTotal.toFixed(2);
+                totalSpan.innerHTML = (paymentTotal + feeTotal).toFixed(2);
+            }
+            console.log('refresh');
+            console.log('TOTAL Span: ' + totalSpan.innerHTML);
+            console.log('REFRESHING');
+            refreshContinue();
+        }
+
+
+        function calculateAndHighlightRows(assessmentId, inputAmount) {
+            //spof_a020r000007HUU2AAO highlight-full
+
+            let rowSelector = '".spof_' + assessmentId + '"';
+            // console.log(assessmentId);
+
+            let sprows = $j('.spof_' + assessmentId);
+            // console.log(sprows);
+
+            let totalAmount = parseFloat(inputAmount);
+
+            $j('.spof_' + assessmentId).each(function () {
+
+                $j(this).removeClass("highlight-full");
+                $j(this).removeClass("highlight-partial");
+
+                let rowAmount = parseFloat($j(this).data('amount'));
+
+                if (rowAmount > 0 && totalAmount > 0) {
+
+                    if (rowAmount <= totalAmount) {
+                        $j(this).addClass("highlight-full");
+                    } else if (rowAmount > totalAmount) {
+                        $j(this).addClass("highlight-partial");
+                    }
+
+                    totalAmount = totalAmount - rowAmount;
+
+                }
+
+
+            });
+        }
+
+    </script>
+</apex:page>

@@ -1,0 +1,435 @@
+<!--
+ - Created by Chris Home Desktop on 10/19/2017.
+ -->
+
+<apex:page id="PaymentWizard" standardController="Batch__c" extensions="PaymentWizardController" docType="html-5.0">
+
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <apex:form id="theForm">
+        <apex:pageBlock id="thePageBlock" >
+            <apex:pageMessages id="showmsg"></apex:pageMessages>
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Back" action="{!GoBackToBatch}" />
+                <apex:commandButton value="Save & Summarize"  action="{!SaveAndSummarize}" reRender="theForm" onComplete="updateSubtotal('');updateRemaining();"/>
+                <apex:commandButton value="Save & Adjust" rendered="{!batch.Transaction_Type__c == 'Void'}" action="{!SaveAndAdjust}" reRender="theForm" onComplete="updateSubtotal('');updateRemaining();"/>
+                <apex:commandButton value="Save & Exit" action="{!SaveAndExit}" reRender="theForm" onComplete="updateSubtotal('');updateRemaining();"/>
+                <apex:commandButton value="Save & Continue" action="{!SaveAndContinue}" reRender="theForm" onComplete="updateSubtotal('');updateRemaining();"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection id="topPageBlockSection">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Household" />
+                    <apex:inputField value="{!DummyContact.AccountId}" id="householdLookup" onchange="if(value != ''){ShowLoading();SearchAction()};" tabOrderHint="1"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel rendered="{!batch.Transaction_Type__c == 'Posted Payment'}" value="Check Number" />
+                    <apex:inputField rendered="{!batch.Transaction_Type__c == 'Posted Payment'}"  value="{!ThePA.Check_Number__c}" tabOrderHint="2"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Deposit ID" />
+                    <apex:outputField value="{!batch.Deposit_ID__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!IF(batch.Transaction_Type__c == 'Posted Payment','Check','Action')} Date" />
+                    <apex:inputField value="{!ThePA.Check_Date__c}" tabOrderHint="3" onKeyDown="dateFieldOnKeyDown(event)" onKeyUp="autoCompleteDateField(event);" styleClass="date-field"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Batch Date" />
+                    <apex:outputField value="{!batch.Batch_Date__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Current {!IF(batch.Transaction_Type__c == 'Posted Payment','Payment',batch.Transaction_Type__c)} Amount" />
+                    <apex:inputField value="{!ThePA.Amount__c}" id="paymentAmountEntered" onChange="updateRemaining()" tabOrderHint="4"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Paid By Household" />
+                    <apex:inputField value="{!PaidByDummyContact.AccountId}"  id="paidByHouseholdLookup"  tabOrderHint="5"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Remaining" />
+                    <apex:outputLabel value="$" id="remainingBalanceToAllocate" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="accountBalanceSection">
+                    <apex:outputLabel value="Account Balance Current Year" />
+                    <apex:outputText value="{0, Number, Currency}">
+                        <apex:param value="{!CurrentYearAccountBalance}" />
+                    </apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Action Type"/>
+                    <apex:outputText value="{!batch.Transaction_Type__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Cash Account"/>
+                    <apex:inputField value="{!ThePA.Cash_Override_Account__c}" />
+                    <!--<apex:outputLabel value="Amount Processed" />-->
+                    <!--<apex:outputLabel value="${!batch.Sum_of_Transaction__c}" id="amountProcessed" />-->
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Type" />
+                    <apex:inputField value="{!ThePA.Type__c}" tabOrderHint="6"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel rendered="{!batch.Transaction_Type__c == 'Adjustment'}" value="Reason" />
+                    <apex:inputField rendered="{!batch.Transaction_Type__c == 'Adjustment'}" value="{!ThePA.Reason__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:commandButton value="Auto Pay" action="{!ProcessAutoPay}" reRender="searchAreaSection,showmsg" onComplete="handlePaymentChange()" tabIndex="8"/>
+                    <apex:commandButton value="New Assessment | Credit" action="{!AddNewAssessment}" reRender="searchAreaSection,showmsg"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" id="searchAreaSection">
+                <apex:pageBlockTable value="{!AssessmentWrappers}" var="assessWrap">
+                    <apex:column headerValue="Designation">
+                        <apex:outputField rendered="{!NOT(assessWrap.isNew)}" value="{!assessWrap.assessment.Designation__c}" />
+                        <apex:inputField rendered="{!assessWrap.isNew}" value="{!assessWrap.assessment.Designation__c}" />
+                    </apex:column>
+                    <apex:column value="{!assessWrap.assessment.Description__c}"/>
+                    <apex:column value="{!assessWrap.assessment.Assessment_Date__c}"/>
+                    <apex:column value="{!assessWrap.assessment.Assessed_Amount__c}"/>
+                    <apex:column value="{!assessWrap.assessment.Amount_Adjusted__c}"/>
+                    <apex:column value="{!assessWrap.assessment.Amount_Paid__c}"/>
+                    <apex:column headerValue="Remaining Balance">
+                        <span  class="{!assessWrap.assessment.Id} due">
+                            <apex:outputField rendered="{!NOT(assessWrap.isNew)}" value="{!assessWrap.assessment.Remaining_Balance__c}"/>
+                        </span>
+                        <apex:inputField html-placeholder="Enter Description Here" rendered="{!assessWrap.isNew}" value="{!assessWrap.assessment.Description__c}" />
+                    </apex:column>
+                    <apex:column headerValue="{!IF(batch.Transaction_Type__c == 'Posted Payment','Payment',batch.Transaction_Type__c)} Amount">
+                        <apex:input value="{!assessWrap.paymentAmount}" onchange="handlePaymentChange();" id="paymentAmount" styleClass="paymentInput {!assessWrap.assessment.Id}"/>
+                    </apex:column>
+                    <!--<apex:column rendered="{!NOT(assessWrap.isNew)}">-->
+                    <!--<input onKeyUp="updateSubtotal('{!assessWrap.assessment.Id}');" onchange="handlePaymentChange();" type="text" style="text-align:right" id="paymentAmount"   Class="paymentInput {!assessWrap.assessment.Id}" />-->
+                    <!--</apex:column>-->
+                   <!-- <apex:column rendered="{!NOT(assessWrap.isNew)}" headerValue="Pay in Full" width="10%">
+                        <apex:inputCheckbox styleClass="payInFull {!assessWrap.assessment.Id}" onClick="processPayInFull('{!assessWrap.assessment.Id}')" />
+                    </apex:column> -->
+
+                    <apex:column headerValue="Pay in Full" width="10%">
+                        <apex:inputCheckbox rendered="{!NOT(assessWrap.isNew)}" styleClass="payInFull {!assessWrap.assessment.Id}" onClick="processPayInFull('{!assessWrap.assessment.Id}')" />
+<!--                        <apex:commandButton value="Del" action="{!AddNewAssessment}" reRender="searchAreaSection,showmsg"/>-->
+
+
+                        <apex:outputPanel rendered="{!assessWrap.isNew}"  >
+                            <span title="Delete" style="cursor: pointer; color: red; font-weight: bold;" onClick="deleteRowAF('{!assessWrap.uniqueIdentifier}');">✗</span>
+                        </apex:outputPanel>
+
+                        <!--<apex:outputLink rendered="{!assessWrap.isNew}"  onClick="deleteRowAF('{!assessWrap.uniqueIdentifier}');">
+                            Del
+                        </apex:outputLink>-->
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:actionFunction name="rerenderSubTotals" reRender="topPageBlockSection,searchAreaSection" />
+        <apex:actionFunction name="SearchAction" action="{!SearchAssessments}" reRender="thePageBlock,accountBalanceSection" onComplete="HideLoading();"/>
+        <apex:actionFunction name="OverrideCheckNumberValidation" action="{!OverrideCheckValidation}" reRender="theForm"/>
+        <apex:actionFunction name="OverrideCheckNumberValidation" action="{!OverrideCheckValidation}" reRender="theForm"/>
+
+        <apex:actionFunction name="deleteRowAF" action="{!deleteAssessment}" reRender="topPageBlockSection,searchAreaSection" onComplete="handlePaymentChange();" >
+            <apex:param name="uniqueIdToDelete" assignTo="{!toDelete}"  value=""/>
+        </apex:actionFunction>
+
+
+        <script>
+
+            var EMPTY_STRING = '';
+            var paymentAmountMapList = []
+            var paymentAmountMap = {};
+
+            $j = jQuery.noConflict();
+            $j(document).ready(function() {
+                overrideEnter();
+                updateSubtotal('');
+//                updateRemaining();
+
+                console.log('{!SuccessMessage}');
+
+                if('{!SuccessMessage}' == 'true - summarize'){
+                    window.location.href = '/apex/SummarizePayments';
+                }
+                else if('{!SuccessMessage}' == 'true - exit'){
+                    window.location.href = '/{!batchId}';
+                }
+                else if('{!SuccessMessage}' == 'CheckNumberError'){
+                    var result = confirm('This check number has already been entered for this household. Do you still wish to continue?');
+                    if(result){
+                        OverrideCheckNumberValidation();
+                    }
+                }
+
+
+                // //date-field
+                // $j(".date-field").bind('keyup','keydown', function(event) {
+                //     console.log('working');
+                //
+                //     autoCompleteDateField(event);
+                // });
+            });
+
+
+            function dateFieldOnKeyDown(e) {
+                console.log('OnKeyDown Ran');
+
+                let currentField = e.target;
+                let datepicker = document.querySelector('.datePicker'); // Confirm the class name in DOM
+
+                // Only intercept Tab key if the datepicker is already open
+                if (e.key === "Tab" && datepicker && datepicker.style.display !== "none") {
+                    console.log('RAN TAB DISPLAY');
+                    e.preventDefault(); // Prevent default tab behavior
+
+                    // // Close the datepicker
+                    datepicker.style.display = 'none';
+
+                    // Move focus to the next form field
+                    let formElements = Array.from(document.querySelectorAll('input, select, textarea, button, [tabindex]'));
+                    let index = formElements.indexOf(currentField);
+                    if (index !== -1) {
+                        if (e.shiftKey) {
+                            // Shift + Tab: Move to the previous field
+                            if (index > 0) {
+                                formElements[index - 1].focus();
+                            }
+                        } else {
+                            // Tab: Move to the next field
+                            if (index < formElements.length - 1) {
+                                formElements[index + 1].focus();
+                            }
+                        }
+                    }
+                }
+            }
+
+            function autoCompleteDateField(e) {
+                console.log('Autocomplete Date Field Running');
+                inputString = $j(".date-field").val();
+                inputString = inputString.replace(/[^\d\/]/g,'');
+
+                inputStringLength = inputString.length;
+                if(inputStringLength === 2){
+                    inputString += '/';
+                    //$(".date-field").val(inputString);
+                } else if(inputStringLength === 5){
+                    //inputString += '/'+(new Date()).getFullYear();
+                    inputString += '/'+'{!YEAR(TODAY())}';
+
+                    // $(".date-field").val(inputString);
+                }
+                $j(".date-field").val(inputString);
+
+            }
+
+
+            function checkForEnterKeyHousehold(e){
+                console.log('Click found. ' + e.keyCode + ' ' + e.ctrlKey);
+                if (e.keyCode==13){
+                    console.log('Enter Key found.');
+                    SearchAction();
+                }
+            }
+
+            function updateSubtotal(){
+
+                var subtotal = getPaymentAmountTotal();
+                var roundedValue = subtotal.toFixed(2);
+
+                var totalAmt =  $j('[id$=paymentAmountEntered]')[0];
+                totalAmt = cleanCurrencyText(totalAmt.innerText);
+                var newTotal = parseFloat(totalAmt);
+
+                if(newTotal){
+                    newTotal =  newTotal.toFixed(2);
+                    var difference = (newTotal - roundedValue).toFixed(2);
+                    difference = difference.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    $j('[id$=remainingBalanceToAllocate]').text('$' + difference);
+                }
+
+                $j('[id$=payment_subTotal]').text('$' + roundedValue);
+            }
+
+            function updateRemaining(){
+
+                var subtotal = getPaymentAmountTotal();
+                var roundedValue = subtotal.toFixed(2);
+
+                var totalAmt =  $j('[id$=paymentAmountEntered]')[0];
+                totalAmt = cleanCurrencyText(totalAmt.value);
+                var newTotal = parseFloat(totalAmt);
+
+                if(newTotal){
+                    newTotal =  newTotal.toFixed(2);
+                    var diff = (newTotal - roundedValue).toFixed(2);
+                    diff = diff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    $j('[id$=remainingBalanceToAllocate]').text('$' + diff);
+                    $j('[id$=paymentAmountEntered]')[0].value = newTotal;
+                }
+                else{
+                    $j('[id$=remainingBalanceToAllocate]').text('$' + subtotal.toFixed(2) * -1);
+                    $j('[id$=paymentAmountEntered]')[0].value = 0.00;
+                }
+            }
+
+            function navigateToSummarizePage(){
+
+                window.location.href='/apex/SummarizePayments';
+            }
+            function navigateToBackToBatch(){
+
+                window.location.href='/{!batchId}';
+            }
+
+            function processPayInFull(assessmentId){
+
+                var checkBox = getElementsByClassName('payInFull ' + assessmentId);
+                var paymentInputElement = getElementsByClassName(assessmentId);
+
+                var totalAmt =  $j('[id$=paymentAmountEntered]')[0];
+                var newTotal = parseFloat(cleanCurrencyText(totalAmt.value));
+
+
+                if(checkBox[0].checked == false){
+                    paymentInputElement[1].disabled = false;
+                    paymentInputElement[1].value = '';
+                    updateSubtotal();
+                    updateRemaining();
+                    return;
+                }
+
+                var invoiceBalanceDueElement = getElementsByClassName(assessmentId + ' due');
+                var invoiceBalanceDueText = invoiceBalanceDueElement[0].textContent;
+                var invoiceBalanceDue = parseFloat(cleanCurrencyText(invoiceBalanceDueText));
+
+
+                if((newTotal <= 0 || newTotal == '' || newTotal < invoiceBalanceDue ) && newTotal != 0){
+                    alert('The balance of the assessment is greater than the payment amount entered.');
+                    paymentInputElement[1].disabled = false;
+                    paymentInputElement[1].value = '';
+                    checkBox[0].checked = false;
+                    updateSubtotal();
+                    return;
+                }
+
+                if(parseInt(invoiceBalanceDueText) <  parseInt(cleanCurrencyText($j('[id$=remainingBalanceToAllocate]').text()))){
+                    paymentInputElement[1].disabled = false;
+                    paymentInputElement[1].value = '';
+                    updateSubtotal();
+                    return;
+                }
+
+                if(invoiceBalanceDueText){
+                    paymentInputElement[1].value = invoiceBalanceDueText;
+                    paymentInputElement[1].disabled = true;
+                    updateSubtotal();
+                    updateRemaining();
+                }
+
+
+            }
+
+            function getPaymentAmountTotal(){
+
+                var returnTotal = 0.00;
+                var paymentValues = getElementsByClassName('paymentInput');
+
+                for(var i = 0; i < paymentValues.length; i++){
+                    var inputField = paymentValues[i];
+                    var payment = parseFloat(cleanCurrencyText(inputField.value));
+                    if(payment){
+                        returnTotal += payment;
+                    }
+                }
+
+                return returnTotal;
+            }
+
+
+            function handlePaymentChange(){
+                inputToTwoDecimalPlaces();
+                updateSubtotal();
+                updateRemaining();
+            }
+            function overrideEnter(){
+                $j('input').keydown( function(e) {
+                    var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                    if(key == 13) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // function inputToTwoDecimalPlaces() {
+            //     var paymentValues = getElementsByClassName('paymentInput');
+            //     for(var i = 0; i < paymentValues.length; i++){
+            //         var stringAmount = paymentValues[i].value;
+            //
+            //         if(stringAmount){
+            //             var formattedAmount = parseFloat(stringAmount).toFixed(2);
+            //
+            //             if(formattedAmount === 'NaN'){
+            //                 formattedAmount = '0';
+            //             }
+            //
+            //             paymentValues[i].value = formattedAmount;
+            //         }
+            //     }
+            // }
+
+
+            function inputToTwoDecimalPlaces() {
+                var paymentValues = getElementsByClassName('paymentInput');
+                for(var i = 0; i < paymentValues.length; i++){
+                    // var stringAmount = paymentValues[i].value;
+                    var stringAmount = cleanCurrencyText(paymentValues[i].value);
+                    //totalAmt = cleanCurrencyText(totalAmt.innerText);
+                    console.log(stringAmount);
+                    if(stringAmount){
+                        var formattedAmount = parseFloat(stringAmount).toFixed(2);
+                        console.log(formattedAmount);
+                        if(formattedAmount === 'NaN'){
+                            formattedAmount = '0';
+                        }
+
+                        paymentValues[i].value = '$'+formattedAmount;
+                    }
+                }
+            }
+
+
+
+            function searchBtnClick() {
+                console.log('Test searchBtnClick')
+                SearchAction();
+            }
+
+            function ShowLoading() {
+                console.log('show Loading');
+                $j.blockUI({ css: {
+                        border: 'none',
+                        padding: '15px',
+                        backgroundColor: '#000',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .5,
+                        color: '#fff'
+                    } });
+
+                //setTimeout($.unblockUI, 2000);
+            }
+            function cleanCurrencyText(currencyText){
+                return currencyText.replace(',', '').replace('$', '').replace('(','').replace(')','');
+            }
+            function HideLoading() {
+                console.log('hide Loading');
+                $j.unblockUI();
+            }
+        </script>
+        <apex:outputText id="hiddenText"/>
+    </apex:form>
+</apex:page>

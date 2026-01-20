@@ -1,0 +1,76 @@
+<!--
+ - Created by Chris Home Desktop on 4/30/2018.
+ -->
+
+<apex:page id="CongrComm_Login" controller="SiteLoginController" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    <style type="text/css">
+        .login-form {
+            width: 340px;
+            margin: 50px auto;
+        }
+        .login-form form {
+            margin-bottom: 15px;
+            background: #f7f7f7;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        .login-form h2 {
+            margin: 0 0 15px;
+        }
+        .form-control, .btn {
+            min-height: 38px;
+            border-radius: 2px;
+        }
+        .btn {
+            font-size: 15px;
+            font-weight: bold;
+        }
+    </style>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="login-form">
+                    <form action="/examples/actions/confirmation.php" method="post">
+                        <h2 class="text-center">Member Portal Login</h2>
+                        <hr></hr>
+                        <h4 class="text-center">This valuable resource is partially funded through the generosity of the <b>Edward Kanter Fund
+                         for Innovation</b> and the <b>Jewish Foundation.</b></h4>
+                         <hr></hr>
+                        <div class="form-group">
+                            <apex:input type="text" styleClass="form-control" html-placeholder="Email" value="{!username}" />
+                            <!--<input type="text" class="form-control" placeholder="Username" required="required" />-->
+                        </div>
+                        <div class="form-group">
+                            <apex:inputSecret styleClass="form-control" html-placeholder="Password" value="{!password}" />
+                            <!--<input type="password" class="form-control" placeholder="Password" required="required" />-->
+                        </div>
+                        <!--<apex:pageMessage severity="error" summary="Login Failed.Check the userName or Password" rendered="{!isLoginFailed}"/>-->
+                        <div class="form-group">
+                            <apex:messages layout="list" styleClass="exceptionText" style="color: red;"  id="error"/>
+                            <apex:commandButton action="{!login}" styleClass="btn btn-block wiseBtn" value="Log In" />
+                            <!--<button type="submit" class="">Log in</button>-->
+                        </div>
+                        <div class="clearfix">
+                            <a href="{!URLFOR($Page.CongrComm_ForgotPassword)}" class="pull-right">Forgot Password?</a>
+                        </div>
+                        <hr></hr>
+                        <p class="text-center">If you are using Internet Explorer, you may have login problems. Please switch to Chrome, Firefox, or Safari.
+                         If you have not yet logged in using the link you received via email, click Forgot Password above to
+                        receive another link.</p>
+                        
+                                                                       
+                       
+                    </form>
+                </div>
+                <script>
+
+                    window.onload = function() {
+                        if({!NOT(ISPICKVAL($User.UserType,'Guest'))}){
+                            location.href = '{!URLFOR($Page.CongrComm_Home)}';
+                        }
+                    };
+                </script>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

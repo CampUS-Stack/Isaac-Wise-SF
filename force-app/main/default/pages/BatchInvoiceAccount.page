@@ -1,0 +1,61 @@
+<!--
+ - Created by Chris Home Desktop on 12/2/2017.
+ -->
+
+<apex:page id="BatchInvoiceAccount" standardController="Account" extensions="BatchInvoiceController">
+
+    <apex:form id="theForm">
+        <apex:pageBlock id="pageBlock">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton value="Back" action="/{!Account.Id}"/>
+            </apex:pageBlockButtons>
+            <apex:pageMessages />
+            <apex:pageBlockSection title="{!TheAccount.Name}">
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem labelTitle="{!TheAccount.Name}">
+                    <apex:outputLabel value="Account Name" />
+                    <apex:outputField value="{!TheAccount.Name}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Assessed Amount Total" />
+                    <apex:outputField value="{!TheAccount.Assessed_Amount__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Designation" />
+                    <apex:inputField value="{!MasterAssessment.Designation__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Assessed Amount Total" />
+                    <apex:inputField value="{!MasterAssessment.Assessed_Amount__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Assessment Date" />
+                    <apex:inputField value="{!MasterAssessment.Assessment_Date__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Description" />
+                    <apex:inputField value="{!MasterAssessment.Description__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:commandButton value="Save Assessment" action="{!CreateNewAssessment}" reRender="pageBlock" />
+                    <apex:commandButton value="Clear" action="{!ClearFields}" reRender="pageBlock" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Current Assessments" columns="1" id="resultSection">
+                <apex:pageBlockTable value="{!TheAssessments}" var="assessment" width="100%">
+                    <apex:column value="{!assessment.Designation__r.Name}" />
+                    <apex:column value="{!assessment.Assessment_Date__c}" />
+                    <apex:column value="{!assessment.Assessed_Amount__c}" />
+                    <apex:column value="{!assessment.Description__c}" />
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

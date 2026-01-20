@@ -1,0 +1,6 @@
+<!--
+ - Created by Chris Gibson on 1/18/2020.
+ -->
+
+<apex:page id="NMI_PaymentResponse" controller="NMI_PaymentResponseController">
+</apex:page>

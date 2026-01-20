@@ -1,0 +1,44 @@
+<apex:page id="CongrComm_YahrzeitInfoUpdate" controller="CongrComm_YahrzeitInfoUpdateCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="form1" >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Send Message" action="{!Save}" styleClass="wiseBtn btn btn-default" />&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!Cancel}" styleClass="cancelBtn btn "/>
+                                </div>
+                            </div>
+                            <h2>Message for Rabbis' Assistant</h2>
+                        
+                            <div class="row">
+                                <div class="col-sm-12 form-group" style="margin-top:10px;">
+                                    <label for="firstNameInput">
+                                        If you have a change for an existing Yahrzeit, please let us know below. If you would like to add a Yahrzeit observance, please provide the following information:
+                                    </label>
+                                    
+                                    <ul>
+                                        <li>Name of Deceased</li>
+                                        <li>Relationship to you</li>
+                                        <li>Date of Death</li>
+                                        <li>Would you like to observe on the Hebrew or English date? If Hebrew, please provide Hebrew date of death.</li>
+                                    </ul>
+                                    
+                                    <apex:inputTextarea rows="4" value="{!communityUserAccountDetails.Message_for_Assistant__c}"  styleClass="form-control" id="MessageforAssistant"/>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

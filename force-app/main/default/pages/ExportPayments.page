@@ -1,0 +1,9 @@
+<!--
+ - Created by Chris Home Desktop on 11/7/2017.
+ -->
+
+<apex:page id="ExportPayments" controller="ExportController" action="{!exportPaymentsToExcel}"  showHeader="false" sidebar="false" standardStylesheets="false" cache="true" readOnly="true" contentType="application/vnd.ms-excel#Payment Export - {!NOW()}.csv">Date,Reference,Number of Distributions,G/L Account,Description,Amount,Recur Number,Recur Frequency
+<apex:repeat value="{!lstwrapper}" var="x">
+{!x.ActionDate},{!x.ReferenceNumber},{!x.NumberOfDistributions},{!x.GLAccount},{!x.Description},{!x.Amount},{!x.RecurNumber},{!x.RecurFrequency}
+</apex:repeat>
+</apex:page>

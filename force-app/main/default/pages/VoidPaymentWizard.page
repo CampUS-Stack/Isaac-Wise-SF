@@ -1,0 +1,75 @@
+<!--
+ - Created by cgibs on 3/14/2018.
+ -->
+
+<apex:page id="VoidPaymentWizard" standardController="Batch__c" extensions="VoidPaymentWizardController">
+
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <apex:form id="theForm">
+        <apex:pageBlock id="creditDisplayBlock" rendered="{!DisplayPaymentSearch}">
+            <apex:pageBlockButtons >
+                <!--<apex:commandButton value="Back" action="{!GoBackToBatch}" />-->
+                <!--<apex:commandButton id="voidPaymentSearchBtn" value="Search" action="{!SearchCreditAssessments}" />-->
+            </apex:pageBlockButtons>
+            <apex:pageMessages id="voidshowmsg"></apex:pageMessages>
+            <apex:pageBlockSection id="topPageBlockSection">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Household to search for Payments" />
+                    <apex:inputField value="{!DummyContact.AccountId}" onchange="if(value != ''){ShowLoading();SearchAction()};" onkeyUp="checkForVoidPaymentSearchEnterKey(event);" tabOrderHint="1"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="" />
+                    <apex:commandButton value="Void Payments" action="{!VoidPayments}"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" id="paymentDisplayArea" title="Please select payments to void">
+                <apex:pageBlockTable value="{!PaymentAdjustmentWrappers}" var="paymentWrap">
+                    <apex:column >
+                        <apex:inputCheckbox value="{!paymentWrap.isSelected}" />
+                    </apex:column>
+                    <apex:column value="{!paymentWrap.PaymentAdjustment.Name}" />
+                    <apex:column value="{!paymentWrap.PaymentAdjustment.Check_Date__c}" />
+                    <apex:column value="{!paymentWrap.PaymentAdjustment.Amount__c}" />
+                    <apex:column value="{!paymentWrap.PaymentAdjustment.Batch__r.Deposit_ID__c}" />
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:actionFunction name="SearchAction" action="{!SearchPayments}" reRender="paymentDisplayArea" onComplete="HideLoading();"/>
+        <script>
+
+            $j = jQuery.noConflict();
+            function checkForVoidPaymentSearchEnterKey(e){
+                console.log('Click found. ' + e.keyCode + ' ' + e.ctrlKey);
+                if (e.keyCode==13){
+                    console.log('Enter Key found.');
+                    $j('[id$=creditSearchBtn]').trigger('click');
+                }
+            }
+            function ShowLoading() {
+                console.log('show Loading');
+                $j.blockUI({ css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                } });
+
+                //setTimeout($.unblockUI, 2000);
+            }
+            function HideLoading() {
+                console.log('hide Loading');
+                $j.unblockUI();
+            }
+
+        </script>
+    </apex:form>
+</apex:page>

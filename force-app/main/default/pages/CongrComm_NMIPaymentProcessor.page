@@ -1,0 +1,367 @@
+<!--
+ - Created by Kritik Garg on 30-05-2020.
+ -->
+
+<apex:page id="CongrComm_NMIPaymentProcessor"
+           controller="CongrComm_NMIPaymentProcessorCtrl"
+           action="{!validatePaymentParam}"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <head>
+        <script src="https://www.google.com/recaptcha/api.js" async="true" defer="true"></script>
+        <style>
+            /*#wrapper {*/
+            /*    margin-left: 20px;*/
+            /*    margin-top: 20px;*/
+            /*}*/
+
+            .hideButtonContainer {
+                display: none;
+            }
+        </style>
+        <script>
+
+            function submitPayment() {
+                let successful = submitJS();
+                console.log('IS SUCCESS: ' + successful);
+                if (!successful) return;
+                MakePayment();
+            }
+
+            function submitPaymentAndSaveVault() {
+
+            }
+
+            function saveVault() {
+
+            }
+
+            function saveEditedVault() {
+
+            }
+
+            function submitJS() {
+                if (!grecaptcha.getResponse()) {
+                    document.getElementById("error").style.display = "block";
+                    return false;
+                }
+                return true;
+            }
+
+            function recaptchaCallback() {
+                console.log('RECAPTCHA');
+                let successful = submitJS();
+                console.log('SUCCESSFUL: ' + successful);
+                let paymentId = "{!paId}";
+                console.log(paymentId);
+
+
+                if (successful) {
+
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.CongrComm_NMIPaymentProcessorCtrl.setCaptchaCheckbox}',
+                        paymentId,
+                        function (result, event) {
+                            if (event.status) {
+                                // Get DOM IDs for HTML and Visualforce elements like this
+                                $("[id$=buttonContainer]").css("display", "block");
+
+                            } else if (event.type === 'exception') {
+                                console.log('ERROR');
+                            } else {
+                                console.log('ERROR: ' + event.message);
+                            }
+                        },
+                        {escape: true}
+                    );
+                }
+            }
+
+        </script>
+    </head>
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <!--                <apex:actionFunction name="ConfirmNotRobot" action="{!setCaptchaCheckbox}"></apex:actionFunction>-->
+                <!--                <apex:actionFunction name='MakePayment' action='{!makePayment}'reRender='errorMessage pagemsg' ></apex:actionFunction>-->
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12 col-xs-12">
+                            <apex:outputPanel rendered="{! NOT(isEditingVault)}">
+                                <h2 class="title">
+                                    Make Payment (${!paymentAdjustmentAmount})
+                                </h2>
+                            </apex:outputPanel>
+                            <apex:outputPanel rendered="{!isEditingVault}">
+                                <h2 class="title">
+                                    Editing {!selectedPaymentMethod} Payment Method ({!paymentNumber})
+                                </h2>
+                            </apex:outputPanel>
+
+                            <hr/>
+                            <apex:outputPanel id="errorMessage">
+                                <apex:outputPanel rendered="{!hasErrors}">
+                                    <div class="alert alert-danger" role="alert">
+                                        <apex:pageMessages id="pagemsg"/>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">First Name</label>
+                                    <apex:inputText value="{!firstName}" styleClass="form-control" id="firstNameInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Last Name</label>
+                                    <apex:inputText value="{!lastName}" styleClass="form-control" id="lastNameInput"/>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="emailAddressInput">Email </label>
+                                    <apex:inputText value="{!emailAddress}" styleClass="form-control"
+                                                    id="emailAddressInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="phoneNumberInput">Phone Number</label>
+                                    <apex:inputText value="{!phoneNumber}" styleClass="form-control"
+                                                    id="phoneNumberInput"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="billingStreetInput">Billing Street </label>
+                                    <apex:inputText value="{!billingStreet}" styleClass="form-control"
+                                                    id="billingStreetInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="billingCityInput">Billing City</label>
+                                    <apex:inputText value="{!billingCity}" styleClass="form-control"
+                                                    id="billingCityInput"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="billingStateInput">Billing State</label>
+                                    <apex:inputText value="{!billingState}" styleClass="form-control"
+                                                    id="billingStateInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="billingZipInput">Billing Zip</label>
+                                    <apex:inputText value="{!billingZip}" styleClass="form-control"
+                                                    id="billingZipInput"/>
+                                </div>
+                            </div>
+
+                            <apex:outputPanel rendered="{!shouldDisplayPaymentOptions}">
+                                <div class="row">
+                                    <div class="col-sm-12 form-group radioOpt">
+                                        <label style="margin-left: 0px;" for="creditCard">Select Payment method</label>
+                                        <apex:selectRadio value="{!selectedPaymentMethod}">
+                                            <apex:selectoptions value="{!PaymentOptions}"></apex:selectoptions>
+                                            <apex:actionSupport status="pageStatus" event="onchange" reRender="payfield"
+                                                                action="{!getPaymentAdjustmentAmount}"
+                                                                onComplete="loadCard();"/>
+                                        </apex:selectRadio>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel id="payfield">
+                                <apex:outputPanel rendered="{!IF(selectedPaymentMethod=='CC',true,false)}">
+
+                                    <div class="row">
+
+                                        <div class="col-sm-6">
+                                            <div class="card-wrapper">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <div class="row ccform">
+                                                <div class="col-sm-12 form-group">
+                                                    <label for="creditCard">Credit Card Number</label>
+                                                    <apex:inputText value="{!creditCard}"
+                                                                    styleClass="form-control creditCard"/>
+                                                </div>
+                                                <div class="col-sm-6 form-group">
+                                                    <label for="cvc">CVV</label>
+                                                    <apex:inputText value="{!cvc}" styleClass="form-control cvc"/>
+                                                </div>
+                                                <div class="col-sm-6 form-group">
+                                                    <label for="expirationDate">Expiration Date</label>
+                                                    <apex:inputText value="{!expirationDate}"
+                                                                    styleClass="form-control expirationDate"
+                                                                    id="expirationDate"/>
+                                                </div>
+                                                <div class="col-sm-12 form-group">
+                                                    <label for="name">Full Name</label>
+                                                    <input type="text" class="form-control cardname" name="name"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+
+                                <apex:outputPanel rendered="{!IF(selectedPaymentMethod=='ACH',true,false)}">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-xs-12">
+                                            <h3 class="title">
+                                                ACH Payment Information
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <hr/>
+                                    <div class="row">
+                                        <div class="col-sm-4 form-group">
+                                            <label for="accountName">Billing Account Name</label>
+                                            <apex:inputText value="{!accountName}" styleClass="form-control"
+                                                            id="accountName"/>
+                                        </div>
+                                        <div class="col-sm-4 form-group">
+                                            <label for="accountNumber">Billing Account Number</label>
+                                            <apex:inputText value="{!accountNumber}" styleClass="form-control"
+                                                            id="accountNumber"/>
+                                        </div>
+                                        <div class="col-sm-4 form-group">
+                                            <label for="routingNumber">Billing Routing Number</label>
+                                            <apex:inputText value="{!routingNumber}" styleClass="form-control"
+                                                            id="routingNumber"/>
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+
+                            <apex:actionStatus id="pageStatus">
+                                <apex:facet name="start">
+                                    <apex:outputPanel >
+                                        <div class="bg-overlay">
+                                            <div class="loading">
+                                                <img src="/img/loading32.gif" width="25" height="25"
+                                                     style="margin-right: 10px;"/>
+                                                <apex:outputLabel value="Please Wait..."/>
+                                            </div>
+                                        </div>
+                                    </apex:outputPanel>
+                                </apex:facet>
+                            </apex:actionStatus>
+
+                            <div class="row">
+                                <div class="col-sm-12 center" id="wrapper">
+                                    <div style="width:35%; margin-left:auto;margin-right:auto; min-width: 300px;">
+                                        <div class="g-recaptcha"
+                                             data-sitekey="{!CaptchaSiteKey}"
+                                             data-callback="recaptchaCallback"></div>
+                                        <br/>
+                                        <div id="error" style="color:red;display:none;">Please verify that you are not a
+                                            Robot.
+                                        </div>
+                                        <br/>
+                                        <apex:outputPanel id="dummyPanel"></apex:outputPanel>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 center" style="text-align: center;">
+                                <apex:outputPanel id="buttonContainer" styleClass="hideButtonContainer">
+                                    <apex:commandButton style="margin-top:25px;" action="{!savePaymentVault}"
+                                                        value="Save Payment Method and Go Back" status="pageStatus"
+                                                        styleClass="wiseBtn btn btn-default"
+                                                        rendered="{!AND($Profile.Name != 'MemberCommunity Profile', NOT(isEditingVault), NOT(isGuest))}"/>
+                                    &nbsp;&nbsp;
+                                    <apex:commandButton style="margin-top:25px;" action="{!makePaymentAndSaveVault}"
+                                                        value="Make Payment and Save this Card" status="pageStatus"
+                                                        styleClass="wiseBtn btn btn-default"
+                                                        rendered="{!AND($Profile.Name != 'MemberCommunity Profile', NOT(isEditingVault), NOT(isGuest))}"/>
+                                    &nbsp;&nbsp;
+                                    <apex:commandButton style="margin-top:25px;" action="{!makePayment}"
+                                                        value="{! IF(isGuest, 'Make Payment', 'Make Payment without Saving')}"
+                                                        status="pageStatus"
+                                                        styleClass="wiseBtn btn btn-default"
+                                                        rendered="{!AND($Profile.Name != 'MemberCommunity Profile', NOT(isEditingVault)) }"/>
+
+                                    <apex:commandButton style="margin-top:25px;" action="{!makePayment}"
+                                                        value="Make Payment" status="pageStatus" reRender="errorMessage"
+                                                        styleClass="wiseBtn btn btn-default"
+                                                        rendered="{!isGuest}"/>
+                                </apex:outputPanel>
+
+                                <apex:commandButton style="margin-top:25px;" action="{!cancelPaymentEdit}"
+                                                    value="Cancel" status="pageStatus"
+                                                    styleClass="wiseBtn btn btn-default" reRender="theForm"
+                                                    rendered="{!isEditingVault}"/>
+                                &nbsp;&nbsp;
+                                <apex:commandButton style="margin-top:25px;" action="{!saveEditedPaymentVault}"
+                                                    value="Submit" status="pageStatus"
+                                                    styleClass="wiseBtn btn btn-default" 
+                                                    rendered="{!isEditingVault}"/>
+                                <!--                                <br/>-->
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+    <script type="" src="{!URLFOR($Resource.JQueryCard)}"></script>
+    <Script>
+
+        $(document).ready(function () {
+            loadCard();
+        });
+
+        function loadCard() {
+            $('.ccform').card({
+                // a selector or DOM element for the container
+                // where you want the card to appear
+                container: '.card-wrapper', // *required*
+                formSelectors: {
+                    numberInput: 'input.creditCard',
+                    expiryInput: 'input.expirationDate',
+                    cvcInput: 'input.cvc',
+                    nameInput: 'input.cardname'
+                }
+            });
+        }
+
+    </Script>
+
+    <style>
+        .radioOpt table {
+            width: 200px;
+        }
+
+        .radioOpt label {
+            margin-left: 16px;
+        }
+
+        .bg-overlay {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            right: 0;
+            background: #909090a3;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 45%;
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+        }
+    </style>
+
+</apex:page>

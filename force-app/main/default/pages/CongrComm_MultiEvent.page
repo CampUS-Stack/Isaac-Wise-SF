@@ -1,0 +1,641 @@
+<!--
+- Created by Chris Home Laptop on 9/26/2018.
+-->
+
+<apex:page controller="CongrComm_MultiEventCtrl"
+           id="CongrComm_MultiEvent"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+
+    <style>
+
+        div[id$='_selected_hint'] {
+            display: none;
+        }
+        div[id$='_unselected_hint'] {
+            display: none;
+        }
+        .progress-bar{
+            background-color:#03356a !important;
+        }
+
+        .custom-error {
+            color: #fff;
+            background-color: #c24c39;
+        }
+
+    </style>
+    <apex:stylesheet value="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css"/>
+
+    <style>
+        .cancelBtn {
+            background-color: white;
+            color: #c24c39;
+            margin-left: 10px;
+        }
+
+
+        .card {
+            position: relative;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .25rem;
+        }
+
+        .card-body {
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .phoneScreenPadding {
+                margin-top:15px;
+            }
+        }
+
+    </style>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <apex:outputPanel rendered="{!NumberOfEventsForRegistration == 0 && NOT(ShowEventSelection) && NOT(ShowParticipantRegistration)}">
+                                <h3>There are currently no {!EventType} events.</h3>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel rendered="{!NumberOfEventsForRegistration > 0 && NOT(ShowEventSelection) && NOT(ShowParticipantRegistration)}">
+                                <h2 class="title">
+                                    Which {!EventType} Events are you registering for?
+                                </h2>
+                                <br/>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-12 form-group">
+                                        <table class="table">
+                                            <tr>
+                                                <th></th>
+                                                <th>Name</th>
+                                                <th style="text-align:center;">Start Date</th>
+                                            </tr>
+                                            <apex:repeat id="eventsTable" value="{!EventsForRegistration}" var="event">
+                                                <tr>
+                                                    <td>
+                                                        <apex:inputCheckbox value="{!event.IsSelected}"/>
+                                                    </td>
+                                                    <td>{!event.TheEvent.Name}</td>
+                                                    <td style="text-align:center;">
+                                                        <apex:outputField value="{!event.TheEvent.Event_Date_Start__c}" />
+                                                        <!--<apex:outputText value="{0,date, MMMM d','  yyyy}">-->
+                                                            <!--<apex:param value="{!event.TheEvent.Event_Date_Start__c}" />-->
+                                                        <!--</apex:outputText>-->
+                                                    </td>
+                                                </tr>
+                                            </apex:repeat>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br/>
+
+                                <div class="text-left">
+                                    <div class="row" style="margin-bottom:15px;">
+                                        <div class="col-sm-3">
+                                            <apex:commandbutton styleClass="btn wiseBtn" action="{!AddParticipants}" reRender="theForm" value="Next"></apex:commandbutton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel rendered="{!NumberOfSelectedEventsForRegistration > 0 && NOT(ShowEventSelection) && ShowParticipantRegistration}">
+
+                                <h2 class="title">
+                                    Who is coming?
+                                </h2>
+                                <hr/>
+                                <p>Click button below to choose everyone you'd like to register (including yourself). Before clicking Complete Registration, make sure all attendees are listed below.
+                                </p>
+                                <hr/>
+                                <br/>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-12 form-group">
+                                        <apex:repeat id="selectedEventsTableForParticipant" value="{!SelectedEventsForRegistration}" var="eventWrap">
+                                            <div class="card col-sm-12 col-xs-12">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-xs-12" style="padding-top:10px;text-align:left;">
+                                                            <h4><b>{!eventWrap.TheEvent.Name} -
+                                                                    <apex:outputField value="{!eventWrap.TheEvent.Event_Date_Start__c}" />
+<!--                                                                <apex:outputText value="{0,date, MMMM d','  yyyy}">-->
+<!--                                                                    <apex:param value="{!eventWrap.TheEvent.Event_Date_Start__c}" />-->
+<!--                                                                </apex:outputText>-->
+                                                                <br/>
+                                                                <br/>
+                                                                <apex:commandbutton action="{!ChooseEventForGuestEdit}" reRender="GuestModal" style="margin-left:10px;" value="Register Yourself & Family Members" styleClass="btn wiseBtn" html-data-toggle="modal" html-data-target="#myModal-{!eventWrap.TheEvent.Id}">
+                                                                    <apex:param value="{!eventWrap.TheEvent.Id}" name="theParam" assignTo="{!EventIdChosenForGuestEntry}" />
+                                                                </apex:commandButton>
+                                                                &nbsp;
+                                                                <apex:commandbutton action="{!ChooseEventForGuestEdit}" rendered="false" reRender="GuestModal" style="margin-left:10px;" value="Add Temple Members" styleClass="btn wiseBtn" html-data-toggle="modal" html-data-target="#mySearchModal-{!eventWrap.TheEvent.Id}">
+                                                                    <apex:param value="{!eventWrap.TheEvent.Id}" name="theParam" assignTo="{!EventIdChosenForGuestEntry}" />
+                                                                </apex:commandButton>
+                                                                &nbsp;
+                                                                <apex:commandbutton action="{!ChooseEventForGuestEdit}" rendered="false" reRender="GuestModal" style="margin-left:10px;" value="Add Guests" styleClass="btn wiseBtn" html-data-toggle="modal" html-data-target="#guestRegistrantModal-{!eventWrap.TheEvent.Id}">
+                                                                    <apex:param value="{!eventWrap.TheEvent.Id}" name="theParam" assignTo="{!EventIdChosenForGuestEntry}" />
+                                                                </apex:commandButton>
+                                                            </b></h4>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="row">
+                                                        <apex:repeat value="{!eventWrap.AttendingRegistrants}" var="partWrap">
+                                                            <div style="padding-top:15px;" class="col-sm-3 col-xs-6">
+                                                                <apex:commandLink action="{!eventWrap.RemoveSelectedParticipant}" >
+                                                                    <apex:param value="{!partWrap.TheContact.FirstName+' '+partWrap.TheContact.LastName}" assignTo="{!eventWrap.RegistrantNameToRemove}" name="RegistrantNameToRemove"/>
+                                                                    <span style="color:#c24c39;"
+                                                                          class="glyphicon glyphicon-remove"
+                                                                          aria-hidden="true"></span>
+                                                                </apex:commandLink>
+                                                                    {!partWrap.TheContact.FirstName + ' ' + partWrap.TheContact.LastName}
+                                                            </div>
+                                                        </apex:repeat>
+                                                    </div>
+                                                    <br/>
+                                                </div>
+                                            </div>
+
+                                            <!-------------------------------   ADD FAMILY MODAL WINDOW   -------------------------->
+
+                                            <div class="modal fade" id="myModal-{!eventWrap.TheEvent.Id}" role="dialog">
+                                                <div class="modal-dialog">
+                                                    <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <h4 class="modal-title">Additional</h4>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <apex:repeat value="{!eventWrap.FamilyRegistrants}" var="fam">
+                                                                <div class="card">
+                                                                    <div class="card-body">
+                                                                        <div class="row">
+                                                                            <div class="col-sm-4 col-xs-12" style="padding-top:10px">
+                                                                                <h4><b>{!fam.TheContact.Name}</b></h4>
+                                                                            </div>
+                                                                            <div class="col-sm-8 col-xs-12" style="padding-top:10px">
+                                                                                <apex:selectList label="Ticket Type:"
+                                                                                                 html-placeholder="Select A Value"
+                                                                                                 multiSelect="false" size="1"
+                                                                                                 styleClass="form-control"
+                                                                                                 value="{!fam.SelectedTicketType}" >
+                                                                                    <apex:selectOptions value="{!eventWrap.PricingOptions}"/>
+                                                                                </apex:selectList>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <br/>
+                                                            </apex:repeat>
+                                                            <div class="col-sm-12 text-right">
+                                                            </div>
+                                                            <br/>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-default cancelBtn" data-dismiss="modal">Back
+                                                            </button>
+                                                            <apex:commandButton styleClass="btn btn-default wiseBtn" value="Save" reRender="theForm" html-data-dismiss="modal"
+                                                                                action="{!eventWrap.AddSelectedFamilyRegistrants }"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-------------------------------   END FAMILY MODAL WINDOW   -------------------------->
+
+                                            <!-------------------------------   ADD TEMPLE MEMBERS MODAL WINDOW   -------------------------->
+
+                                            <div class="modal fade" id="mySearchModal-{!eventWrap.TheEvent.Id}" role="dialog">
+                                                <apex:outputPanel id="allView">
+                                                    <apex:outputPanel id="additionalModal" rendered="{!NOT(eventWrap.DisplayAdditionalFinalize)}">
+                                                        <div class="modal-dialog">
+                                                            <!-- Modal content-->
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                    <h4 class="modal-title">Search for Temple Members</h4>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                <!-- Added by Kritik -->
+                                                                <apex:outputPanel id="error2">
+                                                                    <apex:messages layout="block" styleClass="alert alert-danger errors custom-error" style="list-style-type: none;" >
+                                                                    </apex:messages>
+                                                                </apex:outputPanel>
+                                                                    <div class="row" style="margin-bottom:20px;">
+                                                                        <div class="col-sm-4">
+                                                                            <apex:input value="{!eventWrap.FirstName}" html-placeholder="First Name"
+                                                                                        type="text" styleClass="form-control"/>
+                                                                        </div>
+                                                                        <div class="col-sm-4">
+                                                                            <apex:input value="{!eventWrap.LastName}" html-placeholder="Last Name"
+                                                                                        type="text" styleClass="form-control"/>
+                                                                        </div>
+                                                                        <div class="col-sm-4">
+                                                                            <label>&nbsp;</label>
+                                                                            <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                                                value="Search" action="{!eventWrap.RunMemberSearch}"
+                                                                                                reRender="allView"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <apex:outputPanel rendered="{!eventWrap.NumberOfRegistrants > 0}">
+                                                                        <div class="row">
+                                                                            <div class="col-sm-12 form-group">
+                                                                                <table class="table">
+                                                                                    <tr>
+                                                                                        <th>Name</th>
+                                                                                        <th>Ticket</th>
+                                                                                    </tr>
+                                                                                    <apex:repeat value="{!eventWrap.Registrants}" var="reg">
+                                                                                        <tr>
+                                                                                            <td>
+                                                                                                <p><b>{!reg.TheContact.Name}</b></p>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <apex:selectList html-placeholder="Select A Value"
+                                                                                                                 label="Ticket" multiSelect="false"
+                                                                                                                 size="1" styleClass="form-control"
+                                                                                                                 value="{!reg.SelectedTicketType}">
+                                                                                                    <apex:selectOptions value="{!eventWrap.PricingOptions}"/>
+                                                                                                </apex:selectList>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    </apex:repeat>
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                                                                action="{!eventWrap.LoadMoreAdditionalRegistrantSearchResults}"
+                                                                                                                reRender="additionalModal"
+                                                                                                                value="Load More"/>
+                                                                                        </td>
+                                                                                        <td></td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </apex:outputPanel>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-default cancelBtn"
+                                                                            data-dismiss="modal">Back
+                                                                    </button>
+                                                                    <apex:commandButton styleClass="btn btn-default wiseBtn" value="Next"
+                                                                                        action="{!eventWrap.GoToFinalizeAdditionalRegistrant}"
+                                                                                        reRender="allView"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel id="selectedModal" rendered="{!eventWrap.DisplayAdditionalFinalize}">
+                                                        <div class="modal-dialog">
+                                                            <!-- Modal content-->
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                    <h4 class="modal-title">Add A Guest</h4>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="row" style="margin-bottom:20px;">
+                                                                        <div class="col-sm-4">
+                                                                            <apex:input value="{!eventWrap.FirstName}" html-placeholder="First Name"
+                                                                                        type="text" styleClass="form-control"/>
+                                                                        </div>
+                                                                        <div class="col-sm-4">
+                                                                            <apex:input value="{!eventWrap.LastName}" html-placeholder="Last Name"
+                                                                                        type="text" styleClass="form-control"/>
+                                                                        </div>
+                                                                        <div class="col-sm-4">
+                                                                            <label>&nbsp;</label>
+                                                                            <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                                                value="Search" action="{!eventWrap.RunMemberSearch}"
+                                                                                                reRender="selectedModal"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <apex:outputPanel id="selectedRegistrantDisplayArea"
+                                                                                      rendered="{!eventWrap.NumberOfSelectedAttendingRegistrants > 0}">
+                                                                        <div class="row">
+                                                                            <div class="col-sm-12 form-group">
+                                                                                <table class="table">
+                                                                                    <tr>
+                                                                                        <th>Name</th>
+                                                                                        <th>Ticket Type</th>
+                                                                                    </tr>
+                                                                                    <apex:repeat id="selectedRegistrantsTable"
+                                                                                                 value="{!eventWrap.SelectedAttendingRegistrants}"
+                                                                                                 var="reg">
+                                                                                        <tr>
+                                                                                            <td>
+                                                                                                <p><b>{!reg.TheContact.Name}</b></p>
+                                                                                            </td>
+                                                                                            <td>{!reg.TicketType}</td>
+                                                                                        </tr>
+                                                                                    </apex:repeat>
+                                                                                </table>
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </apex:outputPanel>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <!--<apex:commandButton styleClass="btn btn-default cancelBtn" value="Back"-->
+                                                                    <!--action="{!GoBackToAdditionalRegistrantSearch}"-->
+                                                                    <!--reRender="allView"/>-->
+                                                                    <!--<button type="button" class="btn btn-default wiseBtn" data-dismiss="modal">Close</button>-->
+                                                                    <apex:commandButton styleClass="btn btn-default wiseBtn" value="Register"
+                                                                                        action="{!eventWrap.AddSelectedMemberRegistrants}"/>
+                                                                    <!--<button type="button" class="btn btn-default cancelBtn"-->
+                                                                    <!--data-dismiss="modal">Back-->
+                                                                    <!--</button>-->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </apex:outputPanel>
+                                                </apex:outputPanel>
+                                            </div>
+
+                                            <!-------------------------------   END TEMPLE MEMBER MODAL WINDOW   -------------------------->
+
+                                            <!-------------------------------   GUEST MODAL WINDOW   -------------------------->
+
+                                            <div class="modal fade" id="guestRegistrantModal-{!eventWrap.TheEvent.Id}" role="dialog">
+                                                <apex:outputPanel id="guestRegistrantModalPanel">
+                                                    <div class="modal-dialog">
+                                                        <!-- Modal content-->
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                <h4 class="modal-title">Enter Guest Info</h4>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <!-- Added by Kritik -->
+                                                                <apex:outputPanel id="error">
+                                                                    <apex:messages layout="block" styleClass="alert alert-danger errors custom-error" style="list-style-type: none;" >
+                                                                    </apex:messages>
+                                                                </apex:outputPanel>
+
+                                                                <div class="row" style="margin-bottom:20px;">
+                                                                    <div class="col-sm-6">
+                                                                        <apex:input value="{!eventWrap.GuestFirstName}" html-placeholder="First Name"
+                                                                                    type="text" styleClass="form-control" />
+                                                                    </div>
+                                                                    <div class="col-sm-6">
+                                                                        <apex:input value="{!eventWrap.GuestLastName}" html-placeholder="Last Name"
+                                                                                    type="text" styleClass="form-control" />
+                                                                    </div>
+                                                                    <div class="col-sm-6" style="margin-top:10px;">
+                                                                        <apex:input value="{!eventWrap.GuestEmail}" html-placeholder="Email"
+                                                                                    type="text" styleClass="form-control"/>
+                                                                    </div>
+                                                                    <div class="col-sm-6" style="margin-top:10px;">
+                                                                        <apex:selectList label="Ticket Type:"
+                                                                                         html-placeholder="Select A Value"
+                                                                                         multiSelect="false" size="1"
+                                                                                         styleClass="form-control"
+                                                                                         value="{!eventWrap.SelectedPricingOption}">
+                                                                            <apex:selectOptions value="{!eventWrap.PricingOptions}"/>
+                                                                        </apex:selectList>
+                                                                    </div>
+                                                                    <div class="col-sm-6" style="margin-top:10px;">
+                                                                        <label>&nbsp;</label>
+                                                                        <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                                            value="Add This Guest" reRender="guestRegistrantModalPanel"  action="{!eventWrap.AddGuestRegistrant}"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                                <apex:outputPanel id="selectedGuestRegistrantDisplayArea"
+                                                                                  rendered="{!eventWrap.NumberOfAttendingGuestRegistrants > 0}">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-12 form-group">
+                                                                            <table class="table">
+                                                                                <tr>
+                                                                                    <th>Name</th>
+                                                                                </tr>
+                                                                                <apex:repeat id="selectedGuestRegistrantsTable"
+                                                                                             value="{!eventWrap.AttendingGuestRegistrants}"
+                                                                                             var="reg">
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <p><b>{!reg.FirstName + ' ' + reg.LastName}</b></p>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </apex:repeat>
+                                                                            </table>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </apex:outputPanel>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-default cancelBtn"
+                                                                        data-dismiss="modal">Back
+                                                                </button>
+                                                                <apex:commandButton styleClass="btn btn-default wiseBtn" value="Finish"  html-data-dismiss="modal" reRender="theForm"/>
+                                                                <!--<apex:commandButton styleClass="btn btn-default wiseBtn" value="Register" html-data-dismiss="modal"-->
+                                                                <!--action="{!eventWrap.AddGuestRegistrant}" />-->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </apex:outputPanel>
+                                            </div>
+
+                                            <!-------------------------------   END GUEST MODAL WINDOW   -------------------------->
+                                        </apex:repeat>
+                                        <br/>
+                                    </div>
+                                </div>
+
+
+                                <div class="text-left">
+                                    <div class="row" style="margin-bottom:15px;">
+                                        <div class="col-sm-5">
+                                            <!--<button type="button" class="btn wiseBtn" data-toggle="modal" data-target="#myModal">Next</button>-->
+
+                                            <apex:commandbutton styleClass="btn cancelBtn" action="{!BackToEventSelection}" reRender="theForm" value="Back"></apex:commandbutton>
+                                            <apex:commandbutton styleClass="btn wiseBtn" rendered="{!IF(numberOfSelectedFamilyRegistration>0,true,false)}" action="{!SelectEventsGuest}" reRender="theForm" value="Complete Registration"></apex:commandbutton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel rendered="{!NumberOfSelectedEventsForRegistration > 0 && ShowEventSelection  && NOT(ShowParticipantRegistration)}">
+                                <br/>
+                                <br/>
+                                <h2 class="title">
+                                    You're Registered!
+                                </h2>
+                                <div class="row">
+                                    <div class="col-sm-12 form-group">
+                                        <apex:repeat id="selectedEventsTable" value="{!SelectedEventsForRegistration}" var="eventWrap">
+                                            <table class="table">
+                                                <tr>
+                                                    <td colspan="2"> <b> {!eventWrap.TheEvent.Name} -
+                                                            <apex:outputField value="{!eventWrap.TheEvent.Event_Date_Start__c}" />
+<!--                                                        <apex:outputText value="{0,date, MMMM d','  yyyy}">-->
+<!--                                                            <apex:param value="{!eventWrap.TheEvent.Event_Date_Start__c}" />-->
+<!--                                                        </apex:outputText> </b>-->
+                                                        </b></td>
+                                                </tr>
+
+                                                <apex:repeat value="{!eventWrap.AttendingRegistrants}" var="attendingWrap">
+                                                    <tr>
+                                                        <td>{!attendingWrap.TheContact.FirstName + ' ' +attendingWrap.TheContact.LastName}</td>
+                                                        <!-- <td>{!attendingWrap.SelectedTicketType}</td> -->
+                                                    </tr>
+                                                </apex:repeat>
+                                            </table>
+                                        </apex:repeat>
+                                    </div>
+                                </div>
+                                <br/>
+
+
+                                <div class="text-left">
+                                    <div class="row" style="margin-bottom:15px;">
+                                        <div class="col-sm-3">
+                                            <!--<button type="button" class="btn wiseBtn" data-toggle="modal" data-target="#myModal">Next</button>-->
+                                            <!--<apex:commandbutton styleClass="btn cancelBtn" action="{!BackToAddParticipants}" reRender="theForm" value="Back"></apex:commandbutton>-->
+                                            <apex:commandbutton styleClass="btn wiseBtn" action="{!URLFOR($Page.CongrComm_MyEvents)}" value="See My Events"></apex:commandbutton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" role="dialog">
+                        <div class="modal-dialog">
+                            <apex:outputPanel id="GuestModal">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Add Guest</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+
+                                            <div class="col-sm-6 form-group">
+                                                <label for="guestName">Guest Name</label>
+                                                <br/>
+                                                <apex:input styleClass="form-control" id="guestName" value="{!GuestNameEntered}" type="text"/>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <label>Ticket</label>
+                                                <!--<apex:selectList label="Ticket Type:" multiSelect="false" size="1" styleClass="form-control" value="{!GuestTicketChoice}" >-->
+                                                <!--<apex:selectOptions value="{!SelectedEventPricingOptions}" />-->
+                                                <!--</apex:selectList>-->
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <br/>
+                                        <br/>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default cancelBtn" data-dismiss="modal">Back</button>
+                                        <!--<apex:commandButton styleClass="btn btn-default wiseBtn" value="Save" action="{!SelectFamilyMembers}" />-->
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+
+    <script>
+        var $j = jQuery.noConflict();
+        $j(document).ready(function () {
+            $j(' tr.multiSelectPicklistRow td').hide()
+            var col = 1;
+            var x;
+            $j('.multiSelectPicklistRow').each(function (i, val) {
+
+                var unselectedValues = [];
+                var selectedValues = [];
+                var element = '';
+                $j(this).wrap('<div id= "wrapId' + col + '" ></div>');
+
+                element = element + '<select data-id= "wrapId' + col + '" class="selectpicker" multiple="true">';
+
+                $j($j(this).find('select:nth-child(1)')[1]).find('option').each(function () {
+                    selectedValues.push($j(this));
+                    console.log(selectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' selected="true"> ' + $j(this).text() + '</option>';
+                })
+
+                $j($j(this).find('select:nth-child(1)')[0]).find('option').each(function () {
+                    unselectedValues.push($j(this));
+                    console.log(unselectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' > ' + $j(this).text() + '</option>';
+                })
+
+                element = element + ' </select>';
+
+                $j(this).append(element);
+
+                col = col + 1;
+            });
+
+            $j('.selectpicker').on('changed.bs.select', function (e, a, b, c) {
+                var tmp = e.target.options[a].text
+
+
+                selectValue(e.currentTarget.getAttribute('data-id'), $j(e.target.options[a]).attr('data-v'));
+
+            });
+
+            function selectValue(id, value) {
+
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+                $j('#' + id + ' option[value=' + value + ']').trigger('dblclick')
+
+            }
+
+            function unselectValue(id, value) {
+
+                console.log($j('#' + id + ' optgroup[label="Chosen"] option[value=' + value + ']'))
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+
+            }
+
+        });
+
+    </script>
+    <style>
+
+    </style>
+</apex:page>

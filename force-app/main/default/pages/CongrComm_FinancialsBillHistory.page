@@ -1,0 +1,97 @@
+<apex:page controller="CongrComm_FinancialsBillHistCtrl" 
+           id="CongrComm_FinancialsBillHistory" 
+           showHeader="false" 
+           applyBodyTag="false" 
+           sidebar="false" 
+           standardStylesheets="false" 
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="center">
+                                <center><apex:commandButton value="Back" action="{!cancel}" styleClass="btn wiseBtn"/></center>
+                            </div>
+                            <h2 class="title">
+                                Financials
+                            </h2>
+                            <p>
+                                Billing History for {!theContact.Account.Name}<br/>
+                                <br/>
+                                Assessments billed and paid over the previous 2 years. For assessments still showing a balance, click
+                                back to your Financials home page.
+                            </p>
+                            <hr/>
+                            <div style="display: {!if(hasBills, 'block', 'none')};">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Date
+                                            </th>
+                                            
+                                            <th>
+                                                Description
+                                            </th>
+                                            <th>
+                                                Assessment Amount
+                                            </th>
+                                            <th>
+                                                Adjustment Amount
+                                            </th>
+                                            <th>
+                                                Amount Paid
+                                            </th>
+                                            <th>
+                                                Tax Deductible
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <apex:variable value="0" var="index"/>
+                                        <apex:repeat value="{!billList}" var="b" id="theRepeat">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputField value="{!b.theAssessment.Assessment_Date__c}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!b.theAssessment.Designation__r.Designation_Description__c}"/>
+                                                </td>
+                                                
+                                                <td>
+                                                    <apex:outputField value="{!b.theAssessment.Assessed_Amount__c}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!b.theAssessment.Amount_Adjusted__c}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!b.theAssessment.Amount_Paid__c}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!b.theAssessment.Is_Tax_Deductible__c}"/>
+                                                </td>
+                                            </tr>
+                                            <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                        </apex:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p style="display: {!if(hasBills, 'none', 'block')};">
+                                You have no billing history.
+                            </p>
+                            <div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

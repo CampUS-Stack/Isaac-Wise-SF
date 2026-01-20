@@ -1,0 +1,31 @@
+<!--
+ - Created by Chris Home Office on 1/31/2019.
+ -->
+
+<apex:page id="CongrComm_ThanksFreeEvent" controller="CongrComm_ThanksFreeEventCtrl" showHeader="false" sideBar="false" docType="html-5.0" standardStylesheets="false" applyBodyTag="true" >
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+
+                            <center>
+                            <h2 class="title">
+                                You're Registered!
+                            </h2>
+                            </center>
+                            <br/>
+                            <center><h2><em>{!Event.Receipt_Text__c}</em></h2></center>
+                            <br/>
+                            <center><h2><em><a href="https://{!Event.Web_Registration_Form__c}">{!Event.Web_Registration_Form__c}</a></em></h2></center>
+
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+</apex:page>

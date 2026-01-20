@@ -1,0 +1,111 @@
+<!--
+ - Created by Chris Home Desktop on 7/7/2018.
+ -->
+
+<apex:page id="CongrComm_AUTHPayment" controller="CongrComm_AUTHiFrameCommCtrl" showHeader="false" sideBar="false">
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <!-- (c) 2005, 2018. Authorize.Net is a registered trademark of CyberSource Corporation -->
+            <center><div class="AuthorizeNetSeal"> <script type="text/javascript" language="javascript">var ANS_customer_id="ada760ce-36c0-4349-af14-b647d098c4a5";</script> <script type="text/javascript" language="javascript" src="//verify.authorize.net:443/anetseal/seal.js" ></script> </div></center>
+
+            <apex:iframe width="100%" height="770px"  id="the_iframe" src="{!URLFOR($Page.CongrComm_AUTHRedirect) + '?pId=' + $CurrentPage.parameters.pId}" ></apex:iframe>
+
+            <script>
+
+                $j = jQuery.noConflict();
+
+                console.log('{!UserType}');
+                function returnLoaded() {
+                    console.log("Return Page Called ! ");
+                }
+                window.CommunicationHandler = {};
+                function parseQueryString(str) {
+                    var vars = [];
+                    var arr = str.split('&');
+                    var pair;
+                    for (var i = 0; i < arr.length; i++) {
+                        pair = arr[i].split('=');
+                        vars[pair[0]] = unescape(pair[1]);
+                    }
+                    return vars;
+                }
+                var callback = {
+
+                    onSuccess: function(e){
+                        window.location.href = "/" + e;
+                    }, onFailure: function(error){} };
+                CommunicationHandler.onReceiveCommunication = function (argument) {
+                    params = parseQueryString(argument.qstr);
+
+                    console.log(argument);
+                    parentFrame = argument.parent.split('/')[4];
+                    console.log(params);
+                    console.log(parentFrame);
+                    console.log(params['action']);
+                    console.log(params['height']);
+                    var frame = null;
+                    switch (parentFrame) {
+                        case "manage"        :
+                            frame = $j("#load_profile");
+                            break;
+                        case "payment"        :
+                            frame = $j("[id$=the_iframe]");
+                            break;
+                    }
+                    switch (params['action']) {
+                        case "resizeWindow" :
+                            if (parentFrame == "manage" && parseInt(params['height']) < 1150) params['height'] = 1150;
+                            if (parentFrame == "payment" && parseInt(params['height']) < 1000) params['height'] = 1000;
+                            frame.outerHeight(parseInt(params['height']));
+                            break;
+                        case "cancel" :
+                            if('{!UserType}' === 'Guest') {
+                                location.href = 'https://www.wisetemple.org/';
+                            }
+                            else{
+                                location.href = '/MemberCommunity/CongrComm_FinancialsHome';
+                            }
+                            break;
+                        case "transactResponse" :
+                            console.log('Transaction response found. Processing.');
+                            var theResponse =(params['response']);
+                            Visualforce.remoting.Manager.invokeAction(
+                                    '{!$RemoteAction.CongrComm_AUTHiFrameCommCtrl.TransactionUpdateFromAUTH}',
+                                    theResponse,
+                                    function(result, event){
+                                        if(result == 'FAILURE'){
+                                            location.href = '/MemberCommunity/CongrComm_Error';
+                                        }
+                                        console.log(result);
+                                        console.log('{!UserType}');
+                                        if (event.status) {
+                                            if('{!UserType}' === 'Guest') {
+                                                location.href = '/MemberCommunity/CongrComm_GuestEventThanks';
+                                            }
+                                            else{
+                                                location.href = '/MemberCommunity/CongrComm_Reciept?pId=' + result;
+                                            }
+                                        }
+                                    },
+                                    {escape: true}
+                            );
+
+                            // var result = sforce.apex.execute("CongrComm_AUTHResultsCtrl","TransactionUpdateFromAUTH",
+                            //         {
+                            //             jsonUpdateStruct:theResponse
+                            //         },callback);
+                            break;
+                    }
+                }
+
+            </script>
+            <script>
+
+            </script>
+
+            <apex:includeScript value="../../soap/ajax/38.0/connection.js" />
+            <apex:includeScript value="../../soap/ajax/38.0/apex.js" />
+        </apex:define>
+    </apex:composition>
+</apex:page>

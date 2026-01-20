@@ -1,0 +1,9 @@
+<!--
+ - Created by Kritik Garg on 15-03-2020.
+ -->
+
+<apex:page id="UDTicketFileSync" standardController="Ticket_Issue__c" extensions="UDTicketFileSyncController" action="{!executeBatch}">
+
+    <h3>Initiating batch to Sync Files</h3>
+
+</apex:page>

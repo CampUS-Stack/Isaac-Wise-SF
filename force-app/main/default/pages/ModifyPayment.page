@@ -1,0 +1,353 @@
+<!--
+ - Created by Chris Home Desktop on 1/1/2018.
+ -->
+
+<apex:page id="ModifyPayment" controller="ModifyPaymentController"  docType="html-5.0">
+
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <apex:form >
+        <apex:pageBlock id="theBlock" rendered="{!NOT(ShowPaymentReAssignment)}" title="Search For Payments" >
+
+            <apex:pageMessages id="showmsg"></apex:pageMessages>
+            <apex:pageBlockSection columns="1" >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Household Name" />
+                    <apex:inputField value="{!DummyContact.AccountId}" onChange="if(value != '' ){ShowLoading();SearchPayments()};"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:commandButton action="{!SearchForPayments}" value="Search"/>
+                    <apex:commandButton action="{!DisplayReassignmentArea}" value="Use Payment"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockTable id="paymentDisplayArea" value="{!PaymentWrappers}" var="payWrap">
+                <apex:column >
+                    <apex:inputCheckbox value="{!payWrap.IsSelected}"/>
+                </apex:column>
+                <apex:column value="{!payWrap.Payment.Name}"/>
+                <apex:column value="{!payWrap.Payment.Check_Date__c}"/>
+                <apex:column value="{!payWrap.Payment.Deposit_ID__c}"/>
+                <apex:column value="{!payWrap.Payment.Check_Number__c}"/>
+                <apex:column value="{!payWrap.Payment.Amount__c}"/>
+                <apex:column value="{!payWrap.Payment.RecordType.Name}"/>
+                <apex:column value="{!payWrap.Payment.Paid_by_Household__c}" />
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        <apex:pageBlock id="thePageBlock" rendered="{!ShowPaymentReAssignment}">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!Save}"/>
+                <apex:commandButton value="Save & Adjust" action="{!SaveAndAdjust}"/>
+            </apex:pageBlockButtons>
+            <apex:pageMessages id="showmsg"></apex:pageMessages>
+            <apex:pageBlockSection id="topPageBlockSection">
+                <apex:pageBlockSectionItem rendered="{!$CurrentPage.parameters.type == 'transfer'}">
+                    <apex:outputLabel value="Household" />
+                    <apex:inputField value="{!DummyTransferContact.AccountId}" onchange="if(value != '' ){ShowLoading();SearchAction()};" tabOrderHint="1"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!$CurrentPage.parameters.type == 'reallocate'}">
+                    <apex:outputLabel value="Household" />
+                    <apex:outputField value="{!DummyTransferContact.AccountId}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <!--<apex:outputLabel value="Check Date" />-->
+                    <!--<apex:inputField value="{!PaymentToTransfer.Payment.Check_Date__c}" />-->
+                    <apex:outputLabel value="Reallocation date" />
+                    <apex:inputField required="true" value="{!DummyPaidByContact.Date_of_Birth__c}" tabOrderHint="6"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!$CurrentPage.parameters.type == 'transfer'}">
+                    <apex:outputLabel value="Paid By Household" />
+                    <apex:inputField value="{!DummyPaidByContact.AccountId}" tabOrderHint="5"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Current Payment Amount" />
+                    <apex:outputField value="{!PaymentToTransfer.Payment.Amount__c}" id="paymentAmountEntered"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Remaining" />
+                    <apex:outputLabel value="$" id="remainingBalanceToAllocate" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Payment Subtotal" />
+                    <apex:outputLabel value="$" styleClass="payment_subTotal" id="payment_subTotal" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Type" />
+                    <apex:outputField value="{!PaymentToTransfer.Payment.Type__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:commandButton value="Auto Pay" action="{!ProcessAutoPay}" reRender="searchAreaSection,showmsg" onComplete="handlePaymentChange()" tabIndex="8"/>
+                    <apex:commandButton value="New Assessment | Credit" action="{!AddNewAssessment}" reRender="searchAreaSection,showmsg"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" id="searchAreaSection">
+                <apex:pageBlockTable value="{!AssessmentWrappers}" var="assessWrap">
+                    <apex:column headerValue="Designation">
+                        <apex:outputField rendered="{!NOT(assessWrap.isNew)}" value="{!assessWrap.assessment.Designation__c}" />
+                        <apex:inputField rendered="{!assessWrap.isNew}" value="{!assessWrap.assessment.Designation__c}" />
+                    </apex:column>
+                    <apex:column value="{!assessWrap.assessment.Assessment_Date__c}"/>
+                    <apex:column value="{!assessWrap.assessment.Assessed_Amount__c}"/>
+                    <apex:column value="{!assessWrap.assessment.Amount_Adjusted__c}"/>
+                    <apex:column headerValue="Amount Paid">
+                        <apex:inputField rendered="{!NOT(assessWrap.isNew)}" html-placeholder="Enter Description Here" value="{!assessWrap.assessment.Amount_Paid__c}" />
+                        <apex:inputField rendered="{!assessWrap.isNew}" html-placeholder="Enter Description Here" value="{!assessWrap.assessment.Description__c}" />
+                    </apex:column>
+                    <apex:column headerValue="Balance">
+                        <apex:outputText styleClass="{!assessWrap.assessment.Id} due" rendered="{!NOT(assessWrap.hasPrevBalance)}" value="{!assessWrap.assessment.Remaining_Balance__c}"/>
+                        <apex:outputText styleClass="{!assessWrap.assessment.Id} due" rendered="{!assessWrap.hasPrevBalance}" value="{!assessWrap.prevBalance}"/>
+                    </apex:column>
+                    <apex:column headerValue="Payment Amount">
+                        <apex:input tabIndex="7" value="{!assessWrap.paymentAmount}" onchange="handlePaymentChange();" id="paymentAmount" styleClass="paymentInput {!assessWrap.assessment.Id}"/>
+                    </apex:column>
+                    <!--<apex:column rendered="{!NOT(assessWrap.isNew)}">-->
+                    <!--<input onKeyUp="updateSubtotal('{!assessWrap.assessment.Id}');" onchange="handlePaymentChange();" type="text" style="text-align:right" id="paymentAmount"	Class="paymentInput {!assessWrap.assessment.Id}" />-->
+                    <!--</apex:column>-->
+                    <apex:column headerValue="Pay in Full" width="10%">
+                        <apex:inputCheckbox rendered="{!NOT(assessWrap.isNew)}" styleClass="payInFull {!assessWrap.assessment.Id}" onClick="processPayInFull('{!assessWrap.assessment.Id}')" />
+                        <!--<apex:inputField rendered="{!assessWrap.isNew}"  value="{!assessWrap.assessment.Assessment_Date__c}" />-->
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock><apex:actionFunction name="rerenderSubTotals" reRender="topPageBlockSection,searchAreaSection" />
+        <apex:actionFunction name="SearchAction" action="{!SearchForAssessments}" reRender="thePageBlock" onComplete="HideLoading();"/>
+        <apex:actionFunction name="SearchPayments" action="{!SearchForPayments}" reRender="paymentDisplayArea" onComplete="HideLoading();"/>
+        <script>
+
+            var EMPTY_STRING = '';
+            var paymentAmountMapList = []
+            var paymentAmountMap = {};
+
+            $j = jQuery.noConflict();
+            $j(document).ready(function() {
+
+                overrideEnter();
+                updateSubtotal('');
+                updateRemaining();
+            });
+
+
+            function updateSubtotal(){
+
+                var subtotal = 0.00;
+
+                var paymentValues = getElementsByClassName('paymentInput');
+                var inputIndex = 0;
+
+                for(var i = 0; i < paymentValues.length; i++){
+                    var inputField = paymentValues[i];
+                    var payment = parseFloat(inputField.value);
+                    if(payment){
+                        subtotal += payment;
+                    }
+                }
+                var roundedValue = subtotal.toFixed(2);
+
+                var totalAmt =  $j('[id$=paymentAmountEntered]')[0];
+                var newTotal = parseFloat(totalAmt.value);
+                console.log(newTotal);
+                if(newTotal){
+                    newTotal =  newTotal.toFixed(2);
+                    var difference = newTotal - roundedValue;
+                    if(difference >= 0){
+                        $j('[id$=remainingBalanceToAllocate]').text('$' + (newTotal - roundedValue));
+                        $j('[id$=remainingBalanceToAllocate]').css('color','black');
+                    }
+                    else{
+                        $j('[id$=remainingBalanceToAllocate]').text('$' + (newTotal - roundedValue));
+                        $j('[id$=remainingBalanceToAllocate]').css('color','red');
+                    }
+                }
+
+                $j('[id$=payment_subTotal]').text('$' + roundedValue);
+            }
+
+            function updateRemaining(){
+
+                var subtotal = 0.00;
+                var paymentValues = $j('[id$=payment_subTotal]')[0];
+                console.log(paymentValues);
+                console.log(paymentValues.innerHTML);
+                subtotal = paymentValues.innerHTML.replace(',', '').replace('$', '');
+
+                console.log('Printing Sub Total');
+                console.log(subtotal);
+                var roundedValue = parseFloat(subtotal).toFixed(2);
+                var totalAmt =  $j('[id$=paymentAmountEntered]')[0];
+                console.log('Printing Total Amount');
+                console.log(totalAmt);
+                console.log(totalAmt.innerText);
+                totalAmt = totalAmt.innerText.replace(',', '').replace('$', '');
+                console.log(totalAmt);
+                var newTotal = parseFloat(totalAmt);
+
+                console.log('Printing New Total');
+                console.log(newTotal);
+                console.log('Printing Roudned Value');
+                console.log(roundedValue);
+
+                if(newTotal){
+                    newTotal =  newTotal.toFixed(2);
+                    var difference = newTotal - roundedValue;
+                    if(difference >= 0){
+                        $j('[id$=remainingBalanceToAllocate]').text('$' + (newTotal - roundedValue).toFixed(2));
+                        $j('[id$=remainingBalanceToAllocate]').css('color','black');
+                    }
+                    else{
+                        $j('[id$=remainingBalanceToAllocate]').text('$' + 0);
+                        $j('[id$=remainingBalanceToAllocate]').css('color','red');
+                    }
+                }
+            }
+
+            function processPayInFull(assessmentId){
+
+                var checkBox = getElementsByClassName('payInFull ' + assessmentId);
+                var paymentInputElement = getElementsByClassName(assessmentId);
+
+                console.log(checkBox);
+                var totalAmt =  $j('[id$=paymentAmountEntered]')[0];
+                var newTotal = parseFloat(totalAmt.value);
+
+
+                if(checkBox[0].checked == false){
+                    //paymentInputElement[1].disabled = false;
+                    paymentInputElement[1].value = '';
+                    makeReadonlyFalse(paymentInputElement[1]);
+
+                    updateSubtotal();
+                    return;
+                }
+
+                var invoiceBalanceDueElement = getElementsByClassName(assessmentId + ' due');
+                var invoiceBalanceDueText = invoiceBalanceDueElement[0].textContent;
+                var invoiceBalanceDue = parseFloat(invoiceBalanceDueText);
+
+
+                if(newTotal <= 0 || newTotal == '' || newTotal < invoiceBalanceDue){
+                    alert('The balance of the assessment is greater than the payment amount entered.');
+                    //paymentInputElement[1].disabled = false;
+                    paymentInputElement[1].value = '';
+                    makeReadonlyFalse(paymentInputElement[1]);
+
+                    console.log(getElementsByClassName('payInFull ' + assessmentId)[0]);
+                    checkBox[0].checked = false;
+                    updateSubtotal();
+                    return;
+                }
+
+                if(parseInt(invoiceBalanceDueText) <  parseInt($j('[id$=remainingBalanceToAllocate]').text())){
+                    //paymentInputElement[1].disabled = false;
+                    paymentInputElement[1].value = '';
+                    makeReadonlyFalse(paymentInputElement[1]);
+
+                    updateSubtotal();
+                    return;
+                }
+
+                if(invoiceBalanceDueText){
+                    paymentInputElement[1].value = invoiceBalanceDueText;
+                    makeReadonly(paymentInputElement[1]);
+                    //paymentInputElement[1].disabled  = true;
+                }
+
+                updateSubtotal();
+                updateRemaining();
+
+            }
+
+
+            //Added by Kritik
+            function makeReadonly(element) {
+                $j(element).addClass("roinput");
+                $j(element).prop('readonly', true);
+              /*  element.readOnly = true;
+                element.classList.add("roinput");*/
+            }
+
+            function makeReadonlyFalse(element) {
+                $j(element).removeClass("roinput");
+                $j(element).prop('readonly', false);
+                /*  element.readOnly = true;
+                  element.classList.add("roinput");*/
+            }
+
+
+            function handlePaymentChange(){
+                inputToTwoDecimalPlaces();
+                updateSubtotal();
+                updateRemaining();
+            }
+            function overrideEnter(){
+                $j('input').keydown( function(e) {
+                    var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                    if(key == 13) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            function inputToTwoDecimalPlaces() {
+                var paymentValues = getElementsByClassName('paymentInput');
+                for(var i = 0; i < paymentValues.length; i++){
+                    var stringAmount = paymentValues[i].value;
+
+                    if(stringAmount){
+                        var formattedAmount = parseFloat(stringAmount).toFixed(2);
+
+                        if(formattedAmount === 'NaN'){
+                            formattedAmount = '0';
+                        }
+
+                        paymentValues[i].value = formattedAmount;
+                    }
+                }
+            }
+
+            function processAutoPay(){
+
+            }
+            function searchBtnClick() {
+                console.log('Test searchBtnClick')
+                SearchAction();
+            }
+
+            function ShowLoading() {
+                console.log('show Loading');
+                $j.blockUI({ css: {
+                        border: 'none',
+                        padding: '15px',
+                        backgroundColor: '#000',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .5,
+                        color: '#fff'
+                    } }); 
+
+                //setTimeout($.unblockUI, 2000);
+            }
+            function HideLoading() {
+                console.log('hide Loading');
+                $j.unblockUI();
+            }
+        </script>
+        <apex:outputText id="hiddenText"/>
+    </apex:form>
+
+    <style>
+    .roinput {
+        color: rgb(84, 84, 84);
+        background-color: rgb(235, 235, 228);
+    }
+
+    </style>
+
+</apex:page>

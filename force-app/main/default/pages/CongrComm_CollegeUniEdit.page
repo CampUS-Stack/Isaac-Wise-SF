@@ -1,0 +1,221 @@
+<!--
+- Created by Chris Home Desktop on 5/2/2018.
+ -->
+
+<apex:page controller="CongrComm_CollegeUniEditController" 
+           id="CongrComm_CollegeUniEdit" 
+           showHeader="false" 
+           applyBodyTag="false" 
+           sidebar="false" 
+           standardStylesheets="false" 
+           docType="html-5.0">
+    <style>
+        /*.messageCell {*/
+            /*border: 1px solid black;*/
+            /*border-radius: 5px;*/
+            /*margin-left: 5%;*/
+            /*background-color: #EEE;*/
+            /*padding-left: 20px;*/
+            /*padding-right: 20px;*/
+            /*padding-bottom: 20px;*/
+            /*padding-top: 10px;*/
+        /*}*/
+        .cancelBtn {
+            background-color: white;
+            color: #c24c39;
+            margin-left: 10px;
+        }
+    </style>
+
+    <apex:stylesheet value="{!URLFOR($Resource.DatePicker, '/datepicker/css/datepicker.css')}"/>
+    
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DatePicker, '/datepicker/js/bootstrap-datepicker.js')}"/>
+    
+    
+            <script>
+            $( document ).ready(function() {
+                
+                
+                $( function() {
+                    //$( ".datepicker" ).datepicker({ dateFormat: 'mm/dd/yy', changeYear: true, yearRange: '1920:2018' });
+                    $( ".datepicker" ).datepicker({
+                        format: 'm/d/yyyy'  
+                    });
+                } );
+            });
+    </script>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="text-center">
+                                <apex:commandButton value="Save" action="{!save}" styleClass="btn wiseBtn" />
+                                <apex:commandButton value="Cancel" action="{!cancel}" styleClass="btn cancelBtn"/>
+                            </div>
+                            <h2 class="title">
+                                Colleges and Universities
+                            </h2>
+                            <p>
+                                Editing for {!theContact.FirstName} {!theContact.LastName}<br/>
+                            </p>
+                            <apex:outputPanel id="errorMessage" rendered="{!hasErrors}">
+                                <div class="alert alert-danger" role="alert" >
+                                    <apex:pageMessages />
+                                </div>
+                            </apex:outputPanel>
+                            <!--<div class="messageCell" style="display: {!if(isSuccess = true, 'block', 'none')}">-->
+                                <!--Update was successful.-->
+                            <!--</div>-->
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="collegeUniversityName">College/University Name</label>
+                                    <apex:inputField value="{!theCollege.College_University__c}"  type="text" styleClass="form-control" id="collegeUniversityName"  />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Grade Level</label>
+                                    <apex:inputField value="{!theCollege.Grade_Level__c}" label="Grade Level" styleClass="form-control" id="gradeLevelInput"/>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="collegeUniversityName">Other College/University Name</label>
+                                    <apex:inputField value="{!theCollege.Other_College_University__c}"  type="text" styleClass="form-control" id="otherCollegeUniversityName"  />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <!--<label for="lastNameInput">Grade Level</label>-->
+                                    <!--<apex:inputField value="{!theCollege.Grade_Level__c}" label="Grade Level" styleClass="form-control" id="gradeLevelInput"/>-->
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Start Date</label>
+                                    <apex:inputField value="{!theCollege.Start_Date__c}" label="Start Date" styleClass="form-control datepicker" showDatePicker="false"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="collegeUniversityName">End Date</label>
+                                    <apex:inputField value="{!theCollege.End_Date__c}" label="End Date" styleClass="form-control datepicker" showDatePicker="false" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Major</label>
+                                    <apex:inputField value="{!theCollege.Major__c}" styleClass="form-control" id="majorInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">School Street</label>
+                                    <apex:inputField value="{!theCollege.School_Street__c}" styleClass="form-control" id="schoolStreetInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="collegeUniversityName">School City</label>
+                                    <apex:inputField value="{!theCollege.School_City__c}"  type="text" styleClass="form-control" id="schoolCityInput"  />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">School State</label>
+                                    <apex:inputField value="{!theCollege.School_State__c}" styleClass="form-control" id="schoolStateInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="collegeUniversityName">School Zip</label>
+                                    <apex:inputField value="{!theCollege.School_Zip__c}"  type="text" styleClass="form-control" id="schoolZipInput"  />
+                                </div>
+                            </div>
+                            <!--<table class="table">-->
+                                <!--<tbody>-->
+                                    <!--<tr>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--College/University Name-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.College_University__c}" label="College/University Name"/>-->
+                                        <!--</td>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--Start Date-->
+                                            <!--</p>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                    <!--<tr>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--Grade Level-->
+                                            <!--</p>-->
+                                        <!--</td>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--End Date-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.End_Date__c}" label="End Date"/>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                    <!--<tr>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--School Street-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.School_Street__c}" label="School Street"/>-->
+                                        <!--</td>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--Major-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.Major__c}" label="Major"/>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                    <!--<tr>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--School City-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.School_City__c}" label="School City"/>-->
+                                        <!--</td>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--Notes-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.Notes__c}" label="Notes"/>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                    <!--<tr>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--School State-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.School_State__c}" label="School State"/>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                    <!--<tr>-->
+                                        <!--<td>-->
+                                            <!--<p>-->
+                                                <!--School Zip-->
+                                            <!--</p>-->
+                                            <!--<apex:inputField value="{!theCollege.School_Zip__c}" label="School Zip"/>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                <!--</tbody>-->
+                            <!--</table>-->
+                            <div class="text-center">
+                                <apex:commandButton value="Save" action="{!save}" styleClass="btn wiseBtn"/>
+                                <apex:commandButton value="Cancel" action="{!cancel}" styleClass="btn cancelBtn"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

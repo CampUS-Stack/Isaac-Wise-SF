@@ -1,0 +1,183 @@
+<!--
+ - Created by Chris Home Desktop on 4/25/2018.
+ -->
+
+<apex:page id="CongrComm_HouseholdInfo" controller="CongrComm_HouseholdInfoCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" href="https://jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css"/>
+
+    <script>
+        var $j = jQuery.noConflict();
+        $j( document ).ready(function() {
+
+            $j( function() {
+                $j( ".datepicker" ).datepicker({ dateFormat: 'mm/dd/yy', changeYear: true, yearRange: '1920:2018' });
+            } );
+
+            $j('span.dateFormat').remove()
+        });
+    </script>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}" reRender="theForm"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_Home)}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                            <h2>Household Information</h2>
+                            <apex:outputPanel id="errorMessage" rendered="{!hasErrors}">
+                                <div class="alert alert-danger" role="alert" >
+                                    <apex:pageMessages />
+                                </div>
+                            </apex:outputPanel>
+                            <hr/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HouseholdNameInput">Household Name</label><br/>
+                                    <apex:outputField value="{!communityUserAccountDetails.Name}" styleClass="form-control" id="NameInput"  />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Home Phone (land line or primary cell)</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Phone}" type="text" styleClass="form-control" id="HomePhoneInput" />
+                                </div>
+                            </div>
+                            <br/>
+                            <h2>Mailing Address</h2>
+                            <hr/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingStreetInput">Mailing Street Address</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingStreet}" type="text" styleClass="form-control" id="CurrentMailingStreetInput"  />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingCityInput">Mailing City</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingCity}" type="text" styleClass="form-control" id="CurrentMailingCityInput"  />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingStateInput">Mailing State</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingState}" type="text" styleClass="form-control" id="MailingStateInput" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="MailingPostalcodeInput">Mailing Postal Code</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.ShippingPostalCode}" type="text" styleClass="form-control" id="MailingPostalcodeInput" />
+                                </div>
+                            </div>
+                            
+                            <br/>
+
+                            <h2>Billing Address</h2>
+                            <hr/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="BillingStreetInput">Billing Street Address</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.BillingStreet}" type="text" styleClass="form-control" id="BillingStreetInput" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="BillingCityInput">Billing City</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.BillingCity}" type="text" styleClass="form-control" id="BillingCityInput" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="BillingStateInput">Billing State</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.BillingState}" type="text" styleClass="form-control" id="BillingStateInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="BillingPostalcodeInput">Billing Postal Code</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.BillingPostalCode}" type="text" styleClass="form-control" id="BillingPostalcodeInput"/>
+                                </div>
+                            </div>
+                            
+                            <br/>
+
+                            <h2>Seasonal Address</h2><br/>
+                            <p>Complete only if we should send Temple mail to this address during certain months.</p>
+                            <hr/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="SeasonalStreetInput">Seasonal Street Address</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_Street__c}" type="text" styleClass="form-control" id="SeasonalStreetInput" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="SeasonalCityInput">Seasonal City</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_City__c}" type="text" styleClass="form-control" id="SeasonalCityInput"  />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="SeasonalStateInput">Seasonal State</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_State__c}" type="text" styleClass="form-control" id="SeasonalStateInput" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="SeasonalPostalcodeInput">Seasonal Postal Code</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_Zip__c}" type="text" styleClass="form-control" id="SeasonalPostalcodeInput" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="SeasonalStartMonthInput">Seasonal Address Start Month</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_Address_Start_Month__c}" type="text" styleClass="form-control" id="SeasonalStartMonthInput"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="SeaosnalEndMonthInput">Seasonal Address End Month</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_Address_End_Month__c}" type="text" styleClass="form-control" id="SeaosnalEndMonthInput" />
+                                </div>
+                            </div>
+                            <br/>
+
+                            <h2>Wedding Information</h2>
+                            <hr/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="WeddingDateInput">Wedding Date</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Wedding_Date__c}" type="text" styleClass="form-control datepicker" 
+                                    id="WeddingDateInput" html-placeholder="mm/dd/yyyy" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    &nbsp;
+                                </div>
+                            </div>
+                            <!--<div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="BillingCountryInput">Seasonal Country</label>
+                                    <apex:inputField value="{!communityUserAccountDetails.Seasonal_Country__c}" type="text" styleClass="form-control" id="SeasonalCountryInput" html-placeholder="{!communityUserAccountDetails.Name}" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    &nbsp;
+                                </div>
+                            </div>-->
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_Home)}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                        <div style="margin-top:25px;"></div>
+                    </div>
+                </div>
+                <script>
+
+                    $j = jQuery.noConflict();
+                    $j( document ).ready(function() {
+                        $j("[id$='WeddingDateInput']").datepicker();
+                    });
+                </script>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

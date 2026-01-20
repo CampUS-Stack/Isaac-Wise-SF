@@ -1,0 +1,590 @@
+<!--
+ - Created by Chris Home Desktop on 10/8/2018.
+ -->
+
+<apex:page controller="CongrComm_EventGuestController"
+           id="CongrComm_EventGuest"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           action="{!onLoad}"
+           docType="html-5.0">
+
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+
+    <style>
+
+        div[id$='_selected_hint'] {
+            display: none;
+        }
+
+        div[id$='_unselected_hint'] {
+            display: none;
+        }
+
+    </style>
+    <apex:stylesheet value="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css"/>
+
+    <style>
+        /*.messageCell {*/
+        /*border: 1px solid black;*/
+        /*border-radius: 5px;*/
+        /*margin-left: 5%;*/
+        /*background-color: #EEE;*/
+        /*padding-left: 20px;*/
+        /*padding-right: 20px;*/
+        /*padding-bottom: 20px;*/
+        /*padding-top: 10px;*/
+        /*}*/
+        .cancelBtn {
+            background-color: white;
+            color: #c24c39;
+            margin-left: 10px;
+        }
+
+        .card {
+            position: relative;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .25rem;
+        }
+
+        .card-body {
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+        .custom-error {
+            color: #fff;
+            background-color: #c24c39;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .phoneScreenPadding {
+                margin-top: 15px;
+            }
+        }
+
+    </style>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-2 col-xs-12">
+                            <h2 class="title">
+                                Event - {!theEvent.Name}
+                            </h2>
+                            <apex:outputPanel id="errorMessage" rendered="{!hasErrors}">
+                                <apex:messages layout="block" styleClass="alert alert-danger errors custom-error"
+                                               style="list-style-type: none;">
+                                </apex:messages>
+                            </apex:outputPanel>
+                            
+                            
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstName"></label>
+                                    <br/>
+                                    <apex:outputText value=" {0, date, MMMM d','  yyyy}">
+                                        <apex:param value="{!theEvent.Event_Date_Start__c + offset}"/>
+                                    </apex:outputText>
+                                    <!--<apex:outputField value="{0, date, MMMM d','  yyyy}" >
+                                        <apex:param value="{!theEvent.Event_Date_Start__c}"/>
+                                    </apex:outputField>-->
+                                    
+                                </div>
+
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstName"></label>
+                                    <br/>
+                                    <apex:outputText escape="false" value="{!theEvent.Description__c}"/>
+                                </div>
+                            </div>
+<div class="row">
+
+                            <br/>
+                            <div class="row">
+
+                                <div class="col-sm-6">
+                                    <apex:input value="{!GuestPageWrapper.FirstName}" html-placeholder="First Name"
+                                                type="text" styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6">
+                                    <apex:input value="{!GuestPageWrapper.LastName}" html-placeholder="Last Name"
+                                                type="text" styleClass="form-control"/>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px;">
+                                <div class="col-sm-6">
+                                    <apex:input required="true" value="{!GuestPageWrapper.Email}"
+                                                html-placeholder="Email"
+                                                type="text" styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6">
+                                    <apex:input value="{!GuestPageWrapper.Phone}" html-placeholder="Phone"
+                                                type="text" styleClass="form-control"/>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px;">
+                                <div class="col-sm-6 col-xs-12" style="padding-top:10px">
+                                    <apex:selectList rendered="{!theEvent.Paid_Event__c}" label="Ticket Type:"
+                                                     html-placeholder="Select A Value"
+                                                     multiSelect="false" size="1"
+                                                     styleClass="form-control"
+                                                     value="{!GuestPageWrapper.SelectedTicketType}">
+                                        <apex:selectOptions value="{!PricingOptions}"/>
+                                        <apex:actionSupport event="onchange"/>
+                                    </apex:selectList>
+                                    <apex:selectList rendered="{!NOT(theEvent.Paid_Event__c)}" label="Ticket Type:"
+                                                     html-placeholder="Select A Value"
+                                                     multiSelect="false" size="1"
+                                                     styleClass="form-control"
+                                                     value="{!GuestPageWrapper.SelectedTicketType}">
+                                        <apex:selectOptions value="{!TicketOptions}"/>
+                                        <apex:actionSupport event="onchange"/>
+                                    </apex:selectList>
+                                </div>
+                                <div class="col-sm-6">
+                                </div>
+                            </div>
+
+
+                            <br/>
+                            <!--<div class="text-left">-->
+                            <!--<div class="row" style="margin-bottom:15px;">-->
+                            <!--<div class="col-sm-3">-->
+                            <!--<button type="button" class="btn wiseBtn" data-toggle="modal"-->
+                            <!--data-target="#guestRegistrantModal">Register-->
+                            <!--</button>-->
+                            <!--</div>-->
+                            <!--</div>-->
+                            <!--</div>-->
+                            <apex:outputPanel id="AdditionalRegistrantBtn"
+                                              rendered="{!GuestPageWrapper.SelectedTicketType != '' && GuestPageWrapper.SelectedTicketType != null}">
+                                <div class="text-left">
+                                    <div class="row" style="margin-bottom:15px;">
+                                        <div class="col-sm-3">
+                                            <button type="button" class="btn wiseBtn" data-toggle="modal"
+                                                    data-target="#guestRegistrantModal">Add Additional Guest
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                            <br/>
+                            <apex:outputPanel id="guestRegistrantDisplayArea"
+                                              rendered="{!NumberOfSelectedGuestRegistrants > 0 || GuestPageWrapper.SelectedTicketType != null}">
+                                <div class="row">
+                                    <div class="col-sm-12 form-group">
+                                        <table class="table">
+                                            <tr>
+                                                <td>
+
+                                                    <apex:commandLink action="{!RemoveSelectedParticipant}">
+                                                        <!-- <apex:commandLink action="{!RemoveSelectedParticipant}" reRender="allRegistrantTables" onclick="removeRegistrantName('{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}'); return false;" > -->
+                                                        <apex:param value="{!GuestPageWrapper.FirstName+' '+GuestPageWrapper.LastName}"
+                                                                assignTo="{!RegistrantNameToRemove}" name="theVar"/>
+                                                        <apex:param value="{!GuestPageWrapper.FirstName+' '+GuestPageWrapper.LastName}"
+                                                                assignTo="{!RegistrantNameToRemove}"
+                                                                name="RegistrantNameToRemove"/>
+                                                        <span style="color:#c24c39;"
+                                                              class="glyphicon glyphicon-remove"
+                                                              aria-hidden="true"></span>
+                                                    </apex:commandLink>
+                                                </td>
+                                                <td>{!GuestPageWrapper.FirstName + ' ' + GuestPageWrapper.LastName}</td>
+                                                <td>{!GuestPageWrapper.TicketType}</td>
+                                                <td>
+                                                    <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                        <apex:param value="{!GuestPageWrapper.Price}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                            <apex:outputPanel rendered="{!NumberOfSelectedGuestRegistrants > 0}">
+                                                <apex:repeat id="selectedGuestRegistrantTable"
+                                                             value="{!SelectedGuestRegistrants}" var="fam">
+                                                    <tr>
+                                                        <td>
+
+                                                            <apex:commandLink action="{!RemoveSelectedParticipant}">
+                                                                <!-- <apex:commandLink action="{!RemoveSelectedParticipant}" reRender="allRegistrantTables" onclick="removeRegistrantName('{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}'); return false;" > -->
+                                                                <apex:param value="{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}"
+                                                                        assignTo="{!RegistrantNameToRemove}"
+                                                                        name="theVar"/>
+                                                                <apex:param value="{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}"
+                                                                        assignTo="{!RegistrantNameToRemove}"
+                                                                        name="RegistrantNameToRemove"/>
+                                                                <span style="color:#c24c39;"
+                                                                      class="glyphicon glyphicon-remove"
+                                                                      aria-hidden="true"></span>
+                                                            </apex:commandLink>
+                                                        </td>
+                                                        <td>{!fam.TheContact.FirstName + ' ' + fam.TheContact.LastName}</td>
+                                                        <td>{!fam.TicketType}</td>
+                                                        <td>
+                                                            <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                                <apex:param value="{!fam.Price}"/>
+                                                            </apex:outputText>
+                                                        </td>
+                                                    </tr>
+                                                </apex:repeat>
+                                            </apex:outputPanel>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td>Fee</td>
+                                                <td>
+                                                    <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                        <apex:param value="{!TotalAdditionalRegistrantFees}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td>Total</td>
+                                                <td>
+                                                    <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                        <apex:param value="{!TotalPrice + TotalAdditionalRegistrantFees}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br/>
+                            </apex:outputPanel>
+
+
+                            <apex:repeat var="qaw" value="{!listOfQuestionWrapper}">
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label class=" font-weight-bold"
+                                               for="{!qaw.ques.Id}">{!qaw.ques.Question__c}
+                                            <span style="color: red;">
+                                                    {!IF(qaw.ques.Required__c, ' *', '')}
+                                            </span>
+                                        </label>
+                                        <!-- <input type="text" class="form-control" id="{!ques.Id}" placeholder="{!ques.Question__c}"/> -->
+                                        <apex:input style="display: {!IF(qaw.ques.RecordType.Name == 'Picklist', '', 'block')}"
+                                                    styleClass="form-control ti_{!qaw.ques.Id} {!IF(qaw.ques.RecordType.Name == 'Picklist', ' picklist-Text', '')}"
+                                                    required="{!IF(qaw.ques.Required__c, 'true', 'false')}"
+                                                    value="{!qaw.ans}"/>
+                                        <div class="row">
+                                            <apex:repeat var="cbValue" value="{!qaw.pickListValues}"
+                                                         rendered="{!IF(qaw.ques.RecordType.Name == 'Picklist', true, false)}">
+                                                <div class="form-check col-md-6 ">
+                                                    <label>
+                                                        <input type="{!IF(qaw.ques.Allow_Multiple_Choice__c, 'checkbox', 'radio')}"
+                                                               class="cb_{!qaw.ques.Id}" name="check"
+                                                               data-cbvalue="{!cbValue}"
+                                                               onclick="handlecheckbox('{!qaw.ques.Id}')"/> <span
+                                                            class="label-text">{!cbValue}</span>
+                                                    </label>
+                                                </div>
+                                            </apex:repeat>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:repeat>
+
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label for="comments">Comments</label>
+                                    <apex:inputTextArea value="{!Comments}" styleClass="form-control" id="comments"/>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                            </div>
+                            <div class="text-center">
+                                <apex:commandButton rendered="{!(theEvent.Paid_Event__c)}" value="Make Payment"
+                                                    action="{!save}" styleClass="btn wiseBtn"/>
+                                <apex:commandButton rendered="{!NOT(theEvent.Paid_Event__c)}"
+                                                    value="Complete Registration" action="{!saveNonPaidEvent}"
+                                                    styleClass="btn wiseBtn"/>
+                                <apex:commandButton value="Cancel" action="{!cancel}" styleClass="btn cancelBtn"/>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-------------------------------   GUEST MODAL WINDOW   -------------------------->
+
+                    <div class="modal fade" id="guestRegistrantModal" role="dialog">
+                        <apex:outputPanel id="guestRegistrantModalPanel">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Add Additional Registrant</h4>
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <!-- Added by Kritik -->
+                                        <apex:outputPanel id="error">
+                                            <apex:messages layout="block"
+                                                           styleClass="alert alert-danger errors custom-error"
+                                                           style="list-style-type: none;">
+                                            </apex:messages>
+                                        </apex:outputPanel>
+
+                                        <div class="row" style="margin-bottom:20px;">
+                                            <div class="col-sm-6">
+                                                <apex:input value="{!GuestFirstName}" html-placeholder="First Name"
+                                                            type="text" styleClass="form-control"/>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <apex:input value="{!GuestLastName}" html-placeholder="Last Name"
+                                                            type="text" styleClass="form-control"/>
+                                            </div>
+                                            <!--<div class="col-sm-6" style="margin-top:10px;">-->
+                                            <!--<apex:input value="{!GuestEmail}" html-placeholder="Email"-->
+                                            <!--type="text" styleClass="form-control"/>-->
+                                            <!--</div>-->
+                                            <div class="col-sm-6" style="margin-top:10px;">
+                                                <apex:selectList rendered="{!theEvent.Paid_Event__c}"
+                                                                 label="Ticket Type:"
+                                                                 html-placeholder="Select A Value"
+                                                                 multiSelect="false" size="1"
+                                                                 styleClass="form-control"
+                                                                 value="{!GuestTicketType}">
+                                                    <apex:selectOptions value="{!PricingOptions}"/>
+                                                </apex:selectList>
+                                                <apex:selectList rendered="{!NOT(theEvent.Paid_Event__c)}"
+                                                                 label="Ticket Type:"
+                                                                 html-placeholder="Select A Value"
+                                                                 multiSelect="false" size="1"
+                                                                 styleClass="form-control"
+                                                                 value="{!GuestTicketType}">
+                                                    <apex:selectOptions value="{!TicketOptions}"/>
+                                                </apex:selectList>
+                                            </div>
+                                            <div class="col-sm-6" style="margin-top:10px;">
+                                                <label>&nbsp;</label>
+                                                <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                    value="Add Guest" action="{!AddGuestRegistrant}"
+                                                                    reRender="guestRegistrantModalPanel"/>
+                                            </div>
+                                        </div>
+
+                                        <apex:outputPanel id="selectedGuestRegistrantDisplayArea"
+                                                          rendered="{!NumberOfGuestRegistrants > 0}">
+                                            <div class="row">
+                                                <div class="col-sm-12 form-group">
+                                                    <table class="table">
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Price</th>
+                                                        </tr>
+                                                        <apex:repeat id="selectedGuestRegistrantsTable"
+                                                                     value="{!GuestRegistrants}"
+                                                                     var="reg">
+                                                            <tr>
+                                                                <td>
+                                                                    <p><b>{!reg.FirstName + ' ' + reg.LastName}</b></p>
+                                                                </td>
+                                                                <td>$&nbsp;{!reg.Price}</td>
+                                                            </tr>
+                                                        </apex:repeat>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </apex:outputPanel>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default cancelBtn"
+                                                data-dismiss="modal">Back
+                                        </button>
+                                        <apex:commandButton styleClass="btn btn-default wiseBtn" value="Register"
+                                                            action="{!RegisterGuestRegistrants}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </apex:outputPanel>
+                    </div>
+
+                </div>
+           
+           </div> </apex:form>
+        </apex:define>
+    </apex:composition>
+
+
+    <script>
+        var $j = jQuery.noConflict();
+        $j(document).ready(function () {
+            $j(' tr.multiSelectPicklistRow td').hide()
+            var col = 1;
+            var x;
+            $j('.multiSelectPicklistRow').each(function (i, val) {
+
+                var unselectedValues = [];
+                var selectedValues = [];
+                var element = '';
+                $j(this).wrap('<div id= "wrapId' + col + '" ></div>');
+
+                element = element + '<select data-id= "wrapId' + col + '" class="selectpicker" multiple="true">';
+
+                $j($j(this).find('select:nth-child(1)')[1]).find('option').each(function () {
+                    selectedValues.push($j(this));
+                    console.log(selectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' selected="true"> ' + $j(this).text() + '</option>';
+                })
+
+                $j($j(this).find('select:nth-child(1)')[0]).find('option').each(function () {
+                    unselectedValues.push($j(this));
+                    console.log(unselectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' > ' + $j(this).text() + '</option>';
+                })
+
+                element = element + ' </select>';
+
+                $j(this).append(element);
+
+                col = col + 1;
+            });
+
+            $j('.selectpicker').on('changed.bs.select', function (e, a, b, c) {
+                var tmp = e.target.options[a].text
+
+
+                selectValue(e.currentTarget.getAttribute('data-id'), $j(e.target.options[a]).attr('data-v'));
+
+            });
+
+            function selectValue(id, value) {
+
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+                $j('#' + id + ' option[value=' + value + ']').trigger('dblclick')
+
+            }
+
+            function unselectValue(id, value) {
+                console.log($j('#' + id + ' optgroup[label="Chosen"] option[value=' + value + ']'))
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+            }
+
+        });
+
+        function handlecheckbox(qid) {
+            var cbId = '.cb_' + qid;
+            var tiId = '.ti_' + qid;
+            //console.log($(cbId));
+            var text = '';
+            var cbData = $j(cbId);
+            var i;
+            for (i = 0; i < cbData.length; i++) {
+                if (cbData[i].checked) {
+                    text += $j(cbData[i]).data('cbvalue') + ";";
+                }
+            }
+            console.log(text);
+            $j(tiId).val(text);
+        }
+
+    </script>
+    <style>
+
+        label .checkbox {
+            position: relative;
+            cursor: pointer;
+            color: #666;
+            font-size: 30px;
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            position: absolute;
+            right: 9000px;
+        }
+
+        /*Check box*/
+        input[type="checkbox"] + .label-text:before {
+            content: "\f096";
+            font-family: "FontAwesome";
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            width: 1em;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        input[type="checkbox"]:checked + .label-text:before {
+            content: "\f14a";
+            color: #c24c39;
+            animation: effect 250ms ease-in;
+        }
+
+        input[type="checkbox"]:disabled + .label-text {
+            color: #aaa;
+        }
+
+        input[type="checkbox"]:disabled + .label-text:before {
+            content: "\f0c8";
+            color: #ccc;
+        }
+
+        input[type="radio"] + .label-text:before {
+            content: "\f10c";
+            font-family: "FontAwesome";
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            width: 1em;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        input[type="radio"]:checked + .label-text:before {
+            content: "\f192";
+            color: #c24c39;
+            animation: effect 250ms ease-in;
+        }
+
+        input[type="radio"]:disabled + .label-text {
+            color: #aaa;
+        }
+
+        input[type="radio"]:disabled + .label-text:before {
+            content: "\f111";
+            color: #ccc;
+        }
+
+        .picklist-Text{
+            height: 1px;
+            width: 1px;
+            border: none;
+            display: inline;
+            padding: 0px;
+            color: #f0f8ff00;
+            box-shadow: none;
+        }
+
+    </style>
+</apex:page>

@@ -1,0 +1,501 @@
+<!--
+ - Created by Chris Home Desktop on 4/9/2018.
+ -->
+
+<apex:page id="CongrComm_ContactDetails" controller="CongrComm_ContactDetailsCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0" >
+ 
+  <script>
+    $( document ).ready(function() {
+        
+        $( function() {
+            //$( ".datepicker" ).datepicker({ dateFormat: 'mm/dd/yy', changeYear: true, yearRange: '1920:2018' });
+            $( ".datepicker" ).datepicker({
+                format: 'm/d/yyyy'  
+            });
+        } );
+        
+        // $('span.dateFormat').remove()
+    });
+  </script>
+    
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            
+            <!-- RENDER ADULT FORM LAYOUT -->
+            <apex:outputPanel rendered="{!ContactToEdit.RecordType.DeveloperName == 'New_Adult_Contact'}" id="adltcon">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save & Continue"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="cancelBtn btn "/>
+                                </div>
+                            </div>
+                            <h2>General Information</h2>
+                            <hr/>
+                            <h4 class="sub-title">{!$Label.Community_Home_Address}</h4>
+                            <hr/>
+
+                            <apex:outputPanel id="errorMessage" rendered="{!hasErrors}">
+                                <div class="alert alert-danger" role="alert" >
+                                    <apex:pageMessages id="pagemsg"/>
+                                </div>
+                            </apex:outputPanel>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">First Name</label>
+                                    <apex:inputField value="{!ContactToEdit.FirstName}" html-disabled="true" type="text" styleClass="form-control" id="firstNameInput" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Last Name</label>
+                                    <apex:inputField value="{!ContactToEdit.LastName}" html-disabled="true" type="text" styleClass="form-control" id="lastNameInput" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Nickname</label>
+                                    <apex:inputField value="{!ContactToEdit.Nickname__c}" type="text" styleClass="form-control" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Hebrew Name</label>
+                                    <apex:inputField value="{!ContactToEdit.Hebrew_Name__c}" type="text" styleClass="form-control"  />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Primary Email</label>
+                                    <apex:inputField value="{!ContactToEdit.Email}" type="text" styleClass="form-control"  />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Cell Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Mobile_Phone__c}" type="text" styleClass="form-control" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Gender</label>
+                                    <apex:inputField value="{!ContactToEdit.Gender__c}" type="text" styleClass="form-control"/>
+                                </div>
+
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput"  >Date of Birth</label>
+                                    <apex:inputField value="{!ContactToEdit.Date_of_Birth__c}"  styleClass="form-control datepicker" showDatePicker="false"/>
+                                </div> 
+                                <!--<div class="col-sm-6 form-group">-->
+                                <!--<label for="lastNameInput">Primary Email</label>-->
+                                <!--<apex:input type="text" styleClass="form-control" html-placeholder="Burn" />-->
+                                <!--</div>-->
+                            </div>
+                            <!--<h4>May we publicize your birthday and anniversary to the rabbis and/or the congregation?</h4>-->
+                            <!--<div class="row">-->
+                                <!--<div class="col-sm-6 form-group">-->
+                                    <!--<label for="firstNameInput">Publicize Birthdate - Bulletin</label>&nbsp;&nbsp;&nbsp;&nbsp;-->
+                                    <!--<apex:inputField value="{!ContactToEdit.Publicize_Birthdate_Bulletin__c}"   />-->
+                                <!--</div>-->
+                                <!--<div class="col-sm-6 form-group">-->
+                                    <!--<label for="lastNameInput">Publicize Birthdate - Rabbi</label>&nbsp;&nbsp;&nbsp;&nbsp;-->
+                                    <!--<apex:inputField value="{!ContactToEdit.Publicize_Birthdate_Rabbi__c}" />-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <h2>Employment Information</h2>
+                            <hr/>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Industry</label>
+                                    <apex:inputField value="{!ContactToEdit.Occupation__c}" type="text" styleClass="form-control" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Title</label>
+                                    <apex:inputField value="{!ContactToEdit.Title}" type="text" styleClass="form-control" />
+                                </div>
+                                </div>
+                                
+                                 <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Specialization</label>
+                                    <apex:inputField value="{!ContactToEdit.Specialization__c}" type="text" styleClass="form-control"  />
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Employer</label>
+                                    <apex:inputField value="{!ContactToEdit.Employer__c}" type="text" styleClass="form-control" />
+                                </div>
+                                
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Employer Zip Code</label>
+                                    <apex:inputField value="{!ContactToEdit.Employer_Zip_Code__c}" type="text" styleClass="form-control" />
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                                               
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Work Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Work_Phone__c}" type="text" styleClass="form-control" />
+                                </div>
+                                                                
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Work Email</label>
+                                    <apex:inputField value="{!ContactToEdit.Work_Email__c}" type="text" styleClass="form-control"/>
+                                </div>                                                      
+                            
+                            </div>
+                            
+                                                       
+                            <h2>Religious Information</h2>
+                            <hr/>
+               <div class="row">
+                                                           
+                                                                                                
+                                
+                                                                           
+                                                                                     
+                            <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Religious Background</label>
+                                    <apex:inputField value="{!ContactToEdit.Religious_Affiliation__c}" type="text" styleClass="form-control"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Bar/Bat Mitzvah Year</label>
+                                    <apex:inputField value="{!ContactToEdit.Bar_Bat_Mitzvah_Year__c}" type="text" styleClass="form-control" />
+                                </div>
+                                </div>  
+                            
+
+<div class="row">
+                                                               
+                                <div class="col-sm-6 form-group">
+                                     <label for="firstNameInput">Grew up at Wise</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <apex:inputField value="{!ContactToEdit.Grew_up_Here__c}" />
+                                </div>
+                                                                
+                                                                                      
+                            
+                            </div>
+
+
+
+
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save & Continue"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" onclick="location.href='/CongrComm_Home'" styleClass="wiseBtn btn btn-default"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+           </apex:outputPanel>
+            <!-- END RENDER ADULT FORM LAYOUT -->
+
+            <!-- RENDER CHILD FORM LAYOUT -->
+            <apex:outputPanel rendered="{!ContactToEdit.RecordType.DeveloperName == 'New_Child_Contact'}">
+                <apex:form >
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                                <div class="row">
+                                    <div class="col-sm-12 text-center">
+                                        <apex:commandButton value="Save & Continue"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                        <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="cancelBtn btn "/>
+                                    </div>
+                                </div>
+                                <h2>General Information</h2>
+                                <apex:outputPanel id="errorMessage" rendered="{!hasErrors}">
+                                    <div class="alert alert-danger" role="alert" >
+                                        <apex:pageMessages id="pagemsg"/>
+                                    </div>
+                                </apex:outputPanel>
+                                <hr/>
+                                <div class="row" >
+                                    <div class="col-sm-6 form-group">
+                                        <label for="firstNameInput">First Name</label>
+                                        <apex:inputField value="{!ContactToEdit.FirstName}" html-disabled="true"  type="text" styleClass="form-control" id="firstNameInput"  />
+                                    </div>
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Last Name</label>
+                                        <apex:inputField value="{!ContactToEdit.LastName}" html-disabled="true"  type="text" styleClass="form-control" id="lastNameInput"  />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 form-group">
+                                        <label for="firstNameInput">Nickname</label>
+                                        <apex:inputField value="{!ContactToEdit.Nickname__c}" type="text" styleClass="form-control" />
+                                    </div>
+                                    <div class="col-sm-6 form-group">
+                                        <label for="firstNameInput">Hebrew Name</label>
+                                        <apex:inputField value="{!ContactToEdit.Hebrew_Name__c}" type="text" styleClass="form-control"  />
+                                    </div>
+                                </div>
+                                 <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Primary Email</label>
+                                    <apex:inputField value="{!ContactToEdit.Email}" type="text" styleClass="form-control"  />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Cell Phone</label>
+                                    <apex:inputField value="{!ContactToEdit.Mobile_Phone__c}" type="text" styleClass="form-control" />
+                                </div>
+                            </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Secular School Name</label>
+                                        <apex:inputField value="{!ContactToEdit.School_Name__c}" type="text" styleClass="form-control"  />
+                                    </div>
+                                    <div class="col-sm-6 form-group">
+                                        <label for="firstNameInput">Grade for 19-20 school year</label>
+                                        <apex:selectList styleClass="form-control" value="{!ContactToEdit.Grade_Level__c}" multiSelect="false" size="1" >
+                                            <apex:selectOptions value="{!GradeLevels}" />
+                                        </apex:selectList>
+                                    </div>
+                                </div>
+                                <div class="row" >
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Gender</label>
+                                        <apex:inputField value="{!ContactToEdit.Gender__c}" type="text" styleClass="form-control"/>
+                                    </div>
+                                    <div class="col-sm-6 form-group">
+                                        <label for="firstNameInput">Date of Birth</label>
+                                         <apex:inputField value="{!ContactToEdit.Date_of_Birth__c}" type="text" styleClass="form-control datepicker" showDatePicker="false"/> 
+
+                                    </div>
+                                </div>
+                                <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                        <label for="firstNameInput">Bar/Bat Mitzvah Date</label>
+                                        <apex:inputField value="{!ContactToEdit.Bar_Bat_Mitzvah_Date__c}"  html-disabled="true"  type="text" styleClass="form-control datepicker" showDatePicker="false" />
+                                    </div>
+                                </div>
+                                <h2>Other Address</h2>
+                            
+                            <h4 class="sub-title">{!$Label.Community_Child_Addresses}</h4>
+                            <hr/>
+                                
+                                <div class="row">
+                                     <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Street</label>
+                                        <apex:inputField value="{!ContactToEdit.OtherStreet}" type="text" styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                     <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">City</label>
+                                        <apex:inputField value="{!ContactToEdit.OtherCity}" type="text" styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                    </div>
+                                    <div class="row">
+                                     <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">State</label>
+                                        <apex:inputField value="{!ContactToEdit.OtherState}" type="text" styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                     <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Zip Code</label>
+                                        <apex:inputField value="{!ContactToEdit.OtherPostalCode}" type="text" styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                    <div class="col-sm-12 form-group">
+                                        <label for="lastNameInput">Name of Parent at Separate Address (if applicable)</label>
+                                        <apex:inputField value="{!ContactToEdit.Other_Parent_Name1__c}" type="text" styleClass="form-control"/>
+                                    </div>
+                                     <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Other Parent Email</label>
+                                        <apex:inputField value="{!ContactToEdit.Other_Parent_Email1__c}" type="text" styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                    <div class="col-sm-6 form-group">
+                                        <label for="lastNameInput">Other Parent Phone</label>
+                                        <apex:inputField value="{!ContactToEdit.Other_Parent_Phone1__c}" type="text" styleClass="form-control" html-placeholder=""/>
+                                    </div>
+                                </div>
+
+                                <hr/>
+
+                                <apex:outputPanel rendered="{!if(ContactToEdit.Age__c<19,true,false)}" >
+
+                                    <div class="row">
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Doctor's Name</label>
+                                            <apex:inputField value="{!ContactToEdit.Doctor_s_Name__c}" type="text"
+                                                             styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Phone</label>
+                                            <apex:inputField value="{!ContactToEdit.Doctor_s_Phone__c}" type="text"
+                                                             styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                         <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Dentist's Name</label>
+                                            <apex:inputField value="{!ContactToEdit.Dentist__c}" type="text"
+                                                             styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Phone</label>
+                                            <apex:inputField value="{!ContactToEdit.Dentist_s_Phone__c}" type="text"
+                                                             styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                    </div>
+                                    <hr/>
+
+                                    <div class="row">
+                                        <div class="col-sm-12 form-group">
+                                            <label for="lastNameInput">Emergency Contact 1</label>
+                                            <apex:inputField value="{!ContactToEdit.Emergency_Contact_1__c}" type="text"
+                                                             styleClass="form-control"/>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Relationship</label>
+                                            <apex:inputField value="{!ContactToEdit.Emergency_Contact_1_Relationship__c}"
+                                                             type="text" styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Phone</label>
+                                            <apex:inputField value="{!ContactToEdit.Emergency_Contact_1_Phone__c}" type="text"
+                                                             styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                    </div>
+                                    <hr/>
+
+                                    <div class="row">
+                                        <div class="col-sm-12 form-group">
+                                            <label for="lastNameInput">Emergency Contact 2</label>
+                                            <apex:inputField value="{!ContactToEdit.Emergency_Contact_2__c}" type="text"
+                                                             styleClass="form-control"/>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Relationship</label>
+                                            <apex:inputField value="{!ContactToEdit.Emergency_Contact_2_Relationship__c}"
+                                                             type="text" styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+                                            <label for="lastNameInput">Phone</label>
+                                            <apex:inputField value="{!ContactToEdit.Emergency_Contact_2_Phone__c}" type="text"
+                                                             styleClass="form-control" html-placeholder=""/>
+                                        </div>
+                                    </div>
+
+                                </apex:outputPanel>
+
+                                <div class="row">
+
+                                    <h2>College | University Information</h2>
+                                    <hr/>
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>
+                                                College/University Name
+                                            </th>
+                                            <th>
+                                                Grade Level
+                                            </th>
+                                            <th>
+                                                Major
+                                            </th>
+                                            <th>
+                                                Start Date
+                                            </th>
+                                            <th>
+                                                End Date
+                                            </th>
+                                            <th>
+
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <apex:repeat value="{!contactColleges}" var="c" id="theRepeat">
+                                            <tr>
+                                                <td><apex:outputField value="{!c.College_University__c}"/></td>
+                                                <td><apex:outputField value="{!c.Grade_Level__c}"/></td>
+                                                <td><apex:outputField value="{!c.Major__c}"/></td>
+                                                <td><apex:outputField value="{!c.Start_Date__c}"/></td>
+                                                <td><apex:outputField value="{!c.End_Date__c}"/></td>
+                                                <td>
+                                                    <apex:commandButton value="Edit" styleClass="btn wiseBtn" action="{!EditCollegeUniversity}" reRender="theRepeat" onComplete="location.reload()">
+                                                        <apex:param value="{!c.Id}" assignTo="{!CollegeUniversityIdToDelete}" name="param1"/>
+                                                    </apex:commandButton>&nbsp;&nbsp;
+                                                    <apex:commandButton value="Remove" styleClass="btn wiseBtn" action="{!RemoveCollegeUniversity}" reRender="theRepeat" onComplete="location.reload()">
+                                                        <apex:param value="{!c.Id}" assignTo="{!CollegeUniversityIdToDelete}" name="param1"/>
+                                                    </apex:commandButton>
+                                                </td>
+                                            </tr>
+                                        </apex:repeat>
+                                        </tbody>
+                                    </table>
+                                    <div>
+                                        <apex:commandButton style="margin-top:10px;margin-bottom:10px;" value="Add New" styleClass="btn wiseBtn" action="{!AddNewCollege}"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 text-center">
+                                        <apex:commandButton value="Save & Continue"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                        <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_MyFamilyInformation)}" styleClass="cancelBtn btn "/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                                <div class="sidebar-nav">
+                                    <c:CongrComm_LeftHandNav />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </apex:form>
+            </apex:outputPanel>
+            <!-- END RENDER CHILD FORM LAYOUT -->
+
+            <script>
+
+                // Map [Enter] key to work like the [Tab] key
+                // Catch the keydown for the entire document
+                $(document).keydown(function(e) {
+
+                    // Set self as the current item in focus
+                    var self = $(':focus'),
+                            // Set the form by the current item in focus
+                            form = self.parents('form:eq(0)'),
+                            focusable;
+
+                    // Array of Indexable/Tab-able items
+                    focusable = form.find('input,a,select,button,textarea,div[contenteditable=true]').filter(':visible');
+
+                    function enterKey(){
+                        if (e.which === 13 && !self.is('textarea,div,a[contenteditable=true]')) { // [Enter] key
+
+                            // If not a regular hyperlink/button/textarea
+                            if ($.inArray(self, focusable) && (!self.is('a,button'))){
+                                // Then prevent the default [Enter] key behaviour from submitting the form
+                                e.preventDefault();
+                            } // Otherwise follow the link/button as by design, or put new line in textarea
+                            e.preventDefault();
+                            // Focus on the next item (either previous or next depending on shift)
+                            focusable.eq(focusable.index(self) + (e.shiftKey ? -1 : 1)).focus();
+
+                            return false;
+                        }
+                    }
+                    // We need to capture the [Shift] key and check the [Enter] key either way.
+                    if (e.shiftKey) { enterKey() } else { enterKey() }
+                });
+
+            </script>
+            <apex:stylesheet value="{!URLFOR($Resource.DatePicker, '/datepicker/css/datepicker.css')}"/>
+            
+            <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+            <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+            <apex:includeScript value="{!URLFOR($Resource.DatePicker, '/datepicker/js/bootstrap-datepicker.js')}"/>
+        </apex:define>
+    </apex:composition>
+</apex:page>

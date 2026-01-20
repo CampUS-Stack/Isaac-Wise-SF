@@ -1,0 +1,43 @@
+<!--
+ - Created by cgibs on 5/7/2018.
+ -->
+
+<apex:page id="ExportPaymentPreview" controller="ExportController">
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Deposit ID" />
+                    <apex:selectList value="{!SelectedDepositId}" multiSelect="false" size="1" onchange="RunSearch();">
+                        <apex:selectOptions value="{!DepositIds}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Total Selected" />
+                    <apex:outputText id="totalPaymentSelected" value="{!TotalPaymentAmountSelected}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="theBlock" columns="1" rendered="{!NumberOfUnTransferredPayments > 0}">
+                <apex:commandButton value="Export Payments" action="{!GoToExportPaymentPage}" />
+                <apex:pageBlockTable value="{!PaymentWrappers}" var="payWrap">
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:commandLink value="Select All" action="{!SelectAllPayments}"/>
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!payWrap.IsSelected}">
+                            <apex:actionSupport event="onchange" reRender="totalPaymentSelected" />
+                        </apex:inputCheckbox>
+                    </apex:column>
+                    <apex:column value="{!payWrap.Payment.Name}"/>
+                    <apex:column value="{!payWrap.Payment.Deposit_ID__c}"/>
+                    <apex:column value="{!payWrap.Payment.Household__r.Name}"/>
+                    <apex:column value="{!payWrap.Payment.Status__c}"/>
+                    <apex:column value="{!payWrap.Payment.Amount__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <apex:outputLabel value="There are no payments to export at this time. Please summarize some payments and come back to this page." rendered="{!NumberOfUnTransferredPayments == 0}" />
+
+            <apex:actionFunction action="{!SearchForPayments}" name="RunSearch" />
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

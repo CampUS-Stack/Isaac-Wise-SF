@@ -1,0 +1,879 @@
+<!--
+- Created by Chris Home Laptop on 9/26/2018.
+-->
+
+<apex:page controller="CongrComm_EventPageController"
+           id="CongrComm_EventPage"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0" action="{!onLoad}">
+
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+
+    <style>
+
+        div[id$='_selected_hint'] {
+            display: none;
+        }
+
+        div[id$='_unselected_hint'] {
+            display: none;
+        }
+
+    </style> 
+    <apex:stylesheet value="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css"/>
+
+    <style>
+        /*.messageCell {*/
+        /*border: 1px solid black;*/
+        /*border-radius: 5px;*/
+        /*margin-left: 5%;*/
+        /*background-color: #EEE;*/
+        /*padding-left: 20px;*/
+        /*padding-right: 20px;*/
+        /*padding-bottom: 20px;*/
+        /*padding-top: 10px;*/
+        /*}*/
+        .cancelBtn {
+            background-color: white;
+            color: #c24c39;
+            margin-left: 10px;
+        }
+
+        .card {
+            position: relative;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .25rem;
+        }
+
+        .card-body {
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .phoneScreenPadding {
+                margin-top: 15px;
+            }
+        }
+
+        .custom-error {
+            color: #fff;
+            background-color: #c24c39;
+        }
+
+    </style>
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <apex:actionFunction name="RemoveSelectedParticipantAF" action="{!RemoveSelectedParticipant}"
+                                     reRender="theForm">
+                    <apex:param name="nameToRemove" assignTo="{!RegistrantNameToRemove}" value=""/>
+                </apex:actionFunction>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Event - {!theEvent.Name}
+                            </h2>
+                            <apex:outputPanel id="errorMessage" rendered="{!hasErrors}">
+                                <div class="alert alert-danger" role="alert">
+                                    <apex:messages />
+                                </div>
+                            </apex:outputPanel>
+                            
+
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstName"></label>
+                                    <br/>
+                                    <apex:outputField value="{!theEvent.Event_Date_Start__c}" />
+                                    <!--<apex:outputText value="{0, date, MMMM d','  yyyy}">-->
+                                        <!--<apex:param value="{!theEvent.Event_Date_Start__c}"/>-->
+                                    <!--</apex:outputText>-->
+                                </div>
+
+                                <div class="col-sm-6 form-group">
+                                    <label for="firstName"></label>
+                                    <br/>
+                                    <apex:outputText escape="false" value="{!theEvent.Description__c}"/>
+                                </div>
+
+                            </div>
+
+                            <br/>
+                            <div class="text-center">
+                                <div class="row" style="margin-bottom:15px;">
+                                    <div class="col-sm-9">
+                                        <button type="button" class="btn wiseBtn" data-toggle="modal"
+                                                data-target="#myModal">
+                                            Register Now
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <br/>
+
+                            <apex:outputPanel rendered="{!NumberOfAllRegistrants > 0}">
+
+                                <apex:outputPanel id="allRegistrantTables" rendered="{!NumberOfAllRegistrants > 0}">
+                                    <div class="row">
+                                        <div class="col-sm-12 form-group">
+                                            <table class="table">
+                                                <apex:outputPanel rendered="{!NumberOfSelectedFamily > 0}">
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Name</th>
+                                                        <th>Ticket Type</th>
+                                                        <th>Price</th>
+                                                    </tr>
+                                                    <apex:repeat id="selectedFamilyTable"
+                                                                 value="{!SelectedFamilyMembers}"
+                                                                 var="fam">
+                                                        <tr>
+                                                            <td>
+                                                                <apex:commandLink action="{!RemoveSelectedParticipant}">
+                                                                    <!-- <apex:commandLink action="{!RemoveSelectedParticipant}" reRender="allRegistrantTables" onclick="removeRegistrantName('{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}'); return false;" > -->
+                                                                    <apex:param value="{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}"
+                                                                            assignTo="{!RegistrantNameToRemove}"
+                                                                            name="theVar"/>
+                                                                    <apex:param value="{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}"
+                                                                            assignTo="{!RegistrantNameToRemove}"
+                                                                            name="RegistrantNameToRemove"/>
+                                                                    <span style="color:#c24c39;"
+                                                                          class="glyphicon glyphicon-remove"
+                                                                          aria-hidden="true"></span>
+                                                                </apex:commandLink>
+                                                            </td>
+                                                            <td>{!fam.TheContact.FirstName} {!fam.TheContact.LastName}
+                                                            </td>
+                                                            <td>{!fam.TicketType}</td>
+                                                            <td>
+                                                                <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                                    <apex:param value="{!fam.Price}"/>
+                                                                </apex:outputText>
+                                                            </td>
+                                                        </tr>
+                                                    </apex:repeat>
+                                                </apex:outputPanel>
+                                                <apex:outputPanel rendered="{!NumberOfSelectedAdditionalRegistrants > 0}">
+                                                    <apex:repeat id="selectedRegistrantTable"
+                                                                 value="{!SelectedAdditionalRegistrants}" var="fam">
+                                                        <tr>
+                                                            <td>
+
+                                                                <apex:commandLink action="{!RemoveSelectedParticipant}">
+                                                                    <!-- <apex:param value="{!fam.TheContact.Name}" assignTo="{!RegistrantNameToRemove}" name="theVar"/> -->
+                                                                    <apex:param value="{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}"
+                                                                            assignTo="{!RegistrantNameToRemove}"
+                                                                            name="RegistrantNameToRemove"/>
+
+                                                                    <span style="color:#c24c39;"
+                                                                          class="glyphicon glyphicon-remove"
+                                                                          aria-hidden="true"></span>
+                                                                </apex:commandLink>
+                                                            </td>
+                                                            <td>{!fam.TheContact.Name}</td>
+                                                            <td>{!fam.TicketType}</td>
+                                                            <td>
+                                                                <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                                    <apex:param value="{!fam.Price}"/>
+                                                                </apex:outputText>
+                                                            </td>
+                                                        </tr>
+                                                    </apex:repeat>
+                                                </apex:outputPanel>
+                                                <apex:outputPanel rendered="{!NumberOfSelectedGuestRegistrants > 0}"
+                                                                  id="selectedGuestRegistrantTableOP">
+                                                    <apex:repeat id="selectedGuestRegistrantTable"
+                                                                 value="{!SelectedGuestRegistrants}" var="fam">
+                                                        <tr>
+                                                            <td>
+                                                                <apex:commandLink action="{!RemoveSelectedParticipant}">
+                                                                    <!-- <apex:commandLink value="X" onclick="removeRegistrantName('{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}'); return false;" title="X"> -->
+                                                                    <apex:param value="{!fam.TheContact.FirstName+' '+fam.TheContact.LastName}"
+                                                                            assignTo="{!RegistrantNameToRemove}"
+                                                                            name="RegistrantNameToRemove"/>
+                                                                    <span style="color:#c24c39;"
+                                                                          class="glyphicon glyphicon-remove"
+                                                                          aria-hidden="true"></span>
+                                                                </apex:commandLink>
+                                                            </td>
+                                                            <td>
+                                                                <apex:outputText value="{!fam.TheContact.FirstName + ' ' + fam.TheContact.LastName} "></apex:outputText>
+                                                            </td>
+                                                            <td>
+                                                                <apex:outputText value="{!fam.TicketType}"></apex:outputText>
+                                                            </td>
+                                                            <td>
+                                                                <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                                    <apex:param value="{!fam.Price}"/>
+                                                                </apex:outputText>
+                                                            </td>
+                                                        </tr>
+                                                    </apex:repeat>
+                                                </apex:outputPanel>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>Total</td>
+                                                    <td>
+                                                        <apex:outputText value="{0, number, $ ###,##0.00}">
+                                                            <apex:param value="{!TotalPrice}"/>
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                </apex:outputPanel>
+
+                                <apex:outputPanel rendered="{!NumberOfAllRegistrants == 0}">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <hr/>
+
+                                            <p class="mute">
+                                                No Member is selected.
+                                            </p>
+                                            <hr/>
+                                            <br/>
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+
+
+                                <div class="text-center">
+                                    <div class="row" style="margin-bottom:15px;">
+                                        <div class="col-sm-5">
+                                            <button type="button" class="btn wiseBtn" data-toggle="modal"
+                                                    data-target="#mySearchModal">Add Temple Members
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <button type="button" class="btn wiseBtn" data-toggle="modal"
+                                                    data-target="#guestRegistrantModal">Add Non-member Guests
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br/>
+
+                                <div class="row">
+                                </div>
+ 
+                                <apex:repeat var="qaw" value="{!listOfQuestionWrapper}">
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label class=" font-weight-bold"
+                                                   for="{!qaw.ques.Id}">
+                                                {!qaw.ques.Question__c}
+                                                <span style="color: red;">
+                                                    {!IF(qaw.ques.Required__c, ' *', '')}
+                                                </span>
+                                            </label>
+                                            <!-- <input type="text" class="form-control" id="{!ques.Id}" placeholder="{!ques.Question__c}"/> -->
+                                            <apex:input style="display: {!IF(qaw.ques.RecordType.Name == 'Picklist', '', 'block')}"
+                                                    styleClass="form-control ti_{!qaw.ques.Id} {!IF(qaw.ques.RecordType.Name == 'Picklist', ' picklist-Text', '')}" required="{!IF(qaw.ques.Required__c, 'true', 'false')}" value="{!qaw.ans}"/>
+                                            <div class="row">
+                                                <apex:repeat var="cbValue" value="{!qaw.pickListValues}"
+                                                             rendered="{!IF(qaw.ques.RecordType.Name == 'Picklist', true, false)}">
+                                                    <div class="form-check col-md-6 ">
+                                                        <label>
+                                                            <input type="{!IF(qaw.ques.Allow_Multiple_Choice__c, 'checkbox', 'radio')}"
+                                                                   class="cb_{!qaw.ques.Id}" name="check"
+                                                                   data-cbvalue="{!cbValue}"
+                                                                   onclick="handlecheckbox('{!qaw.ques.Id}')"/> <span
+                                                                class="label-text">{!cbValue}</span>
+                                                        </label>
+                                                    </div>
+                                                </apex:repeat>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </apex:repeat>
+
+                                <div class="row">
+                                    <div class="col-md-12 form-group">
+                                        <label for="comments">Comments</label>
+                                        <apex:inputTextArea value="{!Comments}" styleClass="form-control"
+                                                            id="comments"/>
+                                    </div>
+                                </div>
+
+                                <apex:outputPanel rendered="{!theEvent.Paid_Event__c}">
+                                    <div class="row">
+                                        <div class="col-sm-6 form-group">
+                                            <label for="HouseholdNameInput">Select a Method of Payment</label><br/>
+                                            <apex:selectList styleClass="form-control" size="1"
+                                                             value="{!selectedPaymentMethod}">
+                                                <apex:selectOptions value="{! paymentOptions }"/>
+                                            </apex:selectList>
+                                            <p>
+                                                
+                                            </p>
+                                        </div>
+                                        <div class="col-sm-6 form-group">
+
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+
+                                <div class="row">
+                                </div>
+
+                                <div class="text-center">
+                                    <apex:commandButton rendered="{!theEvent.Paid_Event__c}" value="Make Payment"
+                                                        action="{!save}" styleClass="btn wiseBtn"/>
+                                    <apex:commandButton rendered="{!NOT(theEvent.Paid_Event__c)}"
+                                                        value="Complete Registration" action="{!saveNonPaidEvent}"
+                                                        styleClass="btn wiseBtn"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="btn cancelBtn"/>
+                                </div>
+
+                            </apex:outputPanel>
+
+                        </div>
+
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-------------------------------   ADD FAMILY MODAL WINDOW   -------------------------->
+
+                    <div class="modal fade" id="myModal" role="dialog">
+                        <div class="modal-dialog">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Register Family Members</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <apex:repeat value="{!HouseholdFamilyMembers}" var="fam">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-4 col-xs-12" style="padding-top:10px">
+                                                        <h4><b>{!fam.TheContact.Name}</b></h4>
+                                                    </div>
+                                                    <div class="col-sm-8 col-xs-12" style="padding-top:10px">
+                                                        <apex:selectList rendered="{!theEvent.Paid_Event__c}"
+                                                                         label="Ticket Type:"
+                                                                         html-placeholder="Select A Value"
+                                                                         multiSelect="false" size="1"
+                                                                         styleClass="form-control"
+                                                                         value="{!fam.SelectedTicketType}">
+                                                            <apex:selectOptions value="{!PricingOptions}"/>
+                                                        </apex:selectList>
+                                                        <apex:selectList rendered="{!NOT(theEvent.Paid_Event__c)}"
+                                                                         label="Ticket Type:"
+                                                                         html-placeholder="Select A Value"
+                                                                         multiSelect="false" size="1"
+                                                                         styleClass="form-control"
+                                                                         value="{!fam.SelectedTicketType}">
+                                                            <apex:selectOptions value="{!TicketOptions}"/>
+                                                        </apex:selectList>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                    </apex:repeat>
+                                    <div class="text-center">
+                                 <p>To register additional people beyond your immediate family, click “Continue” and you will see options to add temple members and guests. </p>
+                                    </div>
+                                    
+                                    <div class="col-sm-12 text-right">
+                                    </div>
+                                    <br/>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default cancelBtn" data-dismiss="modal">Back
+                                    </button>
+                                    <apex:commandButton styleClass="btn btn-default wiseBtn" value="Continue"
+                                                        action="{!SelectFamilyMembers}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-------------------------------   ADD TEMPLE MEMBERS MODAL WINDOW   -------------------------->
+
+                    <div class="modal fade" id="mySearchModal" role="dialog">
+                        <apex:outputPanel id="allView">
+                            <apex:outputPanel id="additionalModal" rendered="{!NOT(DisplayAdditionalFinalize)}">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">Search for Temple Members</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Added by Kritik -->
+                                            <apex:outputPanel id="error2">
+                                                <apex:messages layout="block"
+                                                               styleClass="alert alert-danger errors custom-error"
+                                                               style="list-style-type: none;">
+                                                </apex:messages>
+                                            </apex:outputPanel>
+                                            <div class="row" style="margin-bottom:20px;">
+                                                <div class="col-sm-4">
+                                                    <apex:input value="{!FirstName}" html-placeholder="First Name"
+                                                                type="text" styleClass="form-control"/>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <apex:input value="{!LastName}" html-placeholder="Last Name"
+                                                                type="text" styleClass="form-control"/>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <label>&nbsp;</label>
+                                                    <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                        value="Search" action="{!SearchForRegistrants}"
+                                                                        reRender="allView"/>
+                                                </div>
+                                            </div>
+                                            <apex:outputPanel rendered="{!NumberOfMemberRegistrants > 0 && MemberSearchRan}">
+                                                <div class="row">
+                                                    <div class="col-sm-12 form-group">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Ticket</th>
+                                                            </tr>
+                                                            <apex:repeat value="{!TheAdditionalRegistrants}" var="reg">
+                                                                <tr>
+                                                                    <td>
+                                                                        <p><b>{!reg.TheContact.Name}</b></p>
+                                                                    </td>
+                                                                    <td>
+                                                                        <apex:selectList rendered="{!theEvent.Paid_Event__c}"
+                                                                                label="Ticket Type:"
+                                                                                html-placeholder="Select A Value"
+                                                                                multiSelect="false" size="1"
+                                                                                styleClass="form-control"
+                                                                                value="{!reg.SelectedTicketType}">
+                                                                            <apex:selectOptions value="{!PricingOptions}"/>
+                                                                        </apex:selectList>
+                                                                        <apex:selectList rendered="{!NOT(theEvent.Paid_Event__c)}"
+                                                                                label="Ticket Type:"
+                                                                                html-placeholder="Select A Value"
+                                                                                multiSelect="false" size="1"
+                                                                                styleClass="form-control"
+                                                                                value="{!reg.SelectedTicketType}">
+                                                                            <apex:selectOptions value="{!TicketOptions}"/>
+                                                                        </apex:selectList>
+                                                                    </td>
+                                                                </tr>
+                                                            </apex:repeat>
+                                                            <tr>
+                                                                <td>
+                                                                    <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                            action="{!LoadMoreAdditionalRegistrantSearchResults}"
+                                                                            reRender="additionalModal"
+                                                                            value="Load More"/>
+                                                                </td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel id="selectedRegistrantDisplayAreaError"
+                                                              rendered="{!NumberOfMemberRegistrants == 0 && MemberSearchRan}">
+                                                <div class="row">
+                                                    No Temple members matched your search. Try searching for just first
+                                                    name or last name.
+                                                </div>
+                                            </apex:outputPanel>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default cancelBtn"
+                                                    data-dismiss="modal">Back
+                                            </button>
+                                            <apex:commandButton styleClass="btn btn-default wiseBtn" value="Register"
+                                                                action="{!GoToFinalizeAdditionalRegistrant}"
+                                                                reRender="allView,error2"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                            <apex:outputPanel id="selectedModal" rendered="{!DisplayAdditionalFinalize}">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">Search for Registrant</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row" style="margin-bottom:20px;">
+                                                <div class="col-sm-4">
+                                                    <apex:input value="{!FirstName}" html-placeholder="First Name"
+                                                                type="text" styleClass="form-control"/>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <apex:input value="{!LastName}" html-placeholder="Last Name"
+                                                                type="text" styleClass="form-control"/>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <label>&nbsp;</label>
+                                                    <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                        value="Search" action="{!SearchForRegistrants}"
+                                                                        reRender="selectedModal,allView"/>
+                                                </div>
+                                            </div>
+                                            <apex:outputPanel id="selectedRegistrantDisplayArea"
+                                                              rendered="{!NumberOfSelectedAdditionalRegistrants > 0}">
+                                                <div class="row">
+                                                    <div class="col-sm-12 form-group">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Ticket Type</th>
+                                                            </tr>
+                                                            <apex:repeat id="selectedRegistrantsTable"
+                                                                         value="{!SelectedAdditionalRegistrants}"
+                                                                         var="reg">
+                                                                <tr>
+                                                                    <td>
+                                                                        <p><b>{!reg.TheContact.Name}</b></p>
+                                                                    </td>
+                                                                    <td>{!reg.TicketType}</td>
+                                                                </tr>
+                                                            </apex:repeat>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </apex:outputPanel>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <apex:commandButton styleClass="btn btn-default cancelBtn" value="Back"
+                                                                action="{!GoBackToAdditionalRegistrantSearch}"
+                                                                reRender="allView"/>
+                                            <!--<button type="button" class="btn btn-default wiseBtn" data-dismiss="modal">Close</button>-->
+                                            <apex:commandButton rendered="{!NumberOfSelectedAdditionalRegistrants > 0}"
+                                                                styleClass="btn btn-default wiseBtn" value="Register"
+                                                                action="{!AddSelectedAdditionalRegistrants}"/>
+                                            <!--<button type="button" class="btn btn-default cancelBtn"-->
+                                            <!--data-dismiss="modal">Back-->
+                                            <!--</button>-->
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                    </div>
+
+                    <!-------------------------------   GUEST MODAL WINDOW   -------------------------->
+
+                    <div class="modal fade" id="guestRegistrantModal" role="dialog">
+                        <apex:outputPanel id="guestRegistrantModalPanel">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Enter Guest Info</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Added by Kritik -->
+                                        <apex:outputPanel id="error">
+                                            <apex:messages layout="block"
+                                                           styleClass="alert alert-danger errors custom-error"
+                                                           style="list-style-type: none;">
+                                            </apex:messages>
+                                        </apex:outputPanel>
+
+                                        <div class="row" style="margin-bottom:20px;">
+                                            <div class="col-sm-6">
+                                                <apex:input value="{!GuestFirstName}" html-placeholder="First Name"
+                                                            type="text" styleClass="form-control"/>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <apex:input value="{!GuestLastName}" html-placeholder="Last Name"
+                                                            type="text" styleClass="form-control"/>
+                                            </div>
+                                            <div class="col-sm-6" style="margin-top:10px;">
+                                                <apex:input value="{!GuestEmail}" html-placeholder="Email"
+                                                            type="text" styleClass="form-control"/>
+                                            </div>
+                                            <div class="col-sm-6" style="margin-top:10px;">
+
+                                                <apex:selectList rendered="{!theEvent.Paid_Event__c}"
+                                                                 label="Ticket Type:"
+                                                                 html-placeholder="Select A Value"
+                                                                 multiSelect="false" size="1"
+                                                                 styleClass="form-control"
+                                                                 value="{!GuestTicketType}">
+                                                    <apex:selectOptions value="{!PricingOptions}"/>
+                                                </apex:selectList>
+                                                <apex:selectList rendered="{!NOT(theEvent.Paid_Event__c)}"
+                                                                 label="Ticket Type:"
+                                                                 html-placeholder="Select A Value"
+                                                                 multiSelect="false" size="1"
+                                                                 styleClass="form-control"
+                                                                 value="{!GuestTicketType}">
+                                                    <apex:selectOptions value="{!TicketOptions}"/>
+                                                </apex:selectList>
+                                            </div>
+                                            <div class="col-sm-6" style="margin-top:10px;">
+                                                <label>&nbsp;</label>
+                                                <apex:commandButton styleClass="btn btn-default wiseBtn"
+                                                                    value="Add This Guest"
+                                                                    reRender="guestRegistrantModalPanel"
+                                                                    action="{!AddGuestRegistrant}"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <apex:outputPanel id="selectedGuestRegistrantDisplayArea"
+                                                          rendered="{!NumberOfGuestRegistrants > 0}">
+                                            <div class="row">
+                                                <div class="col-sm-12 form-group">
+                                                    <table class="table">
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Price</th>
+                                                        </tr>
+                                                        <apex:repeat id="selectedGuestRegistrantsTable"
+                                                                     value="{!GuestRegistrants}"
+                                                                     var="reg">
+                                                            <tr>
+                                                                <td>
+                                                                    <p><b>{!reg.FirstName + ' ' + reg.LastName}</b></p>
+                                                                </td>
+                                                                <td>$&nbsp;{!reg.Price}</td>
+                                                            </tr>
+                                                        </apex:repeat>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </apex:outputPanel>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default cancelBtn"
+                                                data-dismiss="modal">Back
+                                        </button>
+                                        <apex:commandButton styleClass="btn btn-default wiseBtn" value="Register"
+                                                            disabled="{!disableRegBtn}"
+                                                            action="{!RegisterGuestRegistrants}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </apex:outputPanel>
+                    </div>
+
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+
+    <script>
+        var $j = jQuery.noConflict();
+        $j(document).ready(function () {
+            $j(' tr.multiSelectPicklistRow td').hide()
+            var col = 1;
+            var x;
+            $j('.multiSelectPicklistRow').each(function (i, val) {
+
+                var unselectedValues = [];
+                var selectedValues = [];
+                var element = '';
+                $j(this).wrap('<div id= "wrapId' + col + '" ></div>');
+
+                element = element + '<select data-id= "wrapId' + col + '" class="selectpicker" multiple="true">';
+
+                $j($j(this).find('select:nth-child(1)')[1]).find('option').each(function () {
+                    selectedValues.push($j(this));
+                    console.log(selectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' selected="true"> ' + $j(this).text() + '</option>';
+                })
+
+                $j($j(this).find('select:nth-child(1)')[0]).find('option').each(function () {
+                    unselectedValues.push($j(this));
+                    console.log(unselectedValues);
+                    element = element + '<option data-v= ' + $j(this).attr('value') + ' > ' + $j(this).text() + '</option>';
+                })
+
+                element = element + ' </select>';
+
+                $j(this).append(element);
+
+                col = col + 1;
+            });
+
+            $j('.selectpicker').on('changed.bs.select', function (e, a, b, c) {
+                var tmp = e.target.options[a].text
+
+                selectValue(e.currentTarget.getAttribute('data-id'), $j(e.target.options[a]).attr('data-v'));
+
+            });
+
+            function selectValue(id, value) {
+
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+                $j('#' + id + ' option[value=' + value + ']').trigger('dblclick')
+
+            }
+
+            function unselectValue(id, value) {
+                console.log($j('#' + id + ' optgroup[label="Chosen"] option[value=' + value + ']'))
+                $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+            }
+
+            $j(document).on('keyup keypress', function (e) {
+                var keyCode = e.keyCode || e.which;
+                console.log(e)
+                //alert('Enter pressed');
+                if (keyCode === 13 && e.target.nodeName != 'TEXTAREA') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+        });
+
+        function handlecheckbox(qid) {
+            var cbId = '.cb_' + qid;
+            var tiId = '.ti_' + qid;
+            //console.log($(cbId));
+            var text = '';
+            var cbData = $j(cbId);
+            var i;
+            for (i = 0; i < cbData.length; i++) {
+                if (cbData[i].checked) {
+                    text += $j(cbData[i]).data('cbvalue') + ";";
+                }
+            }
+            console.log(text);
+            $j(tiId).val(text);
+        }
+
+        function performValidation() {
+            return false;
+        }
+
+        function removeRegistrantName(nametoremove) {
+            console.log(nametoremove);
+            RemoveSelectedParticipantAF(nametoremove);
+        }
+
+    </script>
+    <style>
+
+        label .checkbox {
+            position: relative;
+            cursor: pointer;
+            color: #666;
+            font-size: 30px;
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            position: absolute;
+            right: 9000px;
+        }
+
+        /*Check box*/
+        input[type="checkbox"] + .label-text:before {
+            content: "\f096";
+            font-family: "FontAwesome";
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            width: 1em;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        input[type="checkbox"]:checked + .label-text:before {
+            content: "\f14a";
+            color: #c24c39;
+            animation: effect 250ms ease-in;
+        }
+
+        input[type="checkbox"]:disabled + .label-text {
+            color: #aaa;
+        }
+
+        input[type="checkbox"]:disabled + .label-text:before {
+            content: "\f0c8";
+            color: #ccc;
+        }
+
+        input[type="radio"] + .label-text:before {
+            content: "\f10c";
+            font-family: "FontAwesome";
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            width: 1em;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        input[type="radio"]:checked + .label-text:before {
+            content: "\f192";
+            color: #c24c39;
+            animation: effect 250ms ease-in;
+        }
+
+        input[type="radio"]:disabled + .label-text {
+            color: #aaa;
+        }
+
+        input[type="radio"]:disabled + .label-text:before {
+            content: "\f111";
+            color: #ccc;
+        }
+
+        .picklist-Text{
+            height: 1px;
+            width: 1px;
+            border: none;
+            display: inline;
+            padding: 0px;
+            color: #f0f8ff00;
+            box-shadow: none;
+        }
+
+    </style>
+
+    <!--<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet"></link>-->
+    <!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
+</apex:page>

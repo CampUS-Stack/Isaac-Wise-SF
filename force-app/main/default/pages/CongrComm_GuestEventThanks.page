@@ -1,0 +1,22 @@
+<!--
+ - Created by UD Office Chris on 1/9/2019.
+ -->
+
+<apex:page id="CongrComm_GuestEventThanks" showHeader="false" sideBar="false" docType="html-5.0" standardStylesheets="false" applyBodyTag="true" >
+
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <br/>
+                            <center><h2><em>Thank you for registering. If this is a paid event, you will receive payment confirmation via email.</em></h2></center>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,101 @@
+<!--
+- Created by Chris Home Desktop on 5/15/2018.
+ -->
+
+<apex:page controller="CongrComm_VolunteerEditController" 
+           id="CongrComm_VolunteerEdit" 
+           showHeader="false" 
+           applyBodyTag="false" 
+           sidebar="false" 
+           standardStylesheets="false" 
+           docType="html-5.0">
+    <style>
+        .messageCell {
+            border: 1px solid black;
+            border-radius: 5px;
+            margin-left: 5%;
+            background-color: #EEE;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
+            padding-top: 10px;
+        }
+        .cancelBtn {
+            background-color: white;
+            color: #c24c39;
+            margin-left: 10px;
+        }
+    </style>
+    <script>
+    $( document ).ready(function() {
+        
+        $( function() {
+            $( ".datepicker" ).datepicker({
+                format: 'm/d/yyyy'  
+            });
+        } );
+        
+    });
+    </script>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Other Volunteer Leadership
+                            </h2>
+                            <h4 class="title">Editing for {!theContact.FirstName} {!theContact.LastName}</h4><br/>
+                            <h4>Consider Boards you have served on and leadership roles you have played</h4><br/>
+                                <p>(i.e.-Cincinnati Ballet...Board Treasurer...Start Year...End Year)</p><br/>
+                            <div class="messageCell" style="display: {!if(isSuccess = true, 'block', 'none')}">
+                                Update was successful.
+                            </div>
+                            <apex:pageMessages /><br/>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="organizationInput">Organization</label>
+                                    <apex:inputField value="{!theVolunteerism.Organization__c}"  type="text" styleClass="form-control" id="organizationInput" taborderhint="1" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="startDateInput">Start Year</label>
+                                    <apex:inputField value="{!theVolunteerism.Year_Started__c}" label="Start Date" styleClass="form-control"
+                                    id="startDateInput" taborderhint="3"/>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="roleInput">Role</label>
+                                    <apex:inputField value="{!theVolunteerism.Role__c}" label="Start Date" styleClass="form-control" id="roleInput" taborderhint="2"/>
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="endDateInput">End Year</label>
+                                    <apex:inputField value="{!theVolunteerism.Year_Ended__c}" label="End Date" styleClass="form-control" html-placeholder="leave blank if ongoing"
+                                     
+                                     id="endDateInput" taborderhint="4" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                            </div>
+                            <div>
+                                <apex:commandButton value="Save" action="{!save}" styleClass="btn wiseBtn"/>&nbsp;&nbsp;
+                                <apex:commandButton value="Save & Add Another" action="{!saveAndAddAnother}" styleClass="btn wiseBtn"/>&nbsp;&nbsp;
+                                <apex:commandButton value="Cancel" action="{!cancel}" styleClass="btn cancelBtn"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+            <apex:stylesheet value="{!URLFOR($Resource.DatePicker, '/datepicker/css/datepicker.css')}"/>            
+            <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+            <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+            <apex:includeScript value="{!URLFOR($Resource.DatePicker, '/datepicker/js/bootstrap-datepicker.js')}"/>
+        </apex:define>
+    </apex:composition>
+</apex:page>

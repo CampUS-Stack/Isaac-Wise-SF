@@ -1,0 +1,82 @@
+<apex:page controller="CongrComm_ClassesController"
+           id="CongrComm_Classes"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2 class="title">
+                                Class Assignments
+                            </h2>
+                            <p>
+                                for the {!theFamily.Name} 
+                            </p>
+                            
+                            <h4>Class assignments will be posted here the week before Kehillah starts.</h4>
+                                                                
+                                 
+                                 <p>If you have questions, please contact Courtney Anthony at 513.538.0373 or canthony@wisetemple.org.</p>
+                            
+                            <apex:repeat value="{!classWrapperList}" var="c" id="studentRepeat">
+                                <h3 class="title">
+                                    <apex:outputField value="{!c.theStudent.FirstName}"/>&nbsp;<apex:outputField value="{!c.theStudent.LastName}"/>
+                                </h3>
+                                <div style="display: {!if(hasStudents, 'block', 'none')};">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>
+                                                Class Name
+                                            </th>
+                                            <th>
+                                                Class Description
+                                            </th>
+                                            <th>
+                                                Teacher
+                                            </th>
+                                            <th>
+                                                Room Number
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <apex:variable value="0" var="index"/>
+                                        <apex:repeat value="{!c.theClasses}" var="class" id="classRepeat">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputField value="{!class.Class__r.Name}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!class.Class__r.Class_Description__c}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!class.Class__r.Teacher__r.FirstName}"/>&nbsp;<apex:outputField value="{!class.Class__r.Teacher__r.LastName}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputField value="{!class.Class__r.Room__c}"/>
+                                                </td>
+                                            </tr>
+                                            <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                        </apex:repeat>
+                                        </tbody>
+                                    </table>
+                                </div><br/>
+                            </apex:repeat>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+</apex:page>

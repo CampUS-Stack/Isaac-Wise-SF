@@ -1,0 +1,234 @@
+<!--
+ - Created by Chris Home Desktop on 12/2/2017.
+ -->
+
+<apex:page id="BatchInvoiceAssessment" controller="BatchInvoiceAssessmentController" tabStyle="Batch__c">
+
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <apex:form id="theForm">
+        <apex:pageBlock id="pageBlock" title="Batch Invoice Processing">
+            <apex:pageBlockButtons >
+                <apex:commandButton rendered="{!ShowAccountSearchPage}" value="Back to Assessment" action="{!GoToAssessmentCreation}" reRender="theForm"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection rendered="{!ShowAssessmentEntry}" title="Create the Assessment">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Designation" />
+                    <apex:inputField value="{!MasterAssessment.Designation__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Assessed Amount" />
+                    <apex:inputField value="{!MasterAssessment.Assessed_Amount__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Assessment Date" />
+                    <apex:inputField value="{!MasterAssessment.Assessment_Date__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Description" />
+                    <apex:inputField value="{!MasterAssessment.Description__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:commandButton value="Clear" action="{!Clear}" />
+                    <apex:commandButton value="Next" onClick="ShowLoading();" action="{!GoToAccountSearch}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:outputPanel rendered="{!ShowAccountSearchPage}">
+                <apex:pageBlockSection title="Create the Assessment">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Designation" />
+                        <apex:outputField value="{!MasterAssessment.Designation__c}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Assessed Amount" />
+                        <apex:inputField value="{!MasterAssessment.Assessed_Amount__c}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Assessment Date" />
+                        <apex:outputField value="{!MasterAssessment.Assessment_Date__c}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Description" />
+                        <apex:outputField value="{!MasterAssessment.Description__c}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionitem >
+                        <apex:commandButton value="Create & Continue" reRender="theForm" action="{!CreateAssessmentsAndContinue}"/>
+                        <apex:commandButton value="Create & Finish" reRender="theForm" action="{!CreateAssessments}"/>
+                    </apex:pageBlockSectionitem>
+                    <apex:pageBlockSectionitem >
+                        <apex:outputLabel value="How do you want to search?"/>
+                        <apex:selectList multiSelect="false" size="1" value="{!ChosenSearchType}"  >
+                            <apex:selectOptions value="{!SearchOptions}" />
+                            <apex:actionSupport event="onchange" reRender="theForm" onSubmit="ShowLoading();" action="{!RunAccountQuery}" onComplete="HideLoading();" />
+                        </apex:selectList>
+                    </apex:pageBlockSectionitem>
+                </apex:pageBlockSection>
+                <apex:outputPanel id="allResultArea" rendered="{!ChosenSearchType == 'All'}">
+                    <apex:pageBlockSection title="Search Contacts" columns="2">
+                        <apex:pageBlockSectionitem >
+                            <apex:outputLabel value="Members Only" />
+                            <apex:inputCheckbox value="{!MembersOnly}" />
+                        </apex:pageBlockSectionitem>
+                        <apex:pageBlockSectionitem >
+                            <apex:outputLabel value="Number of People to Assess:" />
+                            <apex:outputText value="{!NumOfPeopleToAssess}" />
+                        </apex:pageBlockSectionitem>
+                        <apex:pageBlockSectionItem >
+                            <apex:commandButton value="Search" onClick="ShowLoading();" onComplete="HideLoading();" action="{!RunAccountQuery}" reRender="allDisplayArea,allResultArea" />
+                            <apex:commandButton value="Remove Selected" onClick="ShowLoading();" onComplete="HideLoading();" action="{!RemoveFromAll}" reRender="allDisplayArea,allResultArea" />
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+
+                    <table width="100%">
+                        <col width="65%"/>
+                        <col width="35%"/>
+                        <tr>
+                            <td >
+
+                                <apex:outputPanel id="paginationControls" >
+                                    <apex:outputLabel value="Number of results per page: " />
+                                    <apex:selectList id="choosenumber"
+                                                     value="{!AllPaginationCtrl.numberOfRecordsShown}" size="1">
+                                        <apex:selectOption itemValue="10" itemLabel="10" />
+                                        <apex:selectOption itemValue="20" itemLabel="20" />
+                                        <apex:selectOption itemValue="30" itemLabel="30" />
+                                        <apex:selectOption itemValue="40" itemLabel="40" />
+                                        <apex:selectOption itemValue="50" itemLabel="50" />
+                                        <apex:selectOption itemValue="75" itemLabel="75" />
+                                        <apex:selectOption itemValue="100" itemLabel="100" />
+                                        <apex:selectOption itemValue="200" itemLabel="200" />
+                                        <apex:actionSupport event="onchange" action="{!AllPaginationCtrl.setNumOfRecordsPerPage}"
+                                                            status="updatestatus" />
+                                    </apex:selectList>
+                                    <apex:outputPanel style="float:right;" >
+                                        <apex:commandButton rendered="{!AllPaginationCtrl.hasPrev}" value="First"
+                                                            action="{!AllPaginationCtrl.firstButton}" reRender="allDisplayArea,paginationControls"/>&nbsp;
+                                        <apex:commandButton rendered="{!AllPaginationCtrl.hasPrev}" value="<"
+                                                            action="{!AllPaginationCtrl.prevButton}" reRender="allDisplayArea,paginationControls"/>&nbsp;
+                                        <apex:commandButton rendered="{!AllPaginationCtrl.hasNext}" value=">"
+                                                            action="{!AllPaginationCtrl.nextButton}" reRender="allDisplayArea,paginationControls"/>&nbsp;
+                                        <apex:commandButton rendered="{!AllPaginationCtrl.hasNext}" value="Last"
+                                                            action="{!AllPaginationCtrl.lastButton}" reRender="allDisplayArea,paginationControls"/>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <apex:pageBlockSection columns="1" id="allDisplayArea">
+                                    <apex:pageBlockTable value="{!TheAccountWrappers}" var="acc">
+                                        <apex:column >
+                                            <apex:inputCheckbox value="{!acc.IsSelected}" />
+                                            <!--<apex:commandLink value="Remove" onClick="ShowLoading();" onComplete="HideLoading();" action="{!RemoveFromAll}" reRender="allResultArea">-->
+                                            <!--<apex:param value="{!acc.Id}" assignTo="{!SelectedAccountIdToRemove}" name="AccId" />-->
+                                            <!--</apex:commandLink>-->
+                                        </apex:column>
+                                        <apex:column value="{!acc.TheAccount.Name}"/>
+                                        <apex:column value="{!acc.TheAccount.Current_Mailing_Address__c}" />
+                                    </apex:pageBlockTable>
+                                </apex:pageBlockSection>
+                            </td>
+                            <td>
+                                <apex:pageBlockSection columns="1" id="allRemovedDisplayArea" >
+                                    <apex:pageBlockTable value="{!AccountsToExcludeForAll}" var="acc">
+                                        <apex:column >
+                                            <apex:commandLink style="" value="X" onClick="ShowLoading();" onComplete="HideLoading();" action="{!AddBackToAll}" reRender="allResultArea,allRemovedDisplayArea">
+                                                <apex:param value="{!acc.Id}" assignTo="{!SelectedAccountIdToRemove}" name="AccId" />
+                                            </apex:commandLink>
+                                        </apex:column>
+                                        <apex:column value="{!acc.Name}"/>
+                                        <!--<apex:column value="{!acc.Current_Mailing_Address__c}" />-->
+                                    </apex:pageBlockTable>
+                                </apex:pageBlockSection>
+                            </td>
+                        </tr>
+                    </table>
+                </apex:outputPanel>
+                <apex:outputPanel id="householdDisplayArea" rendered="{!ChosenSearchType == 'Household'}">
+                    <apex:pageBlockSection title="Search Households" columns="2">
+                        <apex:pageBlockSectionitem >
+                            <apex:outputLabel value="Household Name" />
+                            <apex:inputText value="{!HouseholdName}" onKeyDown="checkForEnterKeyHousehold(event)"/>
+                        </apex:pageBlockSectionitem>
+                        <apex:pageBlockSectionitem >
+                            <apex:outputLabel value="Class Name" />
+                            <apex:inputField value="{!DummClass.Parent_Class__c}" onKeyDown="checkForEnterKeyHousehold(event)"/>
+                        </apex:pageBlockSectionitem>
+                        <apex:pageBlockSectionitem >
+                            <apex:outputLabel value="Do not show records assessed for this designation this year." />
+                            <apex:inputCheckbox value="{!ShouldRemoveRecordsAssessedThisYear}" onKeyDown="checkForEnterKeyHousehold(event)"/>
+                        </apex:pageBlockSectionitem>
+                        <apex:pageBlockSectionitem >
+                            <apex:outputLabel value="" />
+                            <apex:commandButton id="householdSearchBtn" value="Search" onClick="ShowLoading();" onComplete="HideLoading();" action="{!SearchForAccounts}" reRender="householdDisplayArea"/>
+                        </apex:pageBlockSectionitem>
+                    </apex:pageBlockSection>
+                    <table width="100%">
+                        <col width="100%"/>
+                        <!--<col width="35%"/>-->
+                        <tr>
+                            <td style="vertical-align:top;">
+                                <apex:pageBlockSection title="Found Accounts" columns="1" >
+                                    <apex:pageBlockTable value="{!FoundAccountWrappers}" var="wrap" rendered="{!IF(FoundAccountWrappers.size>0,true,false)}">
+                                        <apex:column headerValue="Action" >
+                                            <apex:facet name="header">
+                                                <!--                                                <apex:commandLink value="Add All"></apex:commandLink>-->
+                                                <apex:inputCheckbox onClick="toggle(this)"></apex:inputCheckbox>
+                                            </apex:facet>
+                                            <apex:inputCheckbox value="{!wrap.IsSelected}" styleClass="accCheckbox">
+                                            </apex:inputCheckbox>
+                                        </apex:column>
+                                        <apex:column value="{!wrap.TheAccount.Name}"/>
+                                        <apex:column value="{!wrap.TheAccount.Current_Mailing_Address__c}" />
+                                    </apex:pageBlockTable>
+
+                                    <apex:outputPanel rendered="{!IF(FoundAccountWrappers.size==0,true,false)}" >
+                                        No Account found to Display.
+                                    </apex:outputPanel>
+                                </apex:pageBlockSection>
+                            </td>
+                        </tr>
+                    </table>
+                </apex:outputPanel>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    <script>
+        $j = jQuery.noConflict();
+
+        function checkForEnterKeyHousehold(e){
+            console.log('Click found. ' + e.keyCode + ' ' + e.ctrlKey);
+            if (e.keyCode==13){
+                console.log('Enter Key found.');
+                $j('[id$=householdSearchBtn]').trigger('click');
+            }
+        }
+
+        function ShowLoading() {
+            console.log('show Loading');
+            $j.blockUI({ css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                } });
+
+            //setTimeout($.unblockUI, 2000);
+        }
+        function HideLoading() {
+            console.log('hide Loading');
+            $j.unblockUI();
+        }
+
+        function toggle(source) {
+            checkboxes = $j('.accCheckbox');
+            for(var i=0, n=checkboxes.length;i<n;i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+    </script>
+</apex:page>

@@ -1,0 +1,130 @@
+<!--
+ - Created by Chris Home Desktop on 11/7/2017.
+ -->
+
+<apex:page id="FinancialHome">
+    <style>
+
+        .custom-btn {
+            background: #296FB0;
+            background-image: -webkit-linear-gradient(top, #296FB0, #2980b9);
+            background-image: -moz-linear-gradient(top, #296FB0, #2980b9);
+            background-image: -ms-linear-gradient(top, #296FB0, #2980b9);
+            background-image: -o-linear-gradient(top, #296FB0, #2980b9);
+            background-image: linear-gradient(to bottom, #296FB0, #2980b9);
+            -webkit-border-radius: 5;
+            -moz-border-radius: 5;
+            border-radius: 5px;
+            text-shadow: 1px 1px 3px #666666;
+            font-family: Arial;
+            color: #ffffff;
+            font-size: 16px;
+            padding: 10px 20px 10px 20px;
+            text-decoration: none;
+        }
+
+        .custom-btn:hover {
+            background: #3cb0fd;
+            background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+            text-decoration: none;
+        }
+
+        .custom-btn:disabled{
+            background:#6d6e71;
+        }
+
+        .button-cell{
+            width:48%;
+            display:inline-block;
+            text-align:center;
+        }
+
+        .wizard-btn{
+            width: 250px;
+            margin: 10px 0px;
+        }
+
+        .button-row{
+            width:80%;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        #button-container{
+            /*border: solid 1px;*/
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+
+        #help-text-container{
+            color:#6d6e71;
+            text-align:center;
+        }
+
+        .large-text{
+            font-size: 3em;
+        }
+
+        .small-text{
+            font-size: 1.5em;
+        }
+
+    </style>
+    <div style="margin-left:auto;width:40%;margin-right:auto;text-align:center;">
+
+        <br/><br/>
+        <h1 style="font-size:1.64em;">Wise Temple Financial Home</h1>
+    </div>
+    <apex:form >
+        <div id="button-container">
+
+            <apex:pageMessages />
+            <div class="button-row">
+                <div class="button-cell">
+                    <br/><br/>
+                    <input type="button" id="set-meeting-btn" onclick="location.href = '/apex/ModifyPayment?type=transfer'" class="custom-btn wizard-btn" value="Transfer a Payment" />
+                </div>
+
+                <div class="button-cell">
+                    <br/><br/>
+                    <input type="button" id="set-meeting-btn" onclick="location.href = '/apex/ModifyPayment?type=reallocate'" class="custom-btn wizard-btn" value="Reallocate a Payment" />
+                </div>
+
+            </div>
+            <div class="button-row">
+                <div class="button-cell">
+                    <br/>
+                    <input type="button" id="set-meeting-btn" onclick="location.href = '/apex/SummarizePayments'" class="custom-btn wizard-btn" value="Summarize Payments" />
+                </div>
+
+                <div class="button-cell">
+                    <br/><br/>
+                    <input type="button" id="set-meeting-btn" onclick="location.href = '/apex/SummarizeAssessments'" class="custom-btn wizard-btn" value="Summarize Assessments" />
+                </div>
+
+            </div>
+            <div class="button-row">
+                <div class="button-cell">
+                    <br/><br/>
+                    <input type="button" id="set-meeting-btn" onclick="location.href = '/apex/ExportPaymentPreview'" class="custom-btn wizard-btn" value="Export Payments" />
+                </div>
+
+                <div class="button-cell">
+                    <br/><br/>
+                    <input type="button" id="set-meeting-btn" onclick="location.href = '/apex/ExportAssessmentPreview'" class="custom-btn wizard-btn" value="Export Assessments" />
+                </div>
+
+            </div>
+        </div>
+
+        <!--<apex:pageBlock>-->
+        <!--<apex:pageBlockSection >-->
+
+        <!--</apex:pageBlockSection>-->
+        <!--</apex:pageBlock>-->
+    </apex:form>
+</apex:page>

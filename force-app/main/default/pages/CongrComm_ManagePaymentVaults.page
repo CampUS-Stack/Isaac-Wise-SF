@@ -1,0 +1,393 @@
+<!--
+ - Created by zacha on 11/9/2020.
+ -->
+
+<apex:page id="CongrComm_ManagePaymentVaults"
+           controller="CongrComm_ManagePaymentVaultsController"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0"
+           action="{!onLoadFunction}"
+>
+    <apex:slds />
+    <style>
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+        .modal:before {
+            content: '';
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+            margin-right: -4px;
+        }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .modal-scrollfix.modal-scrollfix {
+            overflow-y: hidden;
+        }
+
+        .card {
+            position: relative;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .25rem;
+        }
+
+        .card-body {
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+        .custPopup {
+            background-color: white;
+            border-width: 2px;
+            border-style: solid;
+            z-index: 9999;
+            left: 50%;
+            padding: 11px;
+            position: absolute;
+            width: 600px;
+            margin-left: -240px;
+            top: 100px;
+        }
+
+        .popupBackground {
+            background-color: black;
+            opacity: 0.20;
+            filter: alpha(opacity=20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+        }
+    </style>
+    <!--    <head>-->
+    <!--        <apex:slds />-->
+    <!--    </head>-->
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+
+                <apex:actionFunction name="DeleteVault" action="{!deleteSelectedVault}" reRender="theForm" status="pageStatus"/>
+                <apex:actionFunction name="EditVault" action="{!editSelectedVault}" reRender="theForm" status="pageStatus"/>
+                <apex:actionFunction name="MakePayment" action="{!makePaymentWithSelectedVault}" status="pageStatus" />
+                <apex:inputHidden value="{!rowIndex}" id="currentRowIndex"></apex:inputHidden>
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <apex:actionStatus id="pageStatus1">
+                                <apex:facet name="start">
+                                    <apex:outputPanel >
+                                        <div class="bg-overlay">
+                                            <div class="loading">
+                                                <img src="/img/loading32.gif" width="25" height="25"
+                                                     style="margin-right: 10px;"/>
+                                                <apex:outputLabel value="Please Wait..."/>
+                                            </div>
+                                        </div>
+                                    </apex:outputPanel>
+                                </apex:facet>
+                            </apex:actionStatus>
+
+                            <div class="row">
+
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Add New Payment Method"
+                                                        action="{!navigateToPaymentPage}" status="pageStatus1"
+                                                        styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Make Payment" action="{!makePaymentWithSelectedVault}"
+                                                        status="pageStatus1"
+                                                        styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                            <h2>Manage Saved Cards (${!paymentAdjustmentAmount})</h2>
+                            <apex:pageMessages id="showMsg"></apex:pageMessages>
+                            <!--                            <apex:outputPanel id="errorMessage">-->
+                            <!--                                <apex:outputPanel rendered="{!pageErrors}">-->
+                            <!--                                    <div class="alert alert-danger" role="alert">-->
+                            <!--                                        <apex:pageMessages />-->
+                            <!--                                    </div>-->
+                            <!--                                </apex:outputPanel>-->
+                            <!--                            </apex:outputPanel>-->
+                            <!--                            <apex:outputPanel id="pageErrors">-->
+                            <!--                                <span>Page Errors: {!pageErrors}</span>-->
+                            <!--                            </apex:outputPanel>-->
+                            <hr/>
+                            <apex:outputPanel id="tableDisplayArea">
+                                <apex:outputPanel >
+                                    <!--<apex:outputPanel rendered="{!NumberOfResults > 0}">-->
+                                    <apex:variable value="{!0}" var="rowCount"/>
+                                    <div class="row table-responsive col-sm-12 hidden-sm hidden-xs"
+                                         style="margin-top:20px;">
+                                        <table class="table">
+                                            <th>Select Method</th>
+                                            <th>Name</th>
+                                            <th>Payment Details</th>
+                                            <th>Payment Type</th>
+                                            <th>Payment Number</th>
+                                            <th></th>
+                                            <th></th>
+                                            <apex:repeat value="{!allVaultWrappers}" var="vaultWrapper">
+                                                <tr>
+                                                    <td>
+                                                        <div class="slds-truncate" title="{!vaultWrapper.isSelected}">
+                                                            <apex:outputpanel rendered="{!vaultWrapper.isSelected}">
+                                                                <input type="radio" checked="true"/>
+                                                            </apex:outputpanel>
+
+                                                            <apex:outputpanel rendered="{!NOT(vaultWrapper.isSelected) && NOT(vaultWrapper.isExpired)}">
+                                                                <apex:actionsupport action="{!selectVault}"
+                                                                                    event="onclick"
+                                                                                    rerender="theForm">
+                                                                    <!-- We use AJAX to call an apex function when a radio button is clicked -->
+                                                                    <input type="radio"/>
+                                                                    <apex:param name="index" value="{!rowCount}"/>
+                                                                    <apex:param name="vaultid"
+                                                                                value="{!vaultWrapper.paymentVault.Id}">
+                                                                    </apex:param>
+                                                                </apex:actionsupport>
+                                                            </apex:outputpanel>
+                                                            <apex:variable var="rowCount" value="{!rowCount+1}"/>
+
+                                                            <apex:outputPanel rendered="{!NOT(vaultWrapper.isSelected) && vaultWrapper.isExpired}">
+                                                                <input type="radio" disabled="disabled" style="opacity: 0.8;"/>
+                                                                <span style="color: red; margin-left: 5px; font-size: 0.9em;">Expired</span>
+                                                            </apex:outputPanel>
+
+                                                        </div>
+                                                    </td>
+                                                    <td>{!vaultWrapper.paymentVault.Name}</td>
+                                                    <td>
+                                                        <apex:outputPanel rendered="{!vaultWrapper.paymentVault.RecordType.Name == 'ACH'}">
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'CheckLogo'}">
+                                                                <apex:image url="{!URLFOR($Resource.CheckLogo)}"
+                                                                            style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                        </apex:outputPanel>
+
+                                                        <apex:outputPanel rendered="{!vaultWrapper.paymentVault.RecordType.Name == 'Credit Card'}">
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'VisaLogo'}">
+                                                                <apex:image url="{!URLFOR($Resource.VisaLogo)}"
+                                                                            style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'DiscoverLogo'}">
+                                                                <img src="{!$Resource.DiscoverLogo}"
+                                                                     style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'MaestroLogo'}">
+                                                                <img src="{!$Resource.MaestroLogo}"
+                                                                     style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'AMEXLogo'}">
+                                                                <img src="{!$Resource.AmexLogo}" style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'MasterCardLogo'}">
+                                                                <img src="{!$Resource.MasterCardLogo}"
+                                                                     style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'DinersLogo'}">
+                                                                <img src="{!$Resource.DinersLogo}" style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!vaultWrapper.PaymentType == 'JCBLogo'}">
+                                                                <img src="{!$Resource.JCBLogo}" style="width:60px;"/>
+                                                                <img src="{!$Resource.JCBLogo}" style="width:60px;"/>
+                                                            </apex:outputPanel>
+                                                        </apex:outputPanel>
+                                                    </td>
+                                                    <td>{!vaultWrapper.paymentVault.RecordType.Name}</td>
+                                                    <td>{!vaultWrapper.PaymentNumber}</td>
+                                                    <td>
+                                                        <div class="slds-scope">
+                                                            <apex:outputPanel >
+                                                                <apex:commandLink onClick="confirmDelete({!rowCount});"
+                                                                                  reRender="theForm">
+                                                                    <svg aria-hidden="true"
+                                                                         class="slds-button__icon slds-button__icon_large">
+                                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                                             xlink:href="/apexpages/slds/latest/assets/icons/action-sprite/svg/symbols.svg#delete">
+                                                                        </use>
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">Priority</span>
+<!--                                                                    <apex:param name="index" value="{!rowCount}"/>-->
+<!--                                                                    <apex:param name="vaultid"-->
+<!--                                                                                value="{!vaultWrapper.paymentVault.Id}"/>-->
+                                                                </apex:commandLink>
+                                                            </apex:outputPanel>
+                                                        </div>
+
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-scope">
+                                                            <apex:outputPanel >
+                                                                <apex:commandLink onClick="confirmEdit({!rowCount});"
+                                                                                  reRender="theForm">
+                                                                    <svg aria-hidden="true"
+                                                                         class="slds-button__icon slds-button__icon_large">
+                                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                                             xlink:href="/apexpages/slds/latest/assets/icons/action-sprite/svg/symbols.svg#edit">
+                                                                        </use>
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">Edit</span>
+<!--                                                                    <apex:param name="index" value="{!rowCount}"/>-->
+<!--                                                                    <apex:param name="vaultid"-->
+<!--                                                                                value="{!vaultWrapper.paymentVault.Id}"/>-->
+                                                                </apex:commandLink>
+                                                            </apex:outputPanel>
+                                                        </div>
+
+                                                    </td>
+                                                </tr>
+                                            </apex:repeat>
+                                        </table>
+
+                                    </div>
+                                    <div class="visible-xs-block visible-sm-block">
+                                        <apex:repeat value="{!allVaultWrappers}" var="vaultWrapper">
+                                            <br/>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h4><b>{!vaultWrapper.paymentVault.Name}</b></h4>
+                                                    <div class="col-sm-4 col-xs-12">
+                                                        <p>Payment Number: </p>
+                                                        <p class="text-info">{!vaultWrapper.PaymentNumber}</p>
+                                                    </div>
+                                                    <div class="col-sm-4 col-xs-12">
+                                                        <p>Select Method: <span>
+                                                        <apex:outputpanel rendered="{!vaultWrapper.isSelected}">
+                                                            <input type="radio" checked="true"/>
+                                                        </apex:outputpanel>
+
+                                                        <apex:outputpanel rendered="{!NOT(vaultWrapper.isSelected)}">
+                                                            <apex:actionsupport action="{!selectVault}" event="onclick"
+                                                                                rerender="theForm">
+                                                                <!-- We use AJAX to call an apex function when a radio button is clicked -->
+                                                                <input type="radio"/>
+                                                                <apex:param name="index" value="{!rowCount}"/>
+                                                                <apex:param name="vaultid"
+                                                                            value="{!vaultWrapper.paymentVault.Id}">
+                                                                </apex:param>
+                                                            </apex:actionsupport>
+                                                        </apex:outputpanel>
+                                                        <apex:variable var="rowCount" value="{!rowCount+1}"/>
+                                                        </span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </apex:repeat>
+
+                                    </div>
+                                </apex:outputPanel>
+                                <!--                            <apex:outputPanel rendered="{!NumberOfResults == 0 && NOT(firstLoad)}">-->
+                                <!--                                <br/>-->
+                                <!--                                <br/>-->
+                                <!--                                <div>-->
+                                <!--                                    No member found. Try searching with fewer criteria. Only {!$Label.Temple_Name} members are included and some may have opted out of being listed.-->
+                                <!--                                </div>-->
+
+                                <!--                            </apex:outputPanel>-->
+                            </apex:outputPanel>
+
+
+                            <apex:actionStatus id="pageStatus">
+                                <apex:facet name="start">
+                                    <apex:outputPanel >
+                                        <div class="bg-overlay">
+                                            <div class="loading">
+                                                <img src="/img/loading32.gif" width="25" height="25"
+                                                     style="margin-right: 10px;"/>
+                                                <apex:outputLabel value="Please Wait..."/>
+                                            </div>
+                                        </div>
+                                    </apex:outputPanel>
+                                </apex:facet>
+                            </apex:actionStatus>
+
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Add New Payment Method"
+                                                        action="{!navigateToPaymentPage}" status="pageStatus"
+                                                        styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Make Payment" onClick="confirmPay();"
+                                                        styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!--                <apex:actionFunction name="DeleteVault" action="{!deleteSelectedVault}" reRender="theForm">-->
+                <!--                    <apex:param name="index" value="{!rowCount}"/>-->
+                <!--                    <apex:param name="vaultid"-->
+                <!--                                value="{!vaultWrapper.paymentVault.Id}">-->
+                <!--                    </apex:param>-->
+                <!--                </apex:actionFunction>-->
+                <!--                <apex:actionFunction name="ReRenderDelete" reRender="theForm"/>-->
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+    <script>
+        function confirmDelete(rowIndex) {
+            let confirmation = confirm("Are you sure you want to delete this payment?");
+            if (confirmation == true) {
+                document.querySelector("[id$='currentRowIndex']").value = rowIndex - 1;
+                console.log(document.querySelector("[id$='currentRowIndex']").value);
+                DeleteVault();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function confirmEdit(rowIndex) {
+            let confirmation = confirm("Are you sure you want to edit this payment?");
+            if (confirmation == true) {
+                document.querySelector("[id$='currentRowIndex']").value = rowIndex - 1;
+                console.log(document.querySelector("[id$='currentRowIndex']").value);
+                EditVault();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function confirmPay(){
+            let confirmation = confirm('Are you sure you want to make a payment using the selected method?');
+            if(confirmation == true){
+                MakePayment();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    </script>
+
+</apex:page>

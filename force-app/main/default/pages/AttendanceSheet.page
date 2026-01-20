@@ -1,0 +1,144 @@
+<apex:page standardController="Class__c" extensions="AttendanceSheetController" sidebar="false" showHeader="false" standardStylesheets="false"
+           renderAs="pdf" applyBodyTag="false"  applyHtmlTag="false">
+    <html>
+    <head>
+        <style>
+            body{
+                font-family: Arial Unicode MS;
+                font-size: 10pt;
+            }
+
+            @page {
+                size: 10in 7.50in;
+                margin-top: .5in;
+                margin-bottom: 0.5in;
+                margin-left:  0.4in;
+                margin-right: 0.4in;
+
+            @bottom-right {
+                font-size: 10pt;
+                font-family: Arial Unicode MS;
+            content: "Generated on:<apex:outputText value="{0, date, MMMM dd','  yyyy}">
+            <apex:param value="{!NOW()+offset}" />
+                                                 </apex:outputText>";
+            color : #000;
+            }
+
+            @top-center {
+                font-size: 14pt;
+                font-family: Arial Unicode MS;
+                content: "Attendance Sheet";
+                color : #000;
+            }
+            }
+
+            table.GeneratedTable {
+                width: 100%;
+                background-color: #ffffff;
+                border-collapse: collapse;
+                border-width: 1px;
+                border-color: #000000;
+                border-style: solid;
+                color: #000000;
+            }
+
+            table.GeneratedTable td, table.GeneratedTable th {
+                border-width: 1px;
+                border-color: #000000;
+                border-style: solid;
+                padding: 3px;
+            }
+
+            table.GeneratedTable thead {
+                background-color: #ffffff;
+            }
+
+            .header{
+                font-size: 16pt;
+
+                padding-bottom: 4px;
+                color: #898989;
+            }
+
+        </style>
+    </head>
+    <body>
+    <div class="header">
+        Class : {!Class__c.Name}
+        <br/>
+        Teacher : {!Class__c.Teacher__r.Name}
+    </div>
+    <table class="GeneratedTable">
+        <col width="145"/>
+        
+       
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+         <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        <col width="30"/>
+        
+        
+        <thead>
+        <tr>
+            <th>Students</th>           
+                       
+            
+            <th>9/11</th>
+            <th>9/18</th>
+            <th>10/2</th>
+            <th>10/9</th>
+            <th>10/16</th>
+            <th>10/23</th>
+            <th>10/30</th>
+            <th>11/6</th>
+            <th>11/13</th>
+            <th>11/20</th>
+            <th>12/4</th>
+            <th>12/11</th>
+            <th>12/18</th>
+            <th>1/8</th>
+            
+            
+                        
+        </tr>
+        </thead>
+        <tbody>
+        <apex:repeat var="stu" value="{!students}">
+            <tr>
+                <td>{!stu.First_Name__c} {!stu.Last_Name__c}</td>
+                
+                <td></td>
+                <td></td>
+                <td></td>
+                 <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                 <td></td>
+                 <td></td>
+                 <td></td>
+                 <td></td>
+                 <td></td>
+                
+                
+                
+            </tr>
+        </apex:repeat>
+
+        </tbody>
+    </table>
+    </body>
+    </html>
+</apex:page>

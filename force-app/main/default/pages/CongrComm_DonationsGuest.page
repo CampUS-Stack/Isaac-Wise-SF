@@ -1,0 +1,307 @@
+<!--
+ - Created by Kritik Garg on 06-03-2019.
+ -->
+
+<apex:page controller="CongrComm_DonationsController"
+           id="CongrComm_DonationsGuest"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="theForm">
+
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col-sm-12  col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+<!--                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>-->
+                                </div>
+                            </div>
+                            <h2>Make a Donation</h2>
+                             <h4>To make a donation, please enter the donation amount, the fund it is directed to, the donation type, honoree name (optional), 
+                            and how you would like your name to be listed in acknowledgements. Then click "Add Donation." You need to add at least one donation before entering your 
+                            contact information and clicking "Make Payment"</h4>
+                            <apex:outputPanel id="errorMessage" rendered="{!pageErrors}">
+                                <div class="alert alert-danger" role="alert" >
+                                    <apex:pageMessages />
+                                </div>
+                            </apex:outputPanel>
+                            <hr/>
+                            <apex:outputPanel rendered="{!!displayContactInfo}">
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Fund</label>
+                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedFund}">
+                                        <apex:selectOptions value="{!fundOptions }"/>
+                                    </apex:selectList>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="HouseholdNameInput">Amount</label><br/>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <apex:inputText value="{!amount}" styleClass="form-control" id="NameInput"  />
+                                    </div>
+                                    <small>Minimum donation = $18</small>
+
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Honoree/memorial name</label>
+                                    <apex:inputText value="{!honoreeName}" styleClass="form-control" />
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="HouseholdNameInput">Listing</label><br/>
+                                    <apex:inputText value="{!listing}" styleClass="form-control" html-placeholder="How would you like your name/s listed in acknowledgements?" />
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-6 form-group">
+                                    <label for="HomePhoneInput">Donation Type</label>
+                                    <apex:selectList styleClass="form-control" size="1" value="{!selectedDonationType}">
+                                        <apex:selectOptions value="{!DonationTypes }"/>
+                                    </apex:selectList> <br/>
+                                </div>
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-12 form-group">
+                                    <label for="HomePhoneInput">Send acknowledgement to</label>
+                                    <apex:inputTextArea value="{!sendAcknowledgementTo}" styleClass="form-control" html-placeholder="Include name and address" />
+                                </div>
+                            </div>
+                                <div class="row" >
+                                    <div class="col-sm-12 form-group">
+
+                                        <apex:commandButton value="Add Donation" action="{!addAnotherDonation}" styleClass="wiseBtn btn btn-default" reRender="theForm" onClick="scrollToTop();"  />
+                                        <small>You need to add at least one donation to make a payment</small>
+                                    </div>
+                                </div>
+
+                            </apex:outputPanel>
+
+
+                            <!--Contact Information Section-->
+                            <!--<apex:outputPanel rendered="{!!displayContactInfo}">-->
+                            <apex:outputPanel >
+
+                                <!--Contact Information Section-->
+
+                                <h3>Contact Information</h3>
+                                <hr/>
+                                <div class="row" >
+                                    <div class="col-sm-6 form-group">
+                                        <label for="HomePhoneInput">First Name</label>
+                                        <apex:inputText value="{!guestContact.FirstName}" styleClass="form-control" />
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="HouseholdNameInput">Last Name
+                                        </label><br/>
+                                        <apex:inputText value="{!guestContact.LastName}"   styleClass="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="row" >
+                                    <div class="col-sm-6 form-group">
+                                        <label for="HomePhoneInput">Email</label>
+                                        <apex:inputText value="{!guestContact.Email}"  styleClass="form-control" />
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="HouseholdNameInput">Street</label><br/>
+                                        <apex:inputText value="{!guestContact.Street}"  styleClass="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="row" >
+                                    <div class="col-sm-4 form-group">
+                                        <label for="HomePhoneInput">City</label>
+                                        <apex:inputText value="{!guestContact.City}"   styleClass="form-control" />
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="HouseholdNameInput">State</label><br/>
+                                        <apex:inputText value="{!guestContact.State}"  styleClass="form-control" />
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="HouseholdNameInput">Zip</label><br/>
+                                        <apex:inputText value="{!guestContact.Zip}"  styleClass="form-control" />
+                                    </div><br/><p>Credit cards accepted are Visa, Mastercard, and Discover.</p>
+                                </div>
+                                <!--<div class="row">
+                                    <div class="col-sm-12 text-center">
+                                        <apex:outputPanel rendered="{!!displayContactInfo}" >
+                                           &lt;!&ndash; <apex:commandButton value="Back" action="{!goBackToDonationEntry}" styleClass="wiseBtn btn btn-default" reRender="theForm"/>&ndash;&gt;
+                                            <apex:commandButton value="Make Payment" action="{!makeDonationAction}" styleClass="wiseBtn btn btn-default" reRender="theForm" status="pageStatus"/>
+                                            &lt;!&ndash;                                            <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>&ndash;&gt;
+                                            <apex:actionStatus id="pageStatus">
+                                                <apex:facet name="start">
+                                                    <apex:outputPanel >
+                                                        <img src="/img/loading32.gif" width="25" height="25" />
+                                                        <apex:outputLabel value="Loading..."/>
+                                                    </apex:outputPanel>
+                                                </apex:facet>
+                                            </apex:actionStatus>
+                                        </apex:outputPanel>
+                                    </div>
+                                </div>-->
+                            </apex:outputPanel>
+
+
+                            <apex:outputPanel id="donationDisplayArea" rendered="{!hasDonationsEntered && !displayContactInfo}">
+                                <apex:variable value="0" var="index"/>
+                                <div class="row table-responsive col-sm-12 hidden-sm hidden-xs" style="margin-top:20px;">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>
+                                                Fund Name
+                                            </th>
+                                            <th>
+                                                Amount
+                                            </th>
+                                            <th>
+                                                Honoree
+                                            </th>
+                                            <th>
+                                                Send Acknowledgement To:
+                                            </th>
+                                            <th>
+                                                Donation Type
+                                            </th>
+                                            <th>
+                                                Listing
+                                            </th>
+                                            <th>
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <apex:repeat value="{!donationWrappers}" var="curDonation" id="dummyPanel">
+                                            <tr>
+                                                <td>
+                                                    <apex:outputText value="{!curDonation.FundName}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputText value="{0, Number, Currency}">
+                                                        <apex:param value="{!curDonation.Amount}" />
+                                                    </apex:outputText>
+                                                </td>
+                                                <td>
+                                                    <apex:outputText value="{!curDonation.HonoreeMemorialName}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputText value="{!curDonation.AcknowledgementText}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputText value="{!curDonation.DonationType}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:outputText value="{!curDonation.Listing}"/>
+                                                </td>
+                                                <td>
+                                                    <apex:commandButton styleClass="cancelBtn btn " value="Remove" action="{!removeFund}" reRender="donationDisplayArea">
+                                                        <apex:param name="removeParam" value="{!index}" assignTo="{!fundSelectedToRemove}" />
+                                                    </apex:commandButton>
+                                                </td>
+                                            </tr>
+                                            <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                        </apex:repeat>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="visible-xs-block visible-sm-block">
+                                    <apex:repeat value="{!donationWrappers}" var="donation">
+                                        <div class="col-sm-6">
+                                            <div class="card" >
+                                                <div class="card-body">
+                                                    <div class="col-sm-12">
+                                                        <span >Fund Name: </span>&nbsp;
+                                                        <span class="text-info">{!donation.FundName}</span>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <span >Amount: </span>
+                                                        <span class="text-info">${!donation.Amount}</span>
+                                                    </div>
+                                                    <a class="card-link">
+                                                        <apex:commandButton styleClass="cancelBtn btn " value="Remove" action="{!removeFund}">
+                                                            <apex:param value="{!index}" assignTo="{!fundSelectedToRemove}" />
+                                                        </apex:commandButton>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <apex:variable var="num" value="{!VALUE(index) + 1}"/>
+                                    </apex:repeat>
+                                </div>
+                                <br/>
+                                <apex:outputText value="Total Donation Amount:"/>&nbsp;&nbsp;
+                                <apex:outputText style="font-weight:bold" value="${!TotalDonationAmount}" />
+
+                                <br/>
+
+                                <!--<div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Next" action="{!next}" styleClass="wiseBtn btn btn-default" reRender="theForm"/>
+
+                                </div>-->
+                            </apex:outputPanel>
+
+
+                            <apex:outputPanel rendered="{!!displayContactInfo}" >
+                                <div class="col-sm-12 text-center">
+                                <!-- <apex:commandButton value="Back" action="{!goBackToDonationEntry}" styleClass="wiseBtn btn btn-default" reRender="theForm"/>-->
+                                <apex:commandButton value="Make Payment" action="{!makeDonationAction}" styleClass="wiseBtn btn btn-default " reRender="theForm" status="pageStatus"/>
+                                <!--                                            <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>-->
+                                <apex:actionStatus id="pageStatus">
+                                    <apex:facet name="start">
+                                        <apex:outputPanel >
+                                            <img src="/img/loading32.gif" width="25" height="25" />
+                                            <apex:outputLabel value="Loading..."/>
+                                        </apex:outputPanel>
+                                    </apex:facet>
+                                </apex:actionStatus>
+                                </div>
+                            </apex:outputPanel>
+
+
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+<!--                                    <apex:commandButton value="Add Donation" action="{!addAnotherDonation}" styleClass="wiseBtn btn btn-default" reRender="theForm" onClick="scrollToTop();"/>-->
+<!--                                    <apex:commandButton value="Cancel" action="{!cancel}" styleClass="cancelBtn btn"/>-->
+                                </div>
+                            </div>
+                        </div>
+                       <!-- <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>-->
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+    <script>
+
+        $j = jQuery.noConflict();
+        $j( document ).ready(function() {
+            var p = $j(".alert");
+            p.scrollTop();
+        });
+
+        function scrollToTop() {
+
+            $j('html, body').animate({
+                scrollTop: 0
+            }, 800);
+            return false;
+
+        }
+        //$( "p:last" ).text( "scrollTop:" + p.scrollTop() );
+
+    </script>
+
+</apex:page>

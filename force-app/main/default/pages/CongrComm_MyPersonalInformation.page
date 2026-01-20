@@ -1,0 +1,140 @@
+<apex:page id="CongrComm_MyPersonalInformation" controller="CongrComm_MyPersonalInfoCtrl" showHeader="false"
+           applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row page-header">
+                                <h2>Update Personal Information</h2>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3"><h3>General Information</h3></div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Name</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.name}"/></div>
+                                <div class="col-sm-3">Nick Name</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Nickname__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Hebrew Name</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Hebrew_Name__c}"/></div>
+                                <div class="col-sm-3">Primary email</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Email}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Mobile Phone</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Mobile_Phone__c}"/>;</div>
+                                <div class="col-sm-3">Gender</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Gender__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Date of birth</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Date_of_Birth__c}"/></div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Publicize Bday/Anniv to congregation?</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Publicize_Birthdate_Bulletin__c}"/></div>
+                                <div class="col-sm-3">Publicize Bday/Anniv to Rabbi's?</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Publicize_Birthdate_Rabbi__c}"/></div>
+                            </div>
+
+                            <hr/>
+
+                            <div class="row">
+                                <div class="col-sm-3"><h3>Employment Information</h3></div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Employer</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Employer__c}"/></div>
+                                <div class="col-sm-3">Employer Zip Code</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Employer_Zip_Code__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Title</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Title}"/></div>
+                                <div class="col-sm-3">Work Email</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Work_Email__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Occupation</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Occupation__c}"/></div>
+                                <div class="col-sm-3">Work Phone</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Work_Phone__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Specialization</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Specialization__c}"/></div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                            </div>
+
+
+                            <hr/>
+
+                            <div class="row">
+                                <div class="col-sm-3"><h3>Religious History</h3></div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                                <div class="col-sm-3">&nbsp;</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Grew up at Wise</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Grew_up_Here__c}"/></div>
+                                <div class="col-sm-3">Religious Background</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Religious_Affiliation__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Consecrated at Wise</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Consecrated_at_Wise__c}"/></div>
+                                <div class="col-sm-3">Consecrated Year</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Consecrated_Year__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Bar/Bat Mitzvah at Wise</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Bar_Bat_Mitzvah_at_Wise__c}"/></div>
+                                <div class="col-sm-3">Bar/Bat Mitzvah Date</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Bar_Bat_Mitzvah_Date__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Confirmed at Wise</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Confirmed_at_Wise__c}"/></div>
+                                <div class="col-sm-3">Confirmation Year</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Confirmation_Year__c}"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">Graduated from Wise Kulanu</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Graduated_from_Wise_Kulanu__c}"/></div>
+                                <div class="col-sm-3">Kulanu Graduation Year</div>
+                                <div class="col-sm-3"><apex:inputField value="{!communityUserContactDetails.Kulanu_Graduation_Year__c}"/></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+
+    Add Comment
+
+
+</apex:page>

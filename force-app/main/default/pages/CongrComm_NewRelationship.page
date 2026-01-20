@@ -1,0 +1,168 @@
+<!--
+ - Created by Chris Home Desktop on 4/24/2018.
+ -->
+
+<apex:page id="CongrComm_NewRelationship" showHeader="false" controller="CongrComm_NewRelationshipCtrl" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+
+    <apex:stylesheet value="{!URLFOR($Resource.Selectize, '/css/selectize.css')}"/>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row col-sm-12" style="padding-top:10px;">
+                                <div class="col-xs-12 center">
+                                    <h3>Add a relationship for {!currentContact.Name}</h3>
+                                <h5>Search for a Wise Temple member below</h5>
+                                </div>
+                            </div>
+                            <apex:outputPanel rendered="{!PageEditType == 'new'}">
+                                <div class="row" >
+                                    <div class="col-sm-4 form-group" style="margin-top:10px;">
+                                        <label for="firstNameInput">First Name</label>
+                                        <apex:input value="{!FirstName}" type="text" styleClass="form-control" id="firstNameInput"  />
+                                    </div>
+                                    <div class="col-sm-4 form-group" style="margin-top:10px;">
+                                        <label for="firstNameInput">Last Name</label>
+                                        <apex:input value="{!LastName}" type="text" styleClass="form-control" id="lastNameInput" />
+                                    </div>
+                                    <div class="col-sm-2 center">
+                                        <label ></label>
+                                        <apex:commandButton style="margin-top:25px;" action="{!RunContactSearch}" value="Find Congregant"  styleClass="wiseBtn btn btn-default" reRender="tableDisplayArea,relDetailsArea" />
+                                    </div>
+                                    <!--<div class="col-sm-12 center">-->
+                                        <!--<apex:commandLink style="margin-top:25px;" action="{!URLFOR($Page.CongrComm_ChildrenForm) + '?cId=' + currentContact.Id}" value="Can't find who you are looking for? Click here"/>-->
+                                    <!--</div>-->
+                                </div>
+                            </apex:outputPanel>
+                            <apex:outputPanel id="tableDisplayArea" >
+                                <apex:outputPanel rendered="{!NumberOfResults > 0}">
+                                    <div class="row table-responsive col-sm-12" style="margin-top:20px;">
+                                        <table class="table">
+                                            <th></th>
+                                            <th>Member Name</th>
+                                            <th>Account Name</th>
+                                                <apex:repeat value="{!ContactResults}" var="conWrap">
+                                                    <tr>
+                                                        <td>
+                                                            <apex:commandButton value="Select" styleClass="wiseBtn btn btn-default" action="{!SelectContact}" reRender="relDetailsArea,tableDisplayArea" onComplete="initializePicklists()">
+                                                                <apex:param value="{!conWrap.theContact.Id}" assignTo="{!SelectedContactId}" name="idPAram"/>
+                                                            </apex:commandButton>
+                                                        </td>
+                                                        <td>{!conWrap.theContact.Name}</td>
+                                                        <td>{!conWrap.theContact.Account.Name}</td>
+                                                    </tr>
+                                                </apex:repeat>
+                                        </table>
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!NumberOfResults == 0 && SearchRan && NOT(ContactSelected)}">
+                                    <div class="row">
+                                        <p>No member found. Only Wise Temple members are included. Some may have opted out of being listed.</p>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                            <apex:outputPanel id="relDetailsArea" style="margin-top:35px;">
+                                <apex:outputPanel rendered="{!ContactSelected}">
+                                    <div class="row" style="margin-top:40px;"></div>
+                                    <div class="row">
+                                        <div class="control-group col-sm-6 col-xs-12">
+                                            <label for="select-beast">Selected Contact Name</label>
+
+                                            <apex:inputField value="{!SelectedContact.Name}" html-disabled="true" type="text" styleClass="form-control" id="selContactNameDisplay" />
+                                        </div>
+                                        <!--<div class="control-group col-sm-6 col-xs-12">-->
+                                            <!--<label for="select-beast">How are you related to this person?</label>-->
+                                            <!--<select id="select-beast2" class="demo-default" placeholder="Select a relationship...">-->
+                                                <!--<option value=""></option>-->
+                                                <!--<option value="1">Sister</option>-->
+                                                <!--<option value="2">Brother</option>-->
+                                                <!--<option value="3">Father</option>-->
+                                                <!--<option value="4">Daughter</option>-->
+                                            <!--</select>-->
+                                        <!--</div>-->
+                                    </div>
+                                    <div class="row" style="margin-top:25px;">
+                                        <div class="control-group col-sm-6 col-xs-12">
+                                            <label for="select-beast">{!SelectedContact.Name} is {!currentContact.Name}'s _____</label>
+                                            <apex:selectList id="select-beast" value="{!ChosenRelationshipTypeFirstName}" styleClass="demo-default" html-placeholder="Select a relationship...">
+                                                <apex:selectOptions value="{!FirstNameRelationshipTypes}"/>
+                                                <apex:actionSupport event="onchange" reRender="select-beast2" onComplete="display2ndPicklist();"/>
+                                            </apex:selectList>
+                                        </div>
+                                        <div class="control-group col-sm-6 col-xs-12" id="2ndNameDropDownArea">
+                                            <label for="select-beast">{!currentContact.Name} is {!SelectedContact.Name}'s _____</label>
+                                            <apex:selectList size="0" id="select-beast2" value="{!ChosenRelationshipTypeSecondName}" styleClass="demo-default" html-placeholder="Select a relationship...">
+                                                <apex:selectOptions value="{!SecondNameRelationshipTypes}"/>
+                                            </apex:selectList>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2 center">
+                                            <label ></label>
+                                            <apex:commandButton rendered="{!PageEditType == 'new'}" style="margin-top:15px;" action="{!CreateRelationship}" value="Create New Relationship"  styleClass="wiseBtn btn btn-default" reRender="tableDisplayArea,relDetailsArea" />
+                                            <apex:commandButton rendered="{!PageEditType == 'edit'}" style="margin-top:15px;" action="{!UpdateRelationship}" value="Update Relationship"  styleClass="wiseBtn btn btn-default" reRender="tableDisplayArea,relDetailsArea" />
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script id="scripts">
+                    $j = jQuery.noConflict();
+                    if('{!PageEditType}' == 'edit'){
+                        initializePicklists();
+                    }
+
+                    function display2ndPicklist(){
+                        var counter = 0;
+                        $j(".selectize-control").each(function(i, obj) {
+                            if(counter > 0){
+                                $j(this).hide();
+                            }
+                            counter++;
+                        });
+                        $j('[id$=select-beast2]').selectize({
+                            create: false,
+                            sortField: {
+                                field: 'text',
+                                direction: 'asc'
+                            },
+                            dropdownParent: 'body'
+                        });
+                    }
+
+                    function initializePicklists() {
+
+                        $j('[id$=select-beast]').selectize({
+                            create: false,
+                            sortField: {
+                                field: 'text',
+                                direction: 'asc'
+                            },
+                            dropdownParent: 'body'
+                        });
+                        $j('[id$=select-beast2]').selectize({
+                            create: false,
+                            sortField: {
+                                field: 'text',
+                                direction: 'asc'
+                            },
+                            dropdownParent: 'body'
+                        });
+                    };
+                </script>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+    <apex:includeScript value="{!URLFOR($Resource.Selectize, '/js/standalone/selectize.min.js')}"/>
+    <!--<apex:includeScript value="{!URLFOR($Resource.Selectize, '/js/index.js')}"/>-->
+    <!--<apex:includeScript value="{!URLFOR($Resource.Selectize, '/js/jqueryui.js')}"/>-->
+</apex:page>

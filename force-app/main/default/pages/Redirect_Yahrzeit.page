@@ -1,0 +1,6 @@
+<!--
+ - Created by Chris Home Desktop on 5/30/2017.
+ -->
+
+<apex:page id="Redirect_Yahrzeit" action="/a1C?fcf=00B370000017CoG&rolodexIndex=-1&page=1">
+</apex:page>

@@ -1,0 +1,20 @@
+<!--
+ - Created by Chris Home Desktop on 7/7/2018.
+ -->
+
+<apex:page id="CongrComm_AUTHRedirect" controller="CongrComm_AUTHRedirectCtrl" showHeader="false" sideBar="true">>
+
+
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"/>
+    <form name="theForm" method="POST" action="https://accept.authorize.net/payment/payment" html-target="the_iframe">
+        <input name="token" hidden="true" value="{!token}"/>
+        <button id="submitBtn" value="submit">Submit</button>
+    </form>
+    <script>
+
+        $j = jQuery.noConflict();
+        $j( document ).ready(function() {
+            $j('#submitBtn').click();
+        });
+    </script>>
+</apex:page>

@@ -1,0 +1,35 @@
+<!--
+- Created by Kritik Garg on 16-02-2019.
+-->
+
+<apex:page controller="CongrComm_FairShareController"
+           id="CongrComm_FairShare"
+           showHeader="false"
+           applyBodyTag="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0"
+>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                        <h2 class="title">
+                            Thank you!
+                        </h2>
+                        <p>
+                            Your Fair Share form has been received.
+                        </p>
+                    </div>
+                    <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                        <div class="sidebar-nav">
+                            <c:CongrComm_LeftHandNav />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </apex:define>
+    </apex:composition>
+
+</apex:page>

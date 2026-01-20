@@ -1,0 +1,17 @@
+<!--
+ - Created by Chris Gibson on 1/18/2020.
+ -->
+
+<apex:page id="NMI_PaymentInfo" controller="NMI_PaymentPageController">
+    <a href="{!FormPOSTURL}" >{!FormPOSTURL}</a>
+    <form action="{!FormPOSTURL}" method="POST">
+        <h3> Payment Information</h3>
+        <table>
+            <tr><td>Credit Card Number</td><td><input type ="text" name="billing-cc-number" value="4111111111111111"> </input></td></tr>
+            <tr><td>Expiration Date</td><td><input type ="text" name="billing-cc-exp" value="1012"> </input></td></tr>
+            <tr><td>CVV</td><td><input type ="text" name="cvv" > </input></td></tr>
+            <tr><td>Billing Account Type</td><td><input type ="text" name="billing-account-type" value="1012"> </input></td></tr>
+            <tr><td colspan="2" align="center"><input type ="submit" value="Submit Step Two"></input></td> </tr>
+        </table>
+    </form>
+</apex:page>

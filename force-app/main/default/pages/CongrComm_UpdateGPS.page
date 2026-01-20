@@ -1,0 +1,256 @@
+<apex:page id="CongrComm_UpdateGPS" controller="CongrComm_UpdateGPSCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-dropdown/2.0.3/jquery.dropdown.js" integrity="sha256-IE5QkfaiGL8TXmW4I4pBVvK+vxBC/YbRw4xbG0v+Bhg=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css"/>
+            
+            <style>
+            div[id$='_selected_hint'] {
+                display: none;
+            }
+            div[id$='_unselected_hint'] {
+                display: none;
+            }
+            </style>
+            
+            <!-- Latest compiled and minified JavaScript -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form >
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_ContactDetails) + '?cId=' + ContactToEdit.Id}" styleClass="cancelBtn btn"/>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <h3>Update Gifts, Passions and Skills</h3>
+                            </div>
+                            <div class="col-sm-12">
+                                <p>Editing for {!ContactToEdit.Name}</p>
+                            </div>
+                            <div class="col-sm-12" style="margin-bottom:35px;">
+                                <h4>There are hundreds of ways you can bring your unique talents to your Wise Temple community. 
+                                Enter your skills and interests so we can connect you to temple experiences most meaningful to you.</h4>
+                                </div>
+                            <div class="col-sm-12" style="margin-bottom:15px;">
+                                <h5>Choose all that apply</h5>
+                            </div>
+                            <div class="row" style="margin-top:35px;">
+                                <center><div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Skills and Interests</label>
+                                    <apex:inputField value="{!ContactToEdit.Skills__c}" styleClass="MultiClass" style="height:auto !important;" html-placeholder="{!ContactToEdit.Skills__c}" />
+                                    </div></center>
+                                <center><div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">Skills and Interests - Other</label><br/>
+                                    <apex:inputField value="{!ContactToEdit.Skills_Interests_Other__c}" styleClass="MultiClass" html-placeholder="{!ContactToEdit.Skills_Interests_Other__c}"/>
+                                    </div></center>
+                            </div>
+                            <div class="row">
+                                
+                                <center><div class="col-sm-6 form-group">
+                                    <label for="firstNameInput">I am a</label>
+                                    <apex:inputField value="{!ContactToEdit.Torah_Commitment__c}" styleClass="MultiClass" html-placeholder="{!ContactToEdit.Torah_Commitment__c}" />
+                                    </div></center>
+                                    <center><div class="col-sm-6 form-group">
+                                    <label for="lastNameInput">Areas of Interest</label>
+                                    <apex:inputField value="{!ContactToEdit.Areas_of_Interest__c}" styleClass="MultiClass" html-placeholder="{!ContactToEdit.Areas_of_Interest__c}" />
+                                    </div></center>
+                            </div>
+                            
+                            <!--<div class="row">-->
+                            <!--<center> <div class="col-sm-6 form-group">-->
+                            <!--<label for="lastNameInput">Gifts, Passions, Skills Notes</label>-->
+                            <!--<apex:inputTextarea value="{!ContactToEdit.Skills_Committments__c}" style="width:625px; height: 300px" styleClass="form-control" />-->
+                            <!--</div></center>-->
+                            <!--</div>-->
+                            <div class="row" style="margin-top: 50px;">
+                                <div class="col-sm-12">
+                                    <h3 class="title">
+                                        Other Volunteer Leadership
+                                    </h3>
+                                    <div class="col-sm-12" style="margin-bottom:5px;">
+                                <h4>Consider Boards you have served on and leadership roles you have played</h4>
+                            </div>
+                             <div class="col-sm-12" style="margin-bottom:25px;">
+                                <h5>(i.e.-Cincinnati Ballet...Board Treasurer...Start Date...End Date)</h5>
+                            </div>
+                                    
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    Organization
+                                                </th>
+                                                <th>
+                                                    Role
+                                                </th>
+                                                <th>
+                                                    Start Date
+                                                </th>
+                                                <th>
+                                                    End Date
+                                                </th>
+                                                <th>
+                                                    
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <apex:repeat id="theRepeat" value="{!otherVolunteerisms}" var="v">
+                                                <tr>
+                                                    <td><apex:outputField value="{!v.Organization__c}"/></td>
+                                                    <td><apex:outputField value="{!v.Role__c}"/></td>
+                                                    <td><apex:outputField value="{!v.Year_Started__c}"/></td>
+                                                    <td><apex:outputField value="{!v.Year_Ended__c}"/></td>
+                                                    <td>
+                                                        <!--<apex:commandButton value="Edit" styleClass="btn wiseBtn" onclick="window.location = './CongrComm_VolunteerEdit\?cId={!v.Id}&type=edit'; return false;"/>-->
+                                                        <apex:commandButton value="Edit" styleClass="btn wiseBtn" action="{!EditOrg}" reRender="theRepeat" onComplete="location.reload()">
+                                                            <apex:param value="{!v.Id}" assignTo="{!OrgIdToEdit}" name="param1"/>
+                                                        </apex:commandButton>
+
+                                                    </td>
+                                                </tr>
+                                            </apex:repeat>
+                                        </tbody>
+                                    </table>
+                                    <div>
+                                        <apex:commandButton value="Add New" styleClass="btn wiseBtn" action="{!AddNewOrg}" reRender="theRepeat" onComplete="location.reload()"/>
+                                        <!--<apex:commandButton value="Add New" styleClass="btn wiseBtn" onclick="window.location = './CongrComm_VolunteerEdit\?cId={!ContactToEdit.Id}&type=new'; return false;"/>-->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <apex:commandButton value="Save"  styleClass="wiseBtn btn btn-default" action="{!SaveContact}"/>&nbsp;&nbsp;
+                                    <apex:commandButton value="Cancel" action="{!URLFOR($Page.CongrComm_ContactDetails) + '?cId=' + ContactToEdit.Id}" styleClass="cancelBtn btn"/>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+
+    <script type="text/javascript">
+    /*
+            var $j = jQuery.noConflict();
+            $j(document).ready(function() {
+                setTimeout(function() {
+                    $j('select.MultiClass').each(function(i, val) {
+                        console.log(screen.width);
+                        if(screen.width > 660){
+                            $j(val).width(300);
+                            $j(val).height(100);
+                        }
+                        else if(screen.width < 660){
+                            $j(val).width(140);
+                            $j(val).height(140);
+                        }
+                    })
+                },100);
+            }); */
+    </script>
+    <script type="text/javascript">
+    var $j = jQuery.noConflict();
+    
+    $j(document).ready(function() {
+        
+        $j(' tr.multiSelectPicklistRow td').hide()
+        var col = 1;
+        var x
+        $j('.multiSelectPicklistRow').each(function(i, val) {
+            
+            var unselectedValues = [];
+            var selectedValues = [];
+            var element = '';
+            $j(this).wrap('<div id= "wrapId' + col + '" ></div>');
+            
+            element = element + '<select data-id= "wrapId' + col + '" class="selectpicker" multiple="true">';
+            
+            // $j(this).find('optgroup[label="Chosen"] option').each(function() {
+            $j($j(this).find('select:nth-child(1)')[1]).find('option').each(function() {
+                selectedValues.push($j(this));
+                console.log(selectedValues);
+                element = element + '<option data-v= ' + $j(this).attr('value') + ' selected="true"> ' + $j(this).text() + '</option>';
+            })
+            // $j(this).find('optgroup[label="Available"] option').each(function() {
+            $j($j(this).find('select:nth-child(1)')[0]).find('option').each(function() {
+                unselectedValues.push($j(this));
+                console.log(unselectedValues);
+                element = element + '<option data-v= ' + $j(this).attr('value') + ' > ' + $j(this).text() + '</option>';
+            })
+            
+            element = element + ' </select>';
+            
+            $j(this).append(element);
+            
+            col = col + 1;
+        })
+        
+        // $j('.selectpicker').selectpicker('render');
+        
+        $j('.selectpicker').on('changed.bs.select', function(e, a, b, c) {
+            
+            /*
+                          console.log('Event=')
+                          console.log(e);
+                          console.log(e.target.selectedOptions)
+                          var selectedInput = e.target.selectedOptions;
+
+                          console.log(e.currentTarget.getAttribute('data-id'))
+                          console.log(e);
+                          console.log(a);
+                          console.log(b);
+                          console.log(c);
+
+                          for (item in selectedInput ) {
+                            console.log($j(selectedInput[item]).attr('data-v'))
+
+                            selectValue(e.currentTarget.getAttribute('data-id'), $j(selectedInput[item]).attr('data-v'));
+                          }
+
+                          */
+            var tmp = e.target.options[a].text
+            
+            
+            selectValue(e.currentTarget.getAttribute('data-id'), $j(e.target.options[a]).attr('data-v'));
+            
+        });
+        
+        function selectValue(id, value) {
+            
+            //$j('#'+id+ 'optgroup[label="Available"] option["'+value+'"]')
+            
+            // console.log( $j('#'+id+ ' optgroup[label="Available"] option[value='+value+']'))
+            $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+            $j('#' + id + ' option[value=' + value + ']').trigger('dblclick')
+            
+        }
+        
+        function unselectValue(id, value) {
+            
+            //$j('#'+id+ ' option["'+value+'"]')
+            
+            console.log($j('#' + id + ' optgroup[label="Chosen"] option[value=' + value + ']'))
+            $j('#' + id + '  option[value=' + value + ']').attr("selected", "selected");
+            
+        }
+        
+    });
+    
+    
+    //  $j('.selectpicker').selectpicker('render');
+    </script>
+    
+</apex:page>

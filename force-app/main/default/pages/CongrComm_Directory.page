@@ -1,0 +1,346 @@
+<!--
+- Created by Chris Home Desktop on 4/30/2018.
+-->
+
+<apex:page id="CongrComm_Directory" controller="CongrComm_DirectoryCtrl" showHeader="false" applyBodyTag="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    
+    <style>
+        .modal {
+            text-align: center;
+            padding: 0!important;
+        }
+        .modal:before {
+            content: '';
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+            margin-right: -4px;
+        }
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .modal-scrollfix.modal-scrollfix {
+            overflow-y: hidden;
+        }
+        .card {
+            position: relative;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+        }
+        .card-body {
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+    </style>
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="form1" >
+                <apex:actionFunction action="{!fetchContactDetails}" name="fetchContactAF" reRender="form2" oncomplete="onLoadComplete()">
+                    <apex:param assignTo="{!conId}" name="param1" value=""/>
+                </apex:actionFunction>
+                <apex:actionFunction action="{!clearSearchAction}" name="clearSearchActionAF" reRender="tableDisplayArea,FormDisplayArea" />
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-7 col-sm-push-3 col-xs-12">
+                            <h2>Wise Temple Directory</h2>
+                            <br></br>
+                            <p>You asked for it. We’ve got it! A new Wise Temple directory at your fingertips. It’s only for congregants and is a great way to connect
+                             with one another. 
+
+                            <br></br>
+                            <br></br>
+                            Search by first name, last name or zip code. For school-age children, you can also search by grade or secular school.
+
+                            <br></br>
+
+                            </p>
+                            
+                            <div>
+                                <apex:pageMessages id="pagemsg"/>
+                            </div>
+                            <apex:outputPanel id="FormDisplayArea" >
+                                <div class="row">
+                                    <div class="col-sm-6 form-group" >
+                                        <div class="col-sm-6" style="padding-left: 0px !important; margin-top:10px;">
+                                            <label for="firstNameInput">First Name</label>
+                                            <apex:input value="{!inName}" type="text" styleClass="form-control" id="firstNameInput" />
+                                        </div>
+                                        <div class="col-sm-6" style="padding: 0px !important; margin-top:10px;">
+                                            <label for="lastNameInput">Last Name</label>
+                                            <apex:input value="{!lastName}" type="text" styleClass="form-control" id="lastNameInput" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 form-group" style="margin-top:10px;">
+                                        <label for="firstNameInput">Grade</label>
+                                        <apex:selectList value="{!inGrade}" size="1" styleClass="form-control">
+                                            <apex:selectOptions value="{!gradeOptions}"/>
+                                        </apex:selectList>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 form-group" style="margin-top:10px;">
+                                        <label for="zipInput">Zip</label>
+                                        <apex:input value="{!inZip}" type="text" styleClass="form-control" id="zipInput" />
+                                    </div>
+                                    <div class="col-sm-6 form-group" style="margin-top:10px;">
+                                        <label for="secularSchoolInput">Secular School Name</label>
+                                        <apex:selectList value="{!inSecularSchoolName}" size="1" styleClass="form-control">
+                                            <apex:selectOptions value="{!secularSchoolOptions}"/>
+                                        </apex:selectList>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 center">
+                                        <label ></label>
+                                        <apex:commandButton style="margin-top:15px;" action="{!searchContacts}" value="Find Congregant"  styleClass="wiseBtn btn btn-default  btn-block" reRender="tableDisplayArea,pagemsg" />
+                                    </div>
+                                    <div class=" col-lg-3 center">
+                                        <label ></label>
+                                        <apex:commandButton style="margin-top:15px;" action="{!clearSearchAction}" value="Clear"  styleClass="wiseBtn btn btn-default  btn-block" reRender="tableDisplayArea,FormDisplayArea" />
+                                    </div>
+                                    <br/>
+                                </div>
+                             <hr/>
+                              <div class="row">
+                              
+                               <br></br>
+Don’t want to be listed? We’ll miss you, but respect your choice. Check the Opt-Out box below. (Note: it’s all or 
+nothing – we can’t show only some of your information)
+ <br/>
+                                    <br/>
+                                    <div>
+                                <apex:inputCheckbox value="{!theAccount.Directory_Opt_out__c}" >
+                                    <apex:actionSupport event="onchange" action="{!updateAccount}"/>
+                                </apex:inputCheckbox>
+                                    &nbsp;&nbsp;Opt-out: I would like to exclude my Household information from the Member Directory&nbsp;&nbsp;
+
+                            
+                            </div>
+                                </div>
+                            </apex:outputPanel>
+                            <apex:outputPanel id="tableDisplayArea">
+                                <apex:outputPanel rendered="{!NumberOfResults > 0}">
+                                    <!--<apex:outputPanel rendered="{!NumberOfResults > 0}">-->
+                                    <div class="row table-responsive col-sm-12 hidden-sm hidden-xs" style="margin-top:20px;">
+                                        <table class="table">
+                                             <th>Action</th>
+                                            <th>Member Name</th>
+                                            <th>Household Name</th>
+                                            <th>Household Address</th>
+                                            <th>Home Phone</th>
+                                            <th>Mobile Phone</th>
+                                            <apex:repeat value="{!contactList}" var="conWrap">
+                                                <tr>
+                                                    <td>
+                                                        <button type="button" class="btn wiseBtn" data-toggle="modal" data-target="#myModal" data-conId="{!conWrap.Id}">View Details</button>
+                                                    </td>
+                                                    <td>{!conWrap.Name}</td>
+                                                    <td>{!conWrap.Account.Name}</td>
+                                                    <td>{!conWrap.Account.Current_Mailing_Address__c}</td>
+                                                    <td>{!conWrap.Home_Phone__c}</td>
+                                                    <td>{!conWrap.Mobile_Phone__c}</td>
+                                                </tr>
+                                            </apex:repeat>
+                                        </table>
+                                       
+                                    </div>
+                                    <div class="visible-xs-block visible-sm-block">
+                                        <apex:repeat value="{!contactList}" var="conWrap">
+                                            <br/>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h4><b>{!conWrap.Name}</b></h4>
+                                                    <div class="col-sm-4 col-xs-12">
+                                                        <p >Account Name: </p>
+                                                        <p class="text-info">{!conWrap.Account.Name}</p>
+                                                    </div>
+                                                    <div class="col-sm-4 col-xs-12">
+                                                        <p >Home Phone: </p>
+                                                        <p class="text-info">{!conWrap.Home_Phone__c}</p>
+                                                    </div>
+                                                    <div class="col-sm-4 col-xs-12">
+                                                        <p >Mobile Phone: </p>
+                                                        <p class="text-info">{!conWrap.Mobile_Phone__c}</p>
+                                                    </div>
+                                                    <div class="col-sm-4 col-xs-12">
+                                                        <button type="button" class="btn wiseBtn btn-block" data-toggle="modal" data-target="#myModal" 
+                                                        data-conId="{!conWrap.Id}">View Details</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </apex:repeat>
+                                             
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!NumberOfResults == 0 && NOT(firstLoad)}">
+                                    <br/>
+                                    <br/>
+                                    <div>
+                                        No member found. Try searching with fewer criteria. Only Wise Temple members are included and some may have opted out of being listed.
+                                    </div>
+                               
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </div>
+                        <div class="col-sm-3 col-sm-pull-7 col-xs-12" id="sidebar" role="navigation">
+                            <div class="sidebar-nav">
+                                <c:CongrComm_LeftHandNav />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <apex:outputPanel id="form2" style="display: none;" styleClass="contactData" >
+                    <apex:outputPanel rendered="{!con.Contact_Type__c == 'Adult' || con.Contact_Type__c == 'Contact 1' || con.Contact_Type__c == 'Contact 2'}">
+                        <div class="row">
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Full Name:   </p>
+                                <p class="text-info">{!con.FirstName}  {!con.LastName} </p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Household Name:   </p>
+                                <p class="text-info">{!con.Account.Name}</p>
+                            </div>
+                            <div class="col-sm-12">
+                                <p> Current Address:   </p>
+                                <p class="text-info">{!con.Account.Current_Mailing_Address__c}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Primary Email:   </p>
+                                <p class="text-info">{!con.Email}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Home Phone:   </p>
+                                <p class="text-info">{!con.Account.Phone}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12"></div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Mobile Phone:   </p>
+                                <p class="text-info">{!con.Mobile_Phone__c}</p>
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!con.Contact_Type__c == 'Child'}">
+                        <div class="row">
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Full Name:   </p>
+                                <p class="text-info">{!con.FirstName}  {!con.LastName} </p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Household Name:   </p>
+                                <p class="text-info">{!con.Account.Name}</p>
+                            </div>
+                            <div class="col-sm-12">
+                                <p> Current Address:   </p>
+                                <p class="text-info">{!con.Account.Current_Mailing_Address__c}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Home Phone:   </p>
+                                <p class="text-info">{!con.Account.Phone}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Mobile Phone:   </p>
+                                <p class="text-info">{!con.Mobile_Phone__c}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Secular School:   </p>
+                                <p class="text-info">{!con.School_Name__c}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Grade Level:   </p>
+                                <p class="text-info">{!con.Grade_Level__c}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Contact 1 Email:   </p>
+                                <p class="text-info">{!con.Account.Contact_1_Email_Formula__c}</p>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <p> Contact 2 Email:   </p>
+                                <p class="text-info">{!con.Account.Contact_2_Email_Formula__c}</p>
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Contact Details</h4>
+                            </div>
+                            <div class="modal-body" >
+                                <p>
+                                    Test
+                                </p>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <apex:actionFunction name="setDirectoryOptOut" />
+                <apex:actionFunction name="setDirectoryOptIn" />
+            </apex:form>
+        </apex:define>
+    </apex:composition>
+    
+    <script type="text/javascript">
+    var $j = jQuery.noConflict();
+    
+    $j(document).ready(function() {
+        
+        
+        var $modal = $j('.modal');
+        
+        $modal.on('show.bs.modal', function(e) {
+            var eventData = $j(e.relatedTarget)
+            console.log(eventData.data('conid'));
+            
+            fetchContactAF(eventData.data('conid'));
+            
+            $j(this)
+            .addClass('modal-scrollfix')
+            .find('.modal-body')
+            .html('Please Wait...')
+            
+        });  
+    });
+
+    function updateAccountOptOut(){
+
+    }
+    
+    function showData() {
+        
+    }
+    
+    function onLoadComplete() {
+        var $modal1 = $j('.modal');
+        $modal1
+        .removeClass('modal-scrollfix')
+        .modal('handleUpdate') ;
+        
+        $modal1.find('.modal-body')
+        .html($j('.contactData').html());
+    }
+    
+    </script>
+    
+    
+</apex:page>
