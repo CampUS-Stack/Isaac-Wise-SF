@@ -24,11 +24,11 @@
             <apex:pageBlockSection columns="2">
                 <apex:pageBlockSectionItem >
                     <apex:outputLabel value="From Date" />
-                    <apex:input value="{!FilledStartDate}" type="date" id="stDate" style="height: 18px; font-family: inherit;"/>
+                    <apex:inputText value="{!FilledStartDate}" id="stDate" styleClass="datepicker date-field" style="height: 18px; font-family: inherit;" onKeyUp="autoCompleteDateField(this);"/>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
                     <apex:outputLabel value="To Date" />
-                    <apex:input value="{!FilledEndDate}" type="date" id="endDate" style="height: 18px; font-family: inherit;"/>
+                    <apex:inputText value="{!FilledEndDate}" id="endDate" styleClass="datepicker date-field" style="height: 18px; font-family: inherit;" onKeyUp="autoCompleteDateField(this);"/>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
                     <apex:outputLabel value=" Amount to Summarize" />
@@ -127,5 +127,30 @@
             $.unblockUI();
             //CONSOLE.log(url)
         }
+
+        function autoCompleteDateField(element) {
+            var inputString = $(element).val();
+            inputString = inputString.replace(/[^\d\/]/g, '');
+
+            var inputStringLength = inputString.length;
+            if (inputStringLength === 2) {
+                inputString += '/';
+            } else if (inputStringLength === 5) {
+                inputString += '/' + new Date().getFullYear();
+            }
+            $(element).val(inputString);
+        }
+
+        $(document).ready(function() {
+            $(".datepicker").datepicker({
+                format: 'm/d/yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+        });
     </script>
+
+    <apex:stylesheet value="{!URLFOR($Resource.DatePicker, '/datepicker/css/datepicker.css')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap, '/bootstrap-3.3.7-dist/js/bootstrap.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DatePicker, '/datepicker/js/bootstrap-datepicker.js')}"/>
 </apex:page>
